@@ -90,6 +90,7 @@ router.get('/purchases', purchaseController.getAllPurchases);
 router.post('/purchases', purchaseController.createPurchase);
 router.put('/purchases/:id/receive', purchaseController.receivePurchase);
 router.put('/purchases/:id/cancel', purchaseController.cancelPurchase);
+router.delete('/purchases/:id', purchaseController.deletePurchase);
 
 // Open URL in Microsoft Edge (Windows only)
 const { exec } = require('child_process');

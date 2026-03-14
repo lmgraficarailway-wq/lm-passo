@@ -98,3 +98,13 @@ exports.cancelPurchase = (req, res) => {
         });
     });
 };
+
+// DELETE /api/purchases/:id — Excluir permanentemente (apenas master)
+exports.deletePurchase = (req, res) => {
+    const { id } = req.params;
+    db.run("DELETE FROM purchase_requests WHERE id = ?", [id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: 'Solicitação não encontrada' });
+        res.json({ success: true, message: 'Solicitação excluída com sucesso' });
+    });
+};

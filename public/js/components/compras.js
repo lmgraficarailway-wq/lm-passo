@@ -199,14 +199,22 @@ export const render = () => {
             return;
         }
 
+        const isMaster = user?.role === 'master';
         tbody.innerHTML = data.map(pr => {
             const total = (pr.unit_cost || 0) * (pr.quantity || 0);
+            const deleteBtn = isMaster
+                ? `<button class="btn btn-secondary btn-sm delete-purchase-btn" data-id="${pr.id}" title="Excluir" style="font-size:0.75rem;color:#ef4444;margin-left:0.25rem"><ion-icon name="trash-outline"></ion-icon></button>`
+                : '';
             const actions = pr.status === 'pendente'
-                ? `<div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+                ? `<div style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center">
                         <button class="btn btn-primary btn-sm receive-btn" data-id="${pr.id}" style="background:#10b981;border-color:#10b981;font-size:0.75rem">Receber</button>
                         <button class="btn btn-secondary btn-sm cancel-btn" data-id="${pr.id}" style="font-size:0.75rem;color:#ef4444">Cancelar</button>
+                        ${deleteBtn}
                    </div>`
-                : `<button class="btn btn-secondary btn-sm details-btn" data-id="${pr.id}" style="font-size:0.75rem">Detalhes</button>`;
+                : `<div style="display:flex;gap:0.4rem;align-items:center">
+                        <button class="btn btn-secondary btn-sm details-btn" data-id="${pr.id}" style="font-size:0.75rem">Detalhes</button>
+                        ${deleteBtn}
+                   </div>`;
 
             return `
                 <tr>
@@ -233,6 +241,9 @@ export const render = () => {
         });
         tbody.querySelectorAll('.details-btn').forEach(btn => {
             btn.onclick = () => openDetailsModal(btn.dataset.id);
+        });
+        tbody.querySelectorAll('.delete-purchase-btn').forEach(btn => {
+            btn.onclick = () => doDeletePurchase(btn.dataset.id);
         });
     };
 
@@ -379,6 +390,21 @@ export const render = () => {
             const res = await fetch(`/api/purchases/${id}/cancel`, { method: 'PUT', headers: { 'Content-Type': 'application/json' } });
             const result = await res.json();
             if (!res.ok) { alert(result.error || 'Erro ao cancelar'); return; }
+            loadPurchases();
+        } catch (err) {
+            alert('Erro de conexão');
+        }
+    };
+
+    // ── Delete Purchase (master only) ──────────────────────────────────────────
+    const doDeletePurchase = async (id) => {
+        const pr = allPurchases.find(p => p.id == id);
+        const name = pr ? pr.product_name : `#${id}`;
+        if (!confirm(`Excluir permanentemente a solicitação de "${name}"? Esta ação não pode ser desfeita.`)) return;
+        try {
+            const res = await fetch(`/api/purchases/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (!res.ok) { alert(result.error || 'Erro ao excluir'); return; }
             loadPurchases();
         } catch (err) {
             alert('Erro de conexão');
