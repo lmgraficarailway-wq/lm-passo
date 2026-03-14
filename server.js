@@ -63,11 +63,9 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 // Routes
 const authRoutes = require('./server/routes/auth.routes');
 const apiRoutes = require('./server/routes/api.routes');
-const importRoute = require('./server/routes/import_route');
 
 app.use('/api/auth', authRoutes);
 app.use('/api', apiRoutes);
-app.use('/api', importRoute);
 
 // Basic Route
 
