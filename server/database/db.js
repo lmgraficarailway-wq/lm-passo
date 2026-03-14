@@ -2,8 +2,8 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcryptjs');
 const path = require('path');
 
-// Use process.cwd() to ensure DB is created outside the executable (in the writable filesystem)
-const dbPath = path.resolve(process.cwd(), 'database.sqlite');
+// Use DB_PATH env var (Railway persistent volume) or fallback to local
+const dbPath = process.env.DB_PATH || path.resolve(process.cwd(), 'database.sqlite');
 
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {

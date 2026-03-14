@@ -21,6 +21,16 @@ process.on('unhandledRejection', (reason, promise) => {
     logError(new Error(`Unhandled Rejection: ${reason}`));
 });
 
+// Ensure DB directory exists (for Railway persistent volume at /data)
+if (process.env.DB_PATH) {
+    try {
+        const dbDir = path.dirname(process.env.DB_PATH);
+        if (!fs.existsSync(dbDir)) {
+            fs.mkdirSync(dbDir, { recursive: true });
+        }
+    } catch (err) { logError(err); }
+}
+
 // Ensure uploads directory exists in the real filesystem
 const uploadDir = path.join(process.cwd(), 'public', 'uploads');
 try {
