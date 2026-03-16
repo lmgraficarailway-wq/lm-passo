@@ -69,6 +69,8 @@ router.put('/orders/:id/file-path', orderController.updateFilePath);
 router.post('/orders/open-folder', orderController.openFolder);
 // Material costs report
 router.get('/reports/material-costs', orderController.getMaterialCostsReport);
+// Delete individual material cost entry (admin only)
+router.delete('/material-costs/:id', orderController.deleteMaterialCost);
 
 // Stock
 const stockController = require('../controllers/stock_controller');

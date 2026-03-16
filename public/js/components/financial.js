@@ -331,6 +331,7 @@ export const render = (user) => {
                             <td style="font-size:0.85rem;">${c.description || '-'}</td>
                             <td style="text-align:center;">${c.quantity || 1}</td>
                             <td style="font-weight:bold; color:#dc2626;">R$ ${(c.cost_amount || 0).toFixed(2)}</td>
+                            ${isAdmin ? `<td style="text-align:center;"><button class="btn-del-cost" data-id="${c.id}" title="Apagar este lançamento" style="background:none; border:none; cursor:pointer; color:#dc2626; font-size:1.1rem; padding:2px 6px; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑️</button></td>` : ''}
                         </tr>
                     `).join('');
 
@@ -349,12 +350,13 @@ export const render = (user) => {
                                     <th>Descrição</th>
                                     <th>Qtd</th>
                                     <th>Custo</th>
+                                    ${isAdmin ? '<th style="width:40px"></th>' : ''}
                                 </tr>
                             </thead>
                             <tbody>${rows}</tbody>
                             <tfoot>
                                 <tr style="background:#fef2f2; font-weight:bold;">
-                                    <td colspan="5" style="text-align:right; color:#991b1b; padding:8px 12px;">Total ${m.label}:</td>
+                                    <td colspan="${isAdmin ? 6 : 5}" style="text-align:right; color:#991b1b; padding:8px 12px;">Total ${m.label}:</td>
                                     <td style="color:#dc2626; font-size:1.05rem;">R$ ${m.total.toFixed(2)}</td>
                                 </tr>
                             </tfoot>
@@ -362,6 +364,22 @@ export const render = (user) => {
                     </div>`;
             }).join('')}
             `;
+
+            // Bind delete cost buttons (admin only)
+            if (isAdmin) {
+                costsContainer.querySelectorAll('.btn-del-cost').forEach(btn => {
+                    btn.onclick = async () => {
+                        if (!confirm('Apagar este lançamento de custo de material?')) return;
+                        const res = await fetch(`/api/material-costs/${btn.dataset.id}`, { method: 'DELETE' });
+                        if (res.ok) {
+                            loadMaterialCosts();
+                        } else {
+                            const json = await res.json().catch(() => ({}));
+                            alert('Erro: ' + (json.error || 'Falha ao apagar'));
+                        }
+                    };
+                });
+            }
         } catch (e) {
             console.error('Error loading material costs:', e);
         }

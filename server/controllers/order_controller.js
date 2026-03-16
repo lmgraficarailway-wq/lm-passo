@@ -606,3 +606,27 @@ exports.getMaterialCostsReport = (req, res) => {
         });
     });
 };
+
+// Delete a single material cost movement (admin only)
+exports.deleteMaterialCost = (req, res) => {
+    const costId = req.params.id;
+
+    // Fetch the entry first to revert the product's cost_value
+    db.get("SELECT product_id, cost_amount FROM material_cost_movements WHERE id = ?", [costId], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(404).json({ error: 'Lançamento não encontrado' });
+
+        // Revert product cost accumulation
+        db.run(
+            "UPDATE products SET cost_value = MAX(0, COALESCE(cost_value, 0) - ?) WHERE id = ?",
+            [row.cost_amount, row.product_id],
+            () => {
+                // Delete the entry
+                db.run("DELETE FROM material_cost_movements WHERE id = ?", [costId], function (err2) {
+                    if (err2) return res.status(500).json({ error: err2.message });
+                    res.json({ message: 'Lançamento de custo apagado com sucesso' });
+                });
+            }
+        );
+    });
+};
