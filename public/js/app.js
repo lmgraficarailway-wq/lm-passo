@@ -60,7 +60,9 @@ const loadView = (view, container) => {
 
     import(modulePath).then(module => {
         container.innerHTML = '';
-        container.appendChild(module.render());
+        // Pass user to financial view for role-based controls
+        const viewArg = (view === 'financial') ? state.user : undefined;
+        container.appendChild(module.render(viewArg));
     }).catch(err => {
         console.error("Error loading view:", err);
         container.innerHTML = `<div style="color:red">Error loading view: ${view}</div>`;

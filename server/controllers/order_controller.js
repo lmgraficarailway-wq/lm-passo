@@ -529,12 +529,35 @@ exports.getArchivedOrders = (req, res) => {
 exports.deleteOrder = (req, res) => {
     const orderId = req.params.id;
     db.serialize(() => {
-        db.run("DELETE FROM order_items WHERE order_id = ?", [orderId]);
-        db.run("DELETE FROM comments WHERE order_id = ?", [orderId]);
-        db.run("DELETE FROM orders WHERE id = ?", [orderId], function (err) {
+        // First check if it's an internal order to revert material costs
+        db.get("SELECT is_internal FROM orders WHERE id = ?", [orderId], (err, order) => {
             if (err) return res.status(500).json({ error: err.message });
-            if (this.changes === 0) return res.status(404).json({ error: 'Pedido não encontrado' });
-            res.json({ message: 'Pedido excluído com sucesso' });
+            if (!order) return res.status(404).json({ error: 'Pedido não encontrado' });
+
+            const doDelete = () => {
+                db.run("DELETE FROM order_items WHERE order_id = ?", [orderId]);
+                db.run("DELETE FROM comments WHERE order_id = ?", [orderId]);
+                db.run("DELETE FROM material_cost_movements WHERE order_id = ?", [orderId]);
+                db.run("DELETE FROM orders WHERE id = ?", [orderId], function (err) {
+                    if (err) return res.status(500).json({ error: err.message });
+                    if (this.changes === 0) return res.status(404).json({ error: 'Pedido não encontrado' });
+                    res.json({ message: 'Pedido excluído com sucesso' });
+                });
+            };
+
+            if (order.is_internal) {
+                // Revert accumulated cost_value on products before deleting
+                db.all("SELECT product_id, cost_amount FROM material_cost_movements WHERE order_id = ?", [orderId], (err2, rows) => {
+                    if (!err2 && rows && rows.length > 0) {
+                        rows.forEach(r => {
+                            db.run("UPDATE products SET cost_value = MAX(0, COALESCE(cost_value, 0) - ?) WHERE id = ?", [r.cost_amount, r.product_id]);
+                        });
+                    }
+                    doDelete();
+                });
+            } else {
+                doDelete();
+            }
         });
     });
 };

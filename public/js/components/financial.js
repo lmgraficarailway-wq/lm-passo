@@ -1,4 +1,4 @@
-export const render = () => {
+export const render = (user) => {
     const container = document.createElement('div');
     container.innerHTML = `
         <div class="view-header">
@@ -88,6 +88,7 @@ export const render = () => {
     ];
 
     let allData = [];
+    const isAdmin = user && user.role === 'master';
 
     const removeAccents = (str) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
@@ -173,6 +174,7 @@ export const render = () => {
                                 ${badgeText}
                             </button>
                         </td>
+                        ${isAdmin && s.is_internal ? `<td><button class="btn btn-sm btn-delete-internal" data-id="${s.id}" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:600;">🗑️ Apagar</button></td>` : (isAdmin ? '<td></td>' : '')}
                     </tr>`;
                 }).join('');
 
@@ -194,6 +196,7 @@ export const render = () => {
                                 <th>Desconto</th>
                                 <th>Pagamento</th>
                                 <th>Core</th>
+                                ${isAdmin ? '<th>Ação</th>' : ''}
                             </tr>
                         </thead>
                         <tbody>${rows}</tbody>
@@ -213,7 +216,7 @@ export const render = () => {
                                     💳 <b>${pm}</b> <span style="color:#94a3b8">(${byMethod[pm].count} pedido${byMethod[pm].count > 1 ? 's' : ''})</span>
                                 </td>
                                 <td style="font-weight:bold; color:#7c3aed; font-size:0.95rem;">R$ ${byMethod[pm].total.toFixed(2)}</td>
-                                <td colspan="2"></td>
+                                <td colspan="${isAdmin ? 3 : 2}"></td>
                             </tr>
                         `).join('');
 
@@ -222,12 +225,12 @@ export const render = () => {
                         const closingLabel = isCurrentMonth ? '📊 Parcial' : '📊 Fechamento';
 
                         return `<tfoot>
-                            <tr><td colspan="9" style="padding:0"><hr style="border:none; border-top:2px dashed #e0d4f5; margin:0;"></td></tr>
+                            <tr><td colspan="${isAdmin ? 10 : 9}" style="padding:0"><hr style="border:none; border-top:2px dashed #e0d4f5; margin:0;"></td></tr>
                             ${methodRows}
                             <tr style="background:linear-gradient(135deg, #f0fdf4, #dcfce7); font-weight:bold;">
                                 <td colspan="6" style="text-align:right; font-size:1.05rem; color:#166534; padding:10px 12px;">${closingLabel} ${m.label}:</td>
                                 <td style="font-size:1.15rem; color:#166534;">R$ ${m.total.toFixed(2)}</td>
-                                <td colspan="2"></td>
+                                <td colspan="${isAdmin ? 3 : 2}"></td>
                             </tr>
                         </tfoot>`;
                     })()}
@@ -256,15 +259,19 @@ export const render = () => {
             };
         });
 
-        // Bind delete buttons
-        container.querySelectorAll('.btn-delete-entry').forEach(btn => {
+        // Bind delete buttons (internal orders - admin only)
+        container.querySelectorAll('.btn-delete-internal').forEach(btn => {
             btn.onclick = async () => {
-                if (!confirm('Tem certeza que deseja excluir esta entrada?')) return;
-                await fetch(`/api/orders/${btn.dataset.id}`, { method: 'DELETE' });
-                loadFinancial();
+                if (!confirm('⚠️ Tem certeza que deseja APAGAR esta demanda de serviço interno?\nEsta ação também remove os lançamentos de custo de material.')) return;
+                const res = await fetch(`/api/orders/${btn.dataset.id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadFinancial();
+                } else {
+                    const json = await res.json().catch(() => ({}));
+                    alert('Erro ao apagar: ' + (json.error || 'Falha desconhecida'));
+                }
             };
         });
-
 
     };
 
