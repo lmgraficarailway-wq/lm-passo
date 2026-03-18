@@ -73,12 +73,18 @@ export const render = () => {
                     <!-- Top Row: Client and Deadline -->
                     <div id="client-row" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
                         <div class="form-group" style="margin:0">
-                            <label style="font-weight: 600; color: #555; margin-bottom: 0.5rem; display: block;">Cliente</label>
-                            <div style="display:flex; gap:0.5rem">
-                                <select id="client-select" class="form-control" style="flex:1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;"><option>Carregando...</option></select>
-                                <button class="btn btn-secondary" id="btn-quick-client" title="Novo Cliente" style="width: 40px; padding: 0; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">+</button>
-                            </div>
-                        </div>
+                             <label style="font-weight: 600; color: #555; margin-bottom: 0.5rem; display: block;">Cliente</label>
+                             <div style="display:flex; gap:0.5rem; position:relative;" id="client-autocomplete-wrap">
+                                 <div style="flex:1; position:relative;">
+                                     <input type="text" id="client-search" placeholder="Buscar cliente..." autocomplete="off"
+                                         style="width:100%; padding:0.5rem; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;">
+                                     <!-- Hidden field that stores the selected client ID -->
+                                     <input type="hidden" id="client-select">
+                                     <div id="client-suggestions" style="display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #ccc; border-top:none; border-radius:0 0 6px 6px; max-height:200px; overflow-y:auto; z-index:1000; box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+                                 </div>
+                                 <button class="btn btn-secondary" id="btn-quick-client" title="Novo Cliente" style="width: 40px; padding: 0; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">+</button>
+                             </div>
+                         </div>
                         
                         <div class="form-group" style="margin:0">
                             <label style="font-weight: 600; color: #555; margin-bottom: 0.5rem; display: block;">Prazo</label>
@@ -296,9 +302,6 @@ export const render = () => {
                         <div class="products">${order.product_name}</div>
                     </div>
                     <div class="line"></div>
-                    <div class="total">R$ ${order.total_value}</div>
-                    <p style="text-align:center; font-size:9px; margin-bottom:1mm;"><b>Pgto:</b> ${order.payment_method || '-'}</p>
-                    <div class="line"></div>
                     <div class="signature">
                         Retirado por: ___________________
                     </div>
@@ -329,8 +332,9 @@ export const render = () => {
         const products = (await productsRes.json()).data;
         loadedProducts = products; // Store for valid.
 
-        const clientSelect = container.querySelector('#client-select');
-        clientSelect.innerHTML = clients.map(c => `<option value="${c.id}" data-origin="${c.origin || ''}" data-discount="${c.core_discount || 0}">${c.name}</option>`).join('');
+        const clientSearch = container.querySelector('#client-search');
+        const clientIdInput = container.querySelector('#client-select'); // hidden input
+        const suggestions   = container.querySelector('#client-suggestions');
 
         // Auto-apply CORE / discount on client change
         const paymentSelect = container.querySelector('#order-payment-method');
@@ -345,20 +349,16 @@ export const render = () => {
             });
         }
 
-        const applyClientDefaults = () => {
-            const opt = clientSelect.options[clientSelect.selectedIndex];
-            if (!opt) return;
-            const origin = opt.dataset.origin;
-            const hasDiscount = opt.dataset.discount === '1';
-
-            if (origin === 'CORE') {
+        const applyClientDefaults = (client) => {
+            if (!client) return;
+            if (client.origin === 'CORE') {
                 paymentSelect.value = 'CORE';
                 paymentSelect.disabled = true;
                 coreInfo.style.display = 'block';
-                coreInfo.textContent = '🔒 Cliente CORE — pagamento travado em CORE' + (hasDiscount ? ' | 15% desconto aplicado' : '');
+                coreInfo.textContent = '🔒 Cliente CORE — pagamento travado em CORE' + (client.core_discount ? ' | 15% desconto aplicado' : '');
             } else {
                 paymentSelect.disabled = false;
-                if (hasDiscount) {
+                if (client.core_discount) {
                     coreInfo.style.display = 'block';
                     coreInfo.textContent = '🏷️ 15% desconto aplicado automaticamente';
                 } else {
@@ -368,8 +368,55 @@ export const render = () => {
             }
         };
 
-        clientSelect.addEventListener('change', applyClientDefaults);
-        applyClientDefaults(); // Apply for initially selected client
+        const removeAccents = (str) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+        const selectClient = (client) => {
+            clientIdInput.value = client.id;
+            clientSearch.value = client.name;
+            clientSearch.style.borderColor = '#22c55e';
+            suggestions.style.display = 'none';
+            applyClientDefaults(client);
+        };
+
+        const showSuggestions = (term) => {
+            const t = removeAccents(term.toLowerCase().trim());
+            if (!t) { suggestions.style.display = 'none'; return; }
+            const filtered = clients.filter(c => removeAccents(c.name.toLowerCase()).includes(t));
+            if (!filtered.length) { suggestions.style.display = 'none'; return; }
+            suggestions.innerHTML = filtered.slice(0, 12).map(c => `
+                <div class="client-suggestion-item" data-id="${c.id}"
+                    style="padding:0.5rem 0.75rem; cursor:pointer; font-size:0.95rem; border-bottom:1px solid #f1f5f9;"
+                    onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background=''"
+                >${c.name}${c.phone ? `<span style="color:#94a3b8; font-size:0.8rem; margin-left:0.5rem;">${c.phone}</span>` : ''}</div>
+            `).join('');
+            suggestions.style.display = 'block';
+            suggestions.querySelectorAll('.client-suggestion-item').forEach(item => {
+                item.onmousedown = (e) => {
+                    e.preventDefault();
+                    const client = clients.find(c => c.id == item.dataset.id);
+                    if (client) selectClient(client);
+                };
+            });
+        };
+
+        clientSearch.addEventListener('input', () => {
+            clientIdInput.value = '';
+            clientSearch.style.borderColor = '#ccc';
+            showSuggestions(clientSearch.value);
+        });
+        clientSearch.addEventListener('blur', () => {
+            setTimeout(() => { suggestions.style.display = 'none'; }, 150);
+        });
+        clientSearch.addEventListener('focus', () => {
+            if (clientSearch.value) showSuggestions(clientSearch.value);
+        });
+
+        // Expose for use after quick-client creation
+        window._kanbanClientsRef = clients;
+        window._kanbanSelectClientById = (id) => {
+            const client = clients.find(c => c.id === id);
+            if (client) selectClient(client);
+        };
 
         const productSelect = container.querySelector('#product-select');
         const typeFilter = container.querySelector('#product-type-filter');
@@ -379,7 +426,6 @@ export const render = () => {
         const types = [...new Set(products.map(p => p.type || '').filter(t => t))];
         typeFilter.innerHTML = '<option value="">Todos os tipos</option>' + types.sort().map(t => `<option value="${t}">${t}</option>`).join('');
 
-        const removeAccents = (str) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
         const filterProducts = () => {
             const selectedType = typeFilter.value;
@@ -390,7 +436,7 @@ export const render = () => {
                 return matchType && matchName;
             });
             productSelect.innerHTML = filtered.length
-                ? filtered.map(p => `<option value="${p.id}">${p.name}</option>`).join('')
+                ? '<option value="">Selecione...</option>' + filtered.map(p => `<option value="${p.id}">${p.name}</option>`).join('')
                 : '<option value="">Nenhum produto encontrado</option>';
         };
 
@@ -1328,10 +1374,9 @@ export const render = () => {
         const json = await res.json();
 
         if (json.id) {
-            // Success
-            await fetchSelectData(); // Reload selects
-            container.querySelector('#client-select').value = json.id; // Select new
-            container.querySelector('#client-select').dispatchEvent(new Event('change')); // Trigger CORE/discount check
+            // Success — reload client list and auto-select the new client
+            await fetchSelectData();
+            if (window._kanbanSelectClientById) window._kanbanSelectClientById(json.id);
             quickClientModal.classList.remove('open');
             e.target.reset();
         } else {
@@ -1460,20 +1505,17 @@ export const render = () => {
     if (internalToggleEl) {
     internalToggleEl.onchange = async function () {
         const clientRow = container.querySelector('#client-row');
-        const clientSelect = container.querySelector('#client-select');
+        const clientIdInput = container.querySelector('#client-select'); // hidden input
         const paymentGroup = container.querySelector('#order-payment-method').closest('.form-group');
         const totalInput = container.querySelector('#cart-total-input');
         if (this.checked) {
             clientRow.style.display = 'none';
-            // Hide payment method for internal orders
             if (paymentGroup) paymentGroup.style.display = 'none';
-            // Set value to 0 for internal
             totalInput.value = '0';
             totalInput.disabled = true;
             // Find or create INTERNO client
-            let internoOpt = [...clientSelect.options].find(o => o.text.trim().toUpperCase() === 'INTERNO');
-            if (!internoOpt) {
-                // Create INTERNO client
+            let internoClient = (window._kanbanClientsRef || []).find(c => c.name.trim().toUpperCase() === 'INTERNO');
+            if (!internoClient) {
                 const res = await fetch('/api/clients', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1482,13 +1524,14 @@ export const render = () => {
                 const json = await res.json();
                 if (json.id) {
                     await fetchSelectData();
-                    internoOpt = [...clientSelect.options].find(o => o.text.trim().toUpperCase() === 'INTERNO');
+                    internoClient = (window._kanbanClientsRef || []).find(c => c.name.trim().toUpperCase() === 'INTERNO');
                 }
             }
-            if (internoOpt) clientSelect.value = internoOpt.value;
+            if (internoClient) {
+                clientIdInput.value = internoClient.id;
+            }
         } else {
             clientRow.style.display = '';
-            // Show payment method again
             if (paymentGroup) paymentGroup.style.display = '';
             totalInput.disabled = false;
         }
@@ -1775,5 +1818,24 @@ export const render = () => {
 
     setupDragDrop();
     loadOrders();
+
+    // Auto-refresh: atualiza o quadro a cada 20 segundos
+    // Não recarrega se houver um modal aberto (para não interromper o usuário)
+    const autoRefreshInterval = setInterval(() => {
+        const anyModalOpen = container.querySelector('.modal-overlay.open');
+        if (!anyModalOpen) {
+            loadOrders();
+        }
+    }, 20000);
+
+    // Cancela o intervalo quando o container é removido do DOM (troca de tela)
+    const stopObserver = new MutationObserver(() => {
+        if (!document.body.contains(container)) {
+            clearInterval(autoRefreshInterval);
+            stopObserver.disconnect();
+        }
+    });
+    stopObserver.observe(document.body, { childList: true, subtree: true });
+
     return container;
 };

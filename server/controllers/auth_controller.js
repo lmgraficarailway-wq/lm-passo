@@ -56,3 +56,24 @@ exports.changePassword = (req, res) => {
         res.json({ message: 'Senha alterada com sucesso' });
     });
 };
+
+exports.updateRole = (req, res) => {
+    const { role } = req.body;
+    const validRoles = ['master', 'financeiro', 'producao', 'vendedor', 'interno', 'cliente'];
+    if (!role || !validRoles.includes(role)) {
+        return res.status(400).json({ error: 'Perfil inválido' });
+    }
+    db.run("UPDATE users SET role = ? WHERE id = ?", [role, req.params.id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
+        res.json({ message: 'Perfil atualizado com sucesso' });
+    });
+};
+
+exports.deleteUser = (req, res) => {
+    db.run("DELETE FROM users WHERE id = ?", [req.params.id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
+        res.json({ message: 'Usuário excluído com sucesso' });
+    });
+};
