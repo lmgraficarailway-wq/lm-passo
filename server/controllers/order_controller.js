@@ -11,6 +11,7 @@ exports.getAllOrders = (req, res) => {
     const { status, role, user_id } = req.query;
     let sql = `
         SELECT o.*, c.name as client_name, c.phone as client_phone, u.name as created_by_name,
+        c.cpf as client_cpf, c.address as client_address, c.city as client_city, c.state as client_state, c.zip_code as client_zip_code,
         mu.name as moved_by_name,
         COALESCE(o.products_summary, p.name) as product_name,
         COALESCE(
@@ -490,7 +491,7 @@ exports.getClientOrders = (req, res) => {
     const sql = `
         SELECT o.id, o.created_at, o.description, o.total_value, o.discount_value, o.payment_method,
                o.products_summary, o.status, o.deadline_at, o.deadline_type, o.checklist,
-               c.name as client_name
+               c.name as client_name, c.cpf as client_cpf, c.address as client_address, c.city as client_city, c.state as client_state, c.zip_code as client_zip_code
         FROM orders o
         LEFT JOIN clients c ON o.client_id = c.id
         WHERE o.client_id = ?
@@ -613,6 +614,7 @@ exports.archiveOrder = (req, res) => {
 exports.getArchivedOrders = (req, res) => {
     const sql = `
         SELECT o.*, c.name as client_name, c.phone as client_phone,
+               c.cpf as client_cpf, c.address as client_address, c.city as client_city, c.state as client_state, c.zip_code as client_zip_code,
                p.name as product_name, u.name as created_by_name
         FROM orders o
         LEFT JOIN clients c ON o.client_id = c.id

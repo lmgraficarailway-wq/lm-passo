@@ -853,9 +853,14 @@ export const render = () => {
                         <div style="white-space: pre-line; background: #f0fdf4; padding: 0.5rem; border: 1px solid #bbf7d0; border-radius: 4px;">${order.product_name}</div>
                      </div>
                 </div>
-                <button class="btn btn-sm btn-secondary btn-whatsapp" title="Copiar para WhatsApp" style="height:fit-content">
-                    📱 Copiar
-                </button>
+                <div style="display:flex; gap:0.5rem">
+                    <button class="btn btn-sm btn-secondary btn-nf" title="Copiar Dados Nota Fiscal" style="height:fit-content; background:#f8fafc; color:#475569; border:1px solid #cbd5e1;">
+                        📄 Dados NF
+                    </button>
+                    <button class="btn btn-sm btn-secondary btn-whatsapp" title="Copiar para WhatsApp" style="height:fit-content">
+                        📱 Copiar
+                    </button>
+                </div>
             </div>
             <div class="form-group"><label>Descrição:</label> <div style="background:#f8fafc; padding:0.5rem; border-radius:4px; white-space:pre-wrap;">${order.description}</div></div>
             ${order.attachments ? `<div class="form-group"><label>📎 Anexos:</label>
@@ -933,6 +938,30 @@ export const render = () => {
                 }
             };
         }
+
+        // Nota Fiscal Copy
+        content.querySelector('.btn-nf').onclick = () => {
+            const getAddressString = () => {
+                const parts = [];
+                if (order.client_address) parts.push(order.client_address);
+                if (order.client_city) parts.push(order.client_city + (order.client_state ? ' - ' + order.client_state : ''));
+                if (order.client_zip_code) parts.push('CEP: ' + order.client_zip_code);
+                return parts.length > 0 ? parts.join(', ') : '';
+            };
+            const addr = getAddressString();
+            const itemsFormatted = order.product_name.replace(/, /g, '\n- ');
+            
+            const text = `*DADOS PARA NOTA FISCAL*\n` +
+                `*Cliente:* ${order.client_name || '-'}\n` +
+                `*CPF/CNPJ:* ${order.client_cpf || ''}\n` +
+                `*Endereço:* ${addr}\n` +
+                `*Valor Total:* R$ ${(order.total_value || 0).toFixed(2)}\n` +
+                `*Itens:*\n - ${itemsFormatted}`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Dados para Nota Fiscal copiados!');
+            });
+        };
 
         // WhatsApp Copy
         content.querySelector('.btn-whatsapp').onclick = () => {
