@@ -1,16 +1,31 @@
 
 console.log('App.js initialized');
 
-// Always start fresh on login screen
-localStorage.removeItem('token');
-localStorage.removeItem('user');
-
 // State
 const state = {
     token: null,
     user: null,
     currentView: 'kanban'
 };
+
+// Restore session from localStorage (persists across F5 / auto-refresh)
+const savedToken = localStorage.getItem('token');
+const savedUser  = localStorage.getItem('user');
+if (savedToken && savedUser) {
+    try {
+        state.token = savedToken;
+        state.user  = JSON.parse(savedUser);
+        // Restore last visited view (or default by role)
+        if (state.user.role === 'cliente') {
+            state.currentView = 'client_financial';
+        } else {
+            state.currentView = localStorage.getItem('lastView') || 'kanban';
+        }
+    } catch (e) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+    }
+}
 
 // Simple Router
 const render = () => {
@@ -33,6 +48,11 @@ const render = () => {
     import('./components/layout.js').then(module => {
         const layout = module.render(state.user, logoutHandler, navigate);
         app.appendChild(layout);
+
+        // Mark correct nav link as active (especially on page refresh)
+        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+        const activeLink = document.getElementById(`nav-${state.currentView}`);
+        if (activeLink) activeLink.classList.add('active');
 
         // Load view into layout content
         const contentArea = document.getElementById('content-area');
