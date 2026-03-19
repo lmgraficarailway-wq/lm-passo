@@ -70,6 +70,15 @@ export const render = (user) => {
                     <div class="stock-card-label">Resultado</div>
                 </div>
             </div>
+            <div class="stock-card" style="border:2px solid #f59e0b; background:linear-gradient(135deg,#fffbeb,#fef3c7);">
+                <div class="stock-card-icon" style="background:#f59e0b30; color:#d97706">
+                    <ion-icon name="hourglass-outline"></ion-icon>
+                </div>
+                <div class="stock-card-info">
+                    <div class="stock-card-value" id="fin-a-receber" style="color:#d97706">R$ 0</div>
+                    <div class="stock-card-label">&#128274; A Receber (Em Prod.)</div>
+                </div>
+            </div>
         </div>
 
         <!-- Filters -->
@@ -84,6 +93,17 @@ export const render = (user) => {
         </div>
 
         <div id="fin-monthly-container"></div>
+
+        <!-- Reserved Orders Section -->
+        <div id="fin-reserved-section" style="margin-top:2rem; display:none;"
+             class="fin-reserved-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 1rem; background:linear-gradient(135deg,#92400e,#d97706); color:white; border-radius:8px 8px 0 0; cursor:pointer;"
+                 id="fin-reserved-toggle">
+                <h3 style="margin:0; font-size:1.05rem;">&#127381; Pedidos A Receber (Em Produção)</h3>
+                <span id="fin-reserved-count" style="font-size:0.9rem; opacity:0.9;">0 pedidos</span>
+            </div>
+            <div id="fin-reserved-body" style="display:none;"></div>
+        </div>
 
         <!-- Material Costs Section -->
         <div id="fin-costs-container" style="margin-top:2rem;"></div>
@@ -409,8 +429,54 @@ export const render = (user) => {
     const loadFinancial = async () => {
         try {
             const res = await fetch('/api/reports/sales');
-            const { data } = await res.json();
+            const { data, reserved, total_reservado } = await res.json();
             allData = data || [];
+
+            // Update 'A Receber' card
+            const aReceberEl = container.querySelector('#fin-a-receber');
+            if (aReceberEl) aReceberEl.textContent = `R$ ${(total_reservado || 0).toFixed(2)}`;
+
+            // Render reserved orders section
+            const reservedSection = container.querySelector('#fin-reserved-section');
+            const reservedBody = container.querySelector('#fin-reserved-body');
+            const reservedCount = container.querySelector('#fin-reserved-count');
+            if (reserved && reserved.length > 0 && reservedSection) {
+                reservedSection.style.display = 'block';
+                reservedCount.textContent = `${reserved.length} pedido${reserved.length > 1 ? 's' : ''} — R$ ${(total_reservado || 0).toFixed(2)}`;
+
+                const statusLabel = s => s.status === 'aguardando_aceite' ? '⏳ Aguardando' : '🔨 Produção';
+                const rows = reserved.map(s => `
+                    <tr>
+                        <td>${new Date(s.created_at).toLocaleDateString('pt-BR')}</td>
+                        <td><b>${s.client_name || '-'}</b></td>
+                        <td style="font-size:0.85rem">${s.products_summary || '-'}</td>
+                        <td style="font-weight:bold; color:#d97706">R$ ${(s.total_value || 0).toFixed(2)}</td>
+                        <td>${s.payment_method || '-'}</td>
+                        <td><span style="background:${s.status === 'aguardando_aceite' ? '#fef3c7' : '#dbeafe'}; color:${s.status === 'aguardando_aceite' ? '#92400e' : '#1e40af'}; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:600;">${statusLabel(s)}</span></td>
+                    </tr>`).join('');
+
+                reservedBody.innerHTML = `
+                    <table class="data-table" style="border-radius:0 0 8px 8px; margin-top:0;">
+                        <thead><tr>
+                            <th>Data</th><th>Cliente</th><th>Produtos</th>
+                            <th>Valor Reservado</th><th>Pagamento</th><th>Status</th>
+                        </tr></thead>
+                        <tbody>${rows}</tbody>
+                        <tfoot><tr style="background:#fff8e1; font-weight:bold;">
+                            <td colspan="3" style="text-align:right; color:#92400e; padding:8px 12px;">Total A Receber:</td>
+                            <td style="color:#d97706; font-size:1.05rem;">R$ ${(total_reservado || 0).toFixed(2)}</td>
+                            <td colspan="2"></td>
+                        </tr></tfoot>
+                    </table>`;
+
+                // Toggle collapse
+                container.querySelector('#fin-reserved-toggle').onclick = () => {
+                    const body = container.querySelector('#fin-reserved-body');
+                    body.style.display = body.style.display === 'none' ? 'block' : 'none';
+                };
+            } else if (reservedSection) {
+                reservedSection.style.display = 'none';
+            }
 
             // Populate month filter dropdown
             const monthSet = new Set();

@@ -159,29 +159,69 @@ exports.createOrder = (req, res) => {
                             }
                             insertedItems++;
                             if (insertedItems === readyItems.length) {
-                                // If internal order, record material costs
-                                if (finalInternal) {
-                                    let costsDone = 0;
-                                    readyItems.forEach(ci => {
-                                        const costPrice = parseFloat(ci.unit_cost) || 0;
-                                        const costAmount = costPrice * (ci.quantity || 1);
-                                        db.run(
-                                            "INSERT INTO material_cost_movements (product_id, order_id, cost_amount, quantity, description) VALUES (?, ?, ?, ?, ?)",
-                                            [ci.product_id, orderId, costAmount, ci.quantity, `Pedido Interno #${orderId} — ${ci.name}`],
-                                            () => {
-                                                db.run("UPDATE products SET cost_value = COALESCE(cost_value, 0) + ? WHERE id = ?", [costAmount, ci.product_id]);
-                                                costsDone++;
-                                                if (costsDone === readyItems.length) {
-                                                    db.run("COMMIT");
-                                                    res.json({ message: 'Pedido interno criado com sucesso', group_id: orderId });
+                                // === RESERVAR ESTOQUE ===
+                                const reserveStock = (afterReserve) => {
+                                    if (finalInternal) { afterReserve(); return; } // serviço interno não reserva estoque
+                                    let reserveDone = 0;
+                                    readyItems.forEach(ri => {
+                                        if (ri.color_variant_id) {
+                                            // Pulseira: debitar da variante de cor
+                                            db.run(
+                                                "UPDATE product_color_variants SET quantity = MAX(0, quantity - ?) WHERE id = ?",
+                                                [ri.quantity, ri.color_variant_id],
+                                                () => {
+                                                    db.get("SELECT product_id FROM product_color_variants WHERE id = ?", [ri.color_variant_id], (err, cv) => {
+                                                        if (cv) {
+                                                            db.get("SELECT SUM(quantity) as total FROM product_color_variants WHERE product_id = ?", [cv.product_id], (err, row) => {
+                                                                db.run("UPDATE products SET stock = ? WHERE id = ?", [(row && row.total) || 0, cv.product_id]);
+                                                            });
+                                                        }
+                                                        db.run("INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'reserva_pedido', ?, ?)",
+                                                            [ri.product_id, -ri.quantity, `Reserva Pedido #${orderId} — Cor: ${ri.color_name || ''}`, null]);
+                                                        reserveDone++;
+                                                        if (reserveDone === readyItems.length) afterReserve();
+                                                    });
                                                 }
-                                            }
-                                        );
+                                            );
+                                        } else {
+                                            // Produto normal
+                                            db.run("UPDATE products SET stock = MAX(0, stock - ?) WHERE id = ?", [ri.quantity, ri.product_id], () => {
+                                                db.run("INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'reserva_pedido', ?, ?)",
+                                                    [ri.product_id, -ri.quantity, `Reserva Pedido #${orderId}`, null]);
+                                                reserveDone++;
+                                                if (reserveDone === readyItems.length) afterReserve();
+                                            });
+                                        }
                                     });
-                                } else {
-                                    db.run("COMMIT");
-                                    res.json({ message: 'Pedido criado com sucesso', group_id: orderId, is_terceirizado: hasTerceirizado });
-                                }
+                                };
+
+                                reserveStock(() => {
+                                    // Marcar pedido como estoque reservado
+                                    db.run("UPDATE orders SET stock_reserved = 1 WHERE id = ?", [orderId]);
+
+                                    if (finalInternal) {
+                                        let costsDone = 0;
+                                        readyItems.forEach(ci => {
+                                            const costPrice = parseFloat(ci.unit_cost) || 0;
+                                            const costAmount = costPrice * (ci.quantity || 1);
+                                            db.run(
+                                                "INSERT INTO material_cost_movements (product_id, order_id, cost_amount, quantity, description) VALUES (?, ?, ?, ?, ?)",
+                                                [ci.product_id, orderId, costAmount, ci.quantity, `Pedido Interno #${orderId} — ${ci.name}`],
+                                                () => {
+                                                    db.run("UPDATE products SET cost_value = COALESCE(cost_value, 0) + ? WHERE id = ?", [costAmount, ci.product_id]);
+                                                    costsDone++;
+                                                    if (costsDone === readyItems.length) {
+                                                        db.run("COMMIT");
+                                                        res.json({ message: 'Pedido interno criado com sucesso', group_id: orderId });
+                                                    }
+                                                }
+                                            );
+                                        });
+                                    } else {
+                                        db.run("COMMIT");
+                                        res.json({ message: 'Pedido criado com sucesso', group_id: orderId, is_terceirizado: hasTerceirizado });
+                                    }
+                                });
                             }
                         });
                     });
@@ -247,7 +287,7 @@ exports.finalizeOrder = (req, res) => {
     db.serialize(() => {
         db.run("BEGIN TRANSACTION");
 
-        const updateOrder = "UPDATE orders SET status = 'em_balcao', loss_justification = ? WHERE id = ?";
+        const updateOrder = "UPDATE orders SET status = 'em_balcao', loss_justification = ?, stock_reserved = 0 WHERE id = ?";
         db.run(updateOrder, [loss_justification || null, req.params.id], function (err) {
             if (err) {
                 db.run("ROLLBACK");
@@ -259,6 +299,8 @@ exports.finalizeOrder = (req, res) => {
                 return res.json({ message: 'Pedido enviado para balcão' });
             }
 
+            // Stock was already reserved at order creation.
+            // Here we only adjust the DELTA: restore under-usage or deduct extra loss.
             let processed = 0;
             const markDone = () => {
                 processed++;
@@ -270,53 +312,57 @@ exports.finalizeOrder = (req, res) => {
 
             items.forEach(item => {
                 const used = item.used || item.ordered;
-                const loss = Math.max(0, used - item.ordered);
+                const delta = used - item.ordered; // positive = extra loss, negative = returned
 
                 if (item.color_variant_id) {
-                    // Pulseira com cor específica: debitar da variante
-                    db.run(
-                        "UPDATE product_color_variants SET quantity = MAX(0, quantity - ?) WHERE id = ?",
-                        [used, item.color_variant_id],
-                        () => {
-                            // Recalculate product stock = sum of all color variants
-                            db.get(
-                                "SELECT product_id FROM product_color_variants WHERE id = ?",
-                                [item.color_variant_id],
-                                (err, cv) => {
-                                    if (cv) {
-                                        db.get(
-                                            "SELECT SUM(quantity) as total FROM product_color_variants WHERE product_id = ?",
-                                            [cv.product_id],
-                                            (err, row) => {
-                                                db.run("UPDATE products SET stock = ? WHERE id = ?", [(row && row.total) || 0, cv.product_id]);
-                                            }
-                                        );
-                                    }
-                                    // Log movement
-                                    db.run(
-                                        "INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'saida_pedido', ?, ?)",
-                                        [item.product_id, -item.ordered, `Pedido #${req.params.id} — Cor: ${item.color_name || cv?.color}`, null]
-                                    );
-                                    markDone();
-                                }
-                            );
-                        }
-                    );
-                } else {
-                    // Produto normal: debitar do estoque geral
-                    db.run("UPDATE products SET stock = stock - ? WHERE id = ?", [used, item.product_id], () => {
+                    // Pulseira: adjust delta on color variant
+                    const adjustQty = -delta; // negative delta = return stock
+                    if (delta !== 0) {
                         db.run(
-                            "INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'saida_pedido', ?, ?)",
-                            [item.product_id, -item.ordered, `Pedido #${req.params.id}`, null]
+                            "UPDATE product_color_variants SET quantity = MAX(0, quantity - ?) WHERE id = ?",
+                            [delta, item.color_variant_id],
+                            () => {
+                                db.get("SELECT product_id FROM product_color_variants WHERE id = ?", [item.color_variant_id], (err, cv) => {
+                                    if (cv) {
+                                        db.get("SELECT SUM(quantity) as total FROM product_color_variants WHERE product_id = ?", [cv.product_id], (err, row) => {
+                                            db.run("UPDATE products SET stock = ? WHERE id = ?", [(row && row.total) || 0, cv.product_id]);
+                                        });
+                                    }
+                                    if (delta > 0) {
+                                        db.run("INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'perda', ?, ?)",
+                                            [item.product_id, -delta, `Perda Pedido #${req.params.id} — Cor: ${item.color_name || ''}`, null]);
+                                    } else {
+                                        db.run("INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'retorno_sobra', ?, ?)",
+                                            [item.product_id, -delta, `Sobra Pedido #${req.params.id} — Cor: ${item.color_name || ''}`, null]);
+                                    }
+                                    markDone();
+                                });
+                            }
                         );
-                        if (loss > 0) {
-                            db.run(
-                                "INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'perda', ?, ?)",
-                                [item.product_id, -loss, `Perda no Pedido #${req.params.id}: ${loss_justification || 'N/A'}`, null]
-                            );
-                        }
+                    } else {
+                        // Log confirmation
+                        db.run("INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'saida_pedido', ?, ?)",
+                            [item.product_id, -item.ordered, `Confirmação Pedido #${req.params.id} — Cor: ${item.color_name || ''}`, null]);
                         markDone();
-                    });
+                    }
+                } else {
+                    // Produto normal: adjust delta
+                    if (delta !== 0) {
+                        db.run("UPDATE products SET stock = stock - ? WHERE id = ?", [delta, item.product_id], () => {
+                            if (delta > 0) {
+                                db.run("INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'perda', ?, ?)",
+                                    [item.product_id, -delta, `Perda no Pedido #${req.params.id}: ${loss_justification || 'N/A'}`, null]);
+                            } else {
+                                db.run("INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'retorno_sobra', ?, ?)",
+                                    [item.product_id, -delta, `Sobra no Pedido #${req.params.id}`, null]);
+                            }
+                            markDone();
+                        });
+                    } else {
+                        db.run("INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'saida_pedido', ?, ?)",
+                            [item.product_id, -item.ordered, `Confirmação Pedido #${req.params.id}`, null]);
+                        markDone();
+                    }
                 }
             });
         });
@@ -335,9 +381,51 @@ exports.concludeOrder = (req, res) => {
 
 exports.rejectOrder = (req, res) => {
     const { rejection_reason } = req.body;
-    db.run("UPDATE orders SET status = 'rejeitado', rejection_reason = ? WHERE id = ?", [rejection_reason, req.params.id], function (err) {
+    const orderId = req.params.id;
+
+    // Restore reserved stock before rejecting
+    db.get("SELECT stock_reserved FROM orders WHERE id = ?", [orderId], (err, order) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Pedido rejeitado' });
+
+        const doReject = () => {
+            db.run("UPDATE orders SET status = 'rejeitado', rejection_reason = ?, stock_reserved = 0 WHERE id = ?",
+                [rejection_reason, orderId], function (err) {
+                    if (err) return res.status(500).json({ error: err.message });
+                    res.json({ message: 'Pedido rejeitado' });
+                });
+        };
+
+        if (order && order.stock_reserved) {
+            // Restore stock for each order_item
+            db.all("SELECT * FROM order_items WHERE order_id = ?", [orderId], (err, items) => {
+                if (err || !items || items.length === 0) { doReject(); return; }
+                let done = 0;
+                const next = () => { done++; if (done === items.length) doReject(); };
+                items.forEach(item => {
+                    if (item.color_variant_id) {
+                        db.run("UPDATE product_color_variants SET quantity = quantity + ? WHERE id = ?",
+                            [item.quantity, item.color_variant_id], () => {
+                                db.get("SELECT product_id FROM product_color_variants WHERE id = ?", [item.color_variant_id], (err, cv) => {
+                                    if (cv) db.get("SELECT SUM(quantity) as total FROM product_color_variants WHERE product_id = ?", [cv.product_id], (err, row) => {
+                                        db.run("UPDATE products SET stock = ? WHERE id = ?", [(row && row.total) || 0, cv.product_id]);
+                                    });
+                                    db.run("INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'retorno_rejeicao', ?, ?)",
+                                        [item.product_id, item.quantity, `Rejeição Pedido #${orderId}`, null]);
+                                    next();
+                                });
+                            });
+                    } else {
+                        db.run("UPDATE products SET stock = stock + ? WHERE id = ?", [item.quantity, item.product_id], () => {
+                            db.run("INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'retorno_rejeicao', ?, ?)",
+                                [item.product_id, item.quantity, `Rejeição Pedido #${orderId}`, null]);
+                            next();
+                        });
+                    }
+                });
+            });
+        } else {
+            doReject();
+        }
     });
 };
 
@@ -369,7 +457,7 @@ exports.getComments = (req, res) => {
 
 // Financial Report — all finalized orders with client details
 exports.getSalesReport = (req, res) => {
-    const sql = `
+    const sqlReal = `
         SELECT o.id, o.created_at, o.description, o.total_value, o.discount_value, o.payment_method,
                o.products_summary, o.launched_to_core, o.is_internal, o.event_name,
                c.name as client_name, c.phone as client_phone
@@ -378,9 +466,21 @@ exports.getSalesReport = (req, res) => {
         WHERE o.status IN ('em_balcao', 'finalizado', 'arquivado')
         ORDER BY o.created_at DESC
     `;
-    db.all(sql, [], (err, rows) => {
+    const sqlReserved = `
+        SELECT o.id, o.created_at, o.description, o.total_value, o.discount_value, o.payment_method,
+               o.products_summary, o.status, o.event_name,
+               c.name as client_name, c.phone as client_phone
+        FROM orders o
+        LEFT JOIN clients c ON o.client_id = c.id
+        WHERE o.status IN ('aguardando_aceite', 'producao') AND o.is_internal = 0
+        ORDER BY o.created_at DESC
+    `;
+    db.all(sqlReal, [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ data: rows });
+        db.all(sqlReserved, [], (err2, reserved) => {
+            const totalReservado = (reserved || []).reduce((s, r) => s + (r.total_value || 0), 0);
+            res.json({ data: rows, reserved: reserved || [], total_reservado: totalReservado });
+        });
     });
 };
 
@@ -530,8 +630,7 @@ exports.getArchivedOrders = (req, res) => {
 exports.deleteOrder = (req, res) => {
     const orderId = req.params.id;
     db.serialize(() => {
-        // First check if it's an internal order to revert material costs
-        db.get("SELECT is_internal FROM orders WHERE id = ?", [orderId], (err, order) => {
+        db.get("SELECT is_internal, stock_reserved FROM orders WHERE id = ?", [orderId], (err, order) => {
             if (err) return res.status(500).json({ error: err.message });
             if (!order) return res.status(404).json({ error: 'Pedido não encontrado' });
 
@@ -546,18 +645,51 @@ exports.deleteOrder = (req, res) => {
                 });
             };
 
+            const afterCostRevert = () => {
+                // Restore reserved stock if applicable
+                if (order.stock_reserved) {
+                    db.all("SELECT * FROM order_items WHERE order_id = ?", [orderId], (err, items) => {
+                        if (err || !items || items.length === 0) { doDelete(); return; }
+                        let done = 0;
+                        const next = () => { done++; if (done === items.length) doDelete(); };
+                        items.forEach(item => {
+                            if (item.color_variant_id) {
+                                db.run("UPDATE product_color_variants SET quantity = quantity + ? WHERE id = ?",
+                                    [item.quantity, item.color_variant_id], () => {
+                                        db.get("SELECT product_id FROM product_color_variants WHERE id = ?", [item.color_variant_id], (err, cv) => {
+                                            if (cv) db.get("SELECT SUM(quantity) as total FROM product_color_variants WHERE product_id = ?", [cv.product_id], (err, row) => {
+                                                db.run("UPDATE products SET stock = ? WHERE id = ?", [(row && row.total) || 0, cv.product_id]);
+                                            });
+                                            db.run("INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'retorno_exclusao', ?, ?)",
+                                                [item.product_id, item.quantity, `Exclusão Pedido #${orderId}`, null]);
+                                            next();
+                                        });
+                                    });
+                            } else {
+                                db.run("UPDATE products SET stock = stock + ? WHERE id = ?", [item.quantity, item.product_id], () => {
+                                    db.run("INSERT INTO stock_movements (product_id, quantity_change, type, reason, user_id) VALUES (?, ?, 'retorno_exclusao', ?, ?)",
+                                        [item.product_id, item.quantity, `Exclusão Pedido #${orderId}`, null]);
+                                    next();
+                                });
+                            }
+                        });
+                    });
+                } else {
+                    doDelete();
+                }
+            };
+
             if (order.is_internal) {
-                // Revert accumulated cost_value on products before deleting
                 db.all("SELECT product_id, cost_amount FROM material_cost_movements WHERE order_id = ?", [orderId], (err2, rows) => {
                     if (!err2 && rows && rows.length > 0) {
                         rows.forEach(r => {
                             db.run("UPDATE products SET cost_value = MAX(0, COALESCE(cost_value, 0) - ?) WHERE id = ?", [r.cost_amount, r.product_id]);
                         });
                     }
-                    doDelete();
+                    afterCostRevert();
                 });
             } else {
-                doDelete();
+                afterCostRevert();
             }
         });
     });

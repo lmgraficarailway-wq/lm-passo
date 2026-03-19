@@ -300,6 +300,8 @@ function initDb() {
     )`);
     // Migration: add event_name for CORE orders
     db.run("ALTER TABLE orders ADD COLUMN event_name TEXT DEFAULT ''", (err) => { /* ignore if exists */ });
+    // Migration: flag indicating stock was reserved at order creation
+    db.run("ALTER TABLE orders ADD COLUMN stock_reserved INTEGER DEFAULT 0", (err) => { /* ignore if exists */ });
 }
 
 module.exports = db;
