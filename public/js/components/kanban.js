@@ -1573,8 +1573,8 @@ export const render = () => {
         };
 
         // Apply 15% discount if client has core_discount
-        const selectedOpt = clientSelect.options[clientSelect.selectedIndex];
-        if (selectedOpt && selectedOpt.dataset.discount === '1') {
+        const selectedClientData = (window._kanbanClientsRef || []).find(c => c.id == clientSelect.value);
+        if (selectedClientData && selectedClientData.core_discount) {
             const originalValue = payload.total_value;
             payload.total_value = parseFloat((originalValue * 0.85).toFixed(2));
             payload.discount_value = parseFloat((originalValue - payload.total_value).toFixed(2));
@@ -1612,7 +1612,7 @@ export const render = () => {
                 e.target.reset();
 
                 // Auto Copy Summary
-                const clientName = container.querySelector('#client-select option:checked').text;
+                const clientName = container.querySelector('#client-search')?.value || 'Cliente';
                 const payment = payload.payment_method;
                 const total = `R$ ${parseFloat(container.querySelector('#cart-total-input').value || 0).toFixed(2)}`;
                 const deadline = payload.deadline_option === '1D' ? '1 Dia (Urgente)' : '3 Dias';
