@@ -44,6 +44,15 @@ export const render = (user) => {
                 </div>
             </div>
             <div class="stock-card">
+                <div class="stock-card-icon" style="background:#f9731620; color:#f97316">
+                    <ion-icon name="pricetag-outline"></ion-icon>
+                </div>
+                <div class="stock-card-info">
+                    <div class="stock-card-value" id="fin-total-discounts" style="color:#dc2626">R$ 0,00</div>
+                    <div class="stock-card-label">Total Descontos</div>
+                </div>
+            </div>
+            <div class="stock-card">
                 <div class="stock-card-icon" style="background:#dc262620; color:#dc2626">
                     <ion-icon name="trending-down-outline"></ion-icon>
                 </div>
@@ -134,13 +143,15 @@ export const render = (user) => {
                     year: d.getFullYear(),
                     month: d.getMonth(),
                     items: [],
-                    total: 0
+                    total: 0,
+                    discount: 0
                 };
             }
             months[key].items.push(s);
             months[key].total += (s.total_value || 0);
+            months[key].discount += (s.discount_value || 0);
             totalGeral += (s.total_value || 0);
-            if (s.launched_to_core) launched++;
+            if (s.launched_to_core) launched++;;
         });
 
         const sortedKeys = Object.keys(months).sort((a, b) => b.localeCompare(a));
@@ -227,6 +238,13 @@ export const render = (user) => {
                         return `<tfoot>
                             <tr><td colspan="${isAdmin ? 10 : 9}" style="padding:0"><hr style="border:none; border-top:2px dashed #e0d4f5; margin:0;"></td></tr>
                             ${methodRows}
+                            ${m.discount > 0 ? `
+                            <tr style="background:#fff7ed;">
+                                <td colspan="5" style="text-align:right; font-size:0.95rem; color:#b45309; padding:8px 12px;">🏷️ Total Descontos ${m.label}:</td>
+                                <td style="font-size:1rem; font-weight:700; color:#dc2626;">- R$ ${m.discount.toFixed(2)}</td>
+                                <td></td>
+                                <td colspan="${isAdmin ? 3 : 2}"></td>
+                            </tr>` : ''}
                             <tr style="background:linear-gradient(135deg, #f0fdf4, #dcfce7); font-weight:bold;">
                                 <td colspan="6" style="text-align:right; font-size:1.05rem; color:#166534; padding:10px 12px;">${closingLabel} ${m.label}:</td>
                                 <td style="font-size:1.15rem; color:#166534;">R$ ${m.total.toFixed(2)}</td>
@@ -240,10 +258,13 @@ export const render = (user) => {
         }
 
         // Summary cards
+        const totalDescontos = data.reduce((sum, s) => sum + (s.discount_value || 0), 0);
         container.querySelector('#fin-total-orders').textContent = data.length;
         container.querySelector('#fin-total-value').textContent = `R$ ${totalGeral.toFixed(2)}`;
         container.querySelector('#fin-launched').textContent = launched;
         container.querySelector('#fin-pending').textContent = data.length - launched;
+        const discountCardEl = container.querySelector('#fin-total-discounts');
+        if (discountCardEl) discountCardEl.textContent = totalDescontos > 0 ? `- R$ ${totalDescontos.toFixed(2)}` : 'R$ 0,00';
 
         // Bind launch buttons
         container.querySelectorAll('.launch-btn').forEach(btn => {
