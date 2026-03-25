@@ -412,6 +412,34 @@ exports.getDispatchCosts = (req, res) => {
     });
 };
 
+// Delete a dispatch cost entry (admin only)
+exports.deleteDispatchCost = (req, res) => {
+    const id = req.params.id;
+    db.run("DELETE FROM dispatch_costs WHERE id = ?", [id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: 'Registro não encontrado' });
+        res.json({ message: 'Custo de despacho apagado com sucesso' });
+    });
+};
+
+// Update a dispatch cost entry (admin only)
+exports.updateDispatchCost = (req, res) => {
+    const id = req.params.id;
+    const { carrier, amount } = req.body;
+    if (!carrier || !amount || parseFloat(amount) <= 0) {
+        return res.status(400).json({ error: 'Campos inválidos' });
+    }
+    db.run(
+        "UPDATE dispatch_costs SET carrier = ?, amount = ? WHERE id = ?",
+        [carrier, parseFloat(amount), id],
+        function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            if (this.changes === 0) return res.status(404).json({ error: 'Registro não encontrado' });
+            res.json({ message: 'Custo de despacho atualizado com sucesso' });
+        }
+    );
+};
+
 
 
 exports.rejectOrder = (req, res) => {

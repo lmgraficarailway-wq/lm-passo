@@ -74,6 +74,9 @@ router.get('/reports/material-costs', orderController.getMaterialCostsReport);
 router.get('/reports/dispatch-costs', orderController.getDispatchCosts);
 // Delete individual material cost entry (admin only)
 router.delete('/material-costs/:id', orderController.deleteMaterialCost);
+// Delete / update dispatch cost entry (admin only)
+router.delete('/dispatch-costs/:id', orderController.deleteDispatchCost);
+router.put('/dispatch-costs/:id', orderController.updateDispatchCost);
 
 // Stock
 const stockController = require('../controllers/stock_controller');

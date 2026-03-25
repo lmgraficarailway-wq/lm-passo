@@ -553,6 +553,14 @@ export const render = (user) => {
                             <td>${d.client_name || '-'}</td>
                             <td>Pedido #${d.order_id || '-'}</td>
                             <td style="font-weight:bold; color:#dc2626;">R$ ${(d.amount || 0).toFixed(2)}</td>
+                            ${isAdmin ? `<td style="text-align:center; white-space:nowrap;">
+                                <button class="btn-edit-dispatch" data-id="${d.id}" data-carrier="${(d.carrier||'').replace(/"/g,'&quot;')}" data-amount="${d.amount}"
+                                    title="Editar" style="background:none;border:none;cursor:pointer;color:#7c3aed;font-size:1.1rem;padding:2px 5px;border-radius:4px;transition:background 0.2s;"
+                                    onmouseover="this.style.background='#f3e8ff'" onmouseout="this.style.background='none'">✏️</button>
+                                <button class="btn-del-dispatch" data-id="${d.id}"
+                                    title="Apagar" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:1.1rem;padding:2px 5px;border-radius:4px;transition:background 0.2s;"
+                                    onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑️</button>
+                            </td>` : ''}
                         </tr>`).join('');
                     return `
                         <div style="margin-bottom:1.5rem;">
@@ -561,16 +569,96 @@ export const render = (user) => {
                                 <span style="font-size:0.85rem; opacity:0.9;">${m.items.length} despacho${m.items.length > 1 ? 's' : ''}</span>
                             </div>
                             <table class="data-table" style="border-radius:0 0 8px 8px; margin-top:0;">
-                                <thead><tr><th>Data</th><th>Transportadora</th><th>Cliente</th><th>Pedido</th><th>Valor</th></tr></thead>
+                                <thead><tr>
+                                    <th>Data</th><th>Transportadora</th><th>Cliente</th><th>Pedido</th><th>Valor</th>
+                                    ${isAdmin ? '<th style="width:80px">Ações</th>' : ''}
+                                </tr></thead>
                                 <tbody>${rows}</tbody>
                                 <tfoot><tr style="background:#fef2f2; font-weight:bold;">
-                                    <td colspan="4" style="text-align:right; color:#991b1b; padding:8px 12px;">Total ${m.label}:</td>
+                                    <td colspan="${isAdmin ? 5 : 4}" style="text-align:right; color:#991b1b; padding:8px 12px;">Total ${m.label}:</td>
                                     <td style="color:#dc2626; font-size:1.05rem;">R$ ${m.total.toFixed(2)}</td>
+                                    ${isAdmin ? '<td></td>' : ''}
                                 </tr></tfoot>
                             </table>
                         </div>`;
                 }).join('')}
             `;
+
+            if (isAdmin) {
+                // Delete buttons
+                dispContainer.querySelectorAll('.btn-del-dispatch').forEach(btn => {
+                    btn.onclick = async () => {
+                        if (!confirm('⚠️ Apagar este custo de despacho? Esta ação não pode ser desfeita.')) return;
+                        const r = await fetch(`/api/dispatch-costs/${btn.dataset.id}`, { method: 'DELETE' });
+                        if (r.ok) {
+                            loadDispatchCosts();
+                        } else {
+                            const j = await r.json().catch(() => ({}));
+                            alert('Erro: ' + (j.error || 'Falha ao apagar'));
+                        }
+                    };
+                });
+
+                // Edit buttons with modal
+                dispContainer.querySelectorAll('.btn-edit-dispatch').forEach(btn => {
+                    btn.onclick = () => {
+                        const id = btn.dataset.id;
+                        const currentCarrier = btn.dataset.carrier;
+                        const currentAmount = parseFloat(btn.dataset.amount) || 0;
+
+                        const old = document.getElementById('dispatch-edit-modal');
+                        if (old) old.remove();
+
+                        const modal = document.createElement('div');
+                        modal.id = 'dispatch-edit-modal';
+                        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+                        modal.innerHTML = `
+                            <div style="background:white;border-radius:12px;padding:2rem;min-width:320px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                                <h3 style="margin:0 0 1.25rem;color:#4c1d95;font-size:1.1rem;">✏️ Editar Custo de Despacho</h3>
+                                <label style="display:block;margin-bottom:0.35rem;font-size:0.85rem;color:#475569;font-weight:600;">Transportadora</label>
+                                <select id="edit-disp-carrier" style="width:100%;padding:0.5rem;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:1rem;font-size:0.95rem;">
+                                    <option value="UNIDA" ${currentCarrier==='UNIDA'?'selected':''}>UNIDA</option>
+                                    <option value="CORREIOS" ${currentCarrier==='CORREIOS'?'selected':''}>CORREIOS</option>
+                                </select>
+                                <label style="display:block;margin-bottom:0.35rem;font-size:0.85rem;color:#475569;font-weight:600;">Valor (R$)</label>
+                                <input id="edit-disp-amount" type="number" step="0.01" min="0.01" value="${currentAmount.toFixed(2)}"
+                                    style="width:100%;padding:0.5rem;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:1.25rem;font-size:0.95rem;box-sizing:border-box;">
+                                <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+                                    <button id="edit-disp-cancel" style="padding:0.5rem 1.25rem;border:1px solid #cbd5e1;background:white;border-radius:6px;cursor:pointer;font-size:0.9rem;">Cancelar</button>
+                                    <button id="edit-disp-save" style="padding:0.5rem 1.25rem;background:#7c3aed;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:600;">Salvar</button>
+                                </div>
+                            </div>`;
+                        document.body.appendChild(modal);
+
+                        modal.querySelector('#edit-disp-cancel').onclick = () => modal.remove();
+                        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+
+                        modal.querySelector('#edit-disp-save').onclick = async () => {
+                            const carrier = modal.querySelector('#edit-disp-carrier').value;
+                            const amount = parseFloat(modal.querySelector('#edit-disp-amount').value);
+                            if (!carrier || isNaN(amount) || amount <= 0) {
+                                alert('Preencha todos os campos corretamente.');
+                                return;
+                            }
+                            const saveBtn = modal.querySelector('#edit-disp-save');
+                            saveBtn.disabled = true; saveBtn.textContent = 'Salvando...';
+                            const r = await fetch(`/api/dispatch-costs/${id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ carrier, amount })
+                            });
+                            if (r.ok) {
+                                modal.remove();
+                                loadDispatchCosts();
+                            } else {
+                                const j = await r.json().catch(() => ({}));
+                                alert('Erro: ' + (j.error || 'Falha ao salvar'));
+                                saveBtn.disabled = false; saveBtn.textContent = 'Salvar';
+                            }
+                        };
+                    };
+                });
+            }
         } catch (e) {
             console.error('Erro ao carregar custos de despacho:', e);
         }
