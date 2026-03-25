@@ -1,4 +1,4 @@
-﻿export const render = () => {
+export const render = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const container = document.createElement('div');
     const isClient = user.role === 'cliente';
@@ -1279,14 +1279,19 @@
 
     const isInternalMode = () => !!(container.querySelector('#internal-toggle') && container.querySelector('#internal-toggle').checked);
 
+    const PULSEIRA_DEFAULT_PRICE = 0.20;
+
     const getProductPrice = (product) => {
         // Internal service: always use unit_cost
         if (isInternalMode()) return parseFloat(product.unit_cost) || 0;
         const type = getDeadline();
         const p1 = parseFloat(product.price_1_day) || 0;
         const p3 = parseFloat(product.price_3_days) || parseFloat(product.price) || 0;
-        const finalP1 = p1 > 0 ? p1 : (p3 * 1.5); // Fallback
-        return type === '1D' ? finalP1 : p3;
+        // Pulseiras: fallback de R$ 0,20 se sem preço definido
+        const isPulseira = isPulseiraProd ? isPulseiraProd(product) : (product.type || '').toLowerCase().includes('pulseira');
+        const p3Final = (p3 === 0 && isPulseira) ? PULSEIRA_DEFAULT_PRICE : p3;
+        const finalP1 = p1 > 0 ? p1 : (p3Final * 1.5); // Fallback
+        return type === '1D' ? finalP1 : p3Final;
     };
 
     const renderCart = () => {
@@ -1357,6 +1362,11 @@
         }
         // It's a pulseira — load colors
         colorSelectContainer.style.display = 'block';
+        // Price label for pulseira
+        const basePrice = parseFloat(product.price_3_days) || parseFloat(product.price) || 0;
+        const displayPrice = basePrice > 0 ? basePrice : PULSEIRA_DEFAULT_PRICE;
+        const priceLabelEl = colorSelectContainer.querySelector('small');
+        if (priceLabelEl) priceLabelEl.innerHTML = `🎨 Selecione a cor da pulseira: <span style="background:#d1fae5; color:#065f46; padding:1px 8px; border-radius:10px; font-size:0.8rem; font-weight:700; margin-left:6px;">R$ ${displayPrice.toFixed(2).replace('.', ',')}/un</span>`;
         colorSelect.innerHTML = '<option value="">Carregando...</option>';
         try {
             const res = await fetch(`/api/products/${pid}/colors`);
