@@ -184,6 +184,7 @@ export const render = () => {
         }
 
         tbody.innerHTML = filtered.map(p => {
+            const isKit = isKitType(p.name);
             const stock = p.stock || 0;
             const minStock = p.min_stock || 5;
             let stockBadge = stock <= 0
@@ -192,16 +193,21 @@ export const render = () => {
                     ? '<span style="background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:0.8em; font-weight:bold;">Baixo</span>'
                     : '<span style="background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:10px; font-size:0.8em; font-weight:bold;">OK</span>';
 
+            let price3Html = isKit ? '<span style="color:#94a3b8; font-size:0.8rem; font-style:italic;">Variável (Kit)</span>' : `R$ ${parseFloat(p.price_3_days || p.price || 0).toFixed(2).replace('.', ',')}`;
+            
+            let price1Html = isKit ? '<span style="color:#94a3b8; font-size:0.8rem;">—</span>' : (p.terceirizado
+                    ? (p.production_time ? `<span style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:2px 10px; font-size:0.8em; color:#1d4ed8; font-weight:600; display:inline-block;">📅 ${p.production_time} dia${p.production_time == 1 ? '' : 's'}</span>` : '<span style="color:#94a3b8">—</span>')
+                    : `<span style="color:#dc2626; font-weight:600">R$ ${parseFloat(p.price_1_day || 0).toFixed(2).replace('.', ',')}</span>`);
+                    
+            let stockHtml = isKit ? '<span style="color:#94a3b8; font-size:0.8rem;">—</span>' : (p.terceirizado ? '<span style="color:#94a3b8;">—</span>' : `<b>${stock}</b> ${stockBadge}`);
+
             return `
             <tr>
                 <td><b>${p.name}</b>${p.terceirizado ? ' <span style="background:#fef3c7; color:#92400e; padding:1px 6px; border-radius:8px; font-size:0.75em;">🏭 Terc.</span>' : ''}</td>
                 <td>${p.type || '-'}</td>
-                <td>R$ ${parseFloat(p.price_3_days || p.price || 0).toFixed(2)}</td>
-                <td>${p.terceirizado
-                    ? (p.production_time ? `<span style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:2px 10px; font-size:0.8em; color:#1d4ed8; font-weight:600; display:inline-block;">📅 ${p.production_time} dia${p.production_time == 1 ? '' : 's'}</span>` : '<span style="color:#94a3b8">—</span>')
-                    : `<span style="color:#dc2626; font-weight:600">R$ ${parseFloat(p.price_1_day || 0).toFixed(2)}</span>`
-                }</td>
-                <td>${p.terceirizado ? '<span style="color:#94a3b8;">—</span>' : `<b>${stock}</b> ${stockBadge}`}</td>
+                <td>${price3Html}</td>
+                <td>${price1Html}</td>
+                <td>${stockHtml}</td>
                 <td>
                     ${canEdit ? `<button class="btn btn-secondary btn-sm edit-btn" data-id="${p.id}">Editar</button>
                     <button class="btn btn-sm delete-btn" style="background:#fee2e2; color:#b91c1c; border:none; margin-left:4px;" data-id="${p.id}">🗑️</button>` : '<span style="color:#94a3b8; font-size:0.85rem;">Somente leitura</span>'}

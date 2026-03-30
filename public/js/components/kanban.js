@@ -634,7 +634,13 @@ export const render = () => {
                         card.style.borderLeftColor = 'red';
                         badge = `<span class="card-badge" style="background:#fecaca; color:#b91c1c">Atrasado</span>`;
                     } else {
-                        badge = `<span class="card-badge">${order.deadline_type || ''}</span>`;
+                        const dt = order.deadline_type || '';
+                        if (dt.toLowerCase().includes('1 dia') || dt.toLowerCase().includes('urgente')) {
+                            card.style.borderLeftColor = '#22c55e';
+                            badge = `<span class="card-badge" style="background:#22c55e; color:#fff; font-weight:bold; letter-spacing:0.5px; border:none; box-shadow:0 0 5px rgba(34,197,94,0.5); padding:2px 8px;">🚨 ${dt.toUpperCase()}</span>`;
+                        } else {
+                            badge = `<span class="card-badge">${dt}</span>`;
+                        }
                     }
                 } else if (order.status === 'em_balcao') {
                     badge = `<span class="card-badge" style="background:#ffedd5; color:#c2410c">Em Balcão</span>`;
