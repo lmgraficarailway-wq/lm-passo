@@ -45,7 +45,7 @@ export const render = () => {
 
         <!-- Modal -->
         <div class="modal-overlay" id="product-modal">
-            <div class="modal" style="max-width:560px">
+            <div class="modal" style="max-width:750px; width:100%;">
                 <div class="modal-header">
                     <h3 id="modal-title">Adicionar Produto</h3>
                     <button class="modal-close">&times;</button>
