@@ -280,8 +280,9 @@ export const render = () => {
                     }
                 });
             }
-            tpl.base_price = autoTotal;
-            
+            if (tpl.base_price === undefined) {
+                tpl.base_price = autoTotal;
+            }
             return `
             <div style="border:1px solid #cbd5e1; border-radius:8px; padding:1rem; background:#f8fafc;">
                 <div style="display:flex; gap:0.5rem; margin-bottom:0.75rem;">
@@ -290,10 +291,12 @@ export const render = () => {
                         <input type="text" class="kit-tpl-name" data-index="${tIndex}" value="${tpl.name || ''}" placeholder="Ex: Básico" style="width:100%; padding:0.4rem; border:1px solid #cbd5e1; border-radius:4px;">
                     </div>
                     <div style="flex:1">
-                        <label style="font-size:0.8rem; color:#64748b; margin-bottom:0.2rem; display:block;">Valor para 3 dias</label>
-                        <div style="width:100%; padding:0.4rem; border:1px solid #cbd5e1; border-radius:4px; background:#e2e8f0; font-weight:bold; color:#1e293b;">
-                            R$ ${autoTotal.toFixed(2).replace('.', ',')}
+                        <label style="font-size:0.8rem; color:#64748b; margin-bottom:0.2rem; display:block;">Valor Final (Venda)</label>
+                        <div style="display:flex; align-items:center;">
+                            <span style="font-weight:bold; color:#1e293b; margin-right:4px;">R$</span>
+                            <input type="number" step="0.01" min="0" class="kit-tpl-price" data-index="${tIndex}" value="${parseFloat(tpl.base_price || 0).toFixed(2)}" style="width:100%; padding:0.4rem; border:1px solid #cbd5e1; border-radius:4px; font-weight:bold; color:#1d4ed8;">
                         </div>
+                        <div style="font-size:0.7rem; color:#64748b; margin-top:0.2rem;">Soma Itens: R$ ${autoTotal.toFixed(2).replace('.', ',')}</div>
                     </div>
                     <div style="display:flex; align-items:flex-end">
                         <button type="button" class="btn btn-sm remove-tpl-btn" data-index="${tIndex}" style="background:#fee2e2; color:#b91c1c; border:none; height:34px;">Excluir</button>
@@ -328,6 +331,7 @@ export const render = () => {
         }
 
         list.querySelectorAll('.kit-tpl-name').forEach(inp => inp.oninput = (e) => kitTemplates[e.target.dataset.index].name = e.target.value);
+        list.querySelectorAll('.kit-tpl-price').forEach(inp => inp.oninput = (e) => kitTemplates[e.target.dataset.index].base_price = parseFloat(e.target.value) || 0);
         list.querySelectorAll('.remove-tpl-btn').forEach(btn => btn.onclick = (e) => { kitTemplates.splice(e.target.dataset.index, 1); renderKitTemplates(); });
         
         list.querySelectorAll('.add-kit-item-btn').forEach(btn => btn.onclick = (e) => {

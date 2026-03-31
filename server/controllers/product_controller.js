@@ -29,8 +29,10 @@ exports.createProduct = (req, res) => {
     db.get(getStockSql, [type], (err, row) => {
         const finalStock = (row && row.stock !== undefined) ? row.stock : (stock || 0);
 
+        const safePrice = price !== undefined ? price : (price_3_days || 0);
+
         const sql = "INSERT INTO products (name, type, production_time, price, stock, price_1_day, price_3_days, terceirizado, unit_cost) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        const params = [name, type, production_time, price, finalStock, price_1_day, price_3_days, terceirizado ? 1 : 0, unit_cost || 0];
+        const params = [name, type || '', production_time || '', safePrice, finalStock, price_1_day || 0, price_3_days || 0, terceirizado ? 1 : 0, unit_cost || 0];
 
         db.run(sql, params, function (err) {
             if (err) return res.status(500).json({ error: err.message });
@@ -59,15 +61,16 @@ exports.updateProduct = (req, res) => {
             if (normalizedType !== '') {
                 // Find stock of existing products of the NEW type if type was changed
                 db.get("SELECT stock FROM products WHERE UPPER(TRIM(type)) = UPPER(?) AND id != ? LIMIT 1", [normalizedType, productId], (err, row) => {
-                    let syncedStock = stock;
+                    let syncedStock = stock !== undefined && stock !== "" ? stock : 0;
                     if (typeChanged && row && row.stock !== undefined) {
                         syncedStock = row.stock;
                         console.log(`[Sync] Type changed to existing type. Adopting stock: ${syncedStock}`);
                     }
 
+                    const safePrice = price !== undefined ? price : (price_3_days || 0);
                     // Update target product
                     const sql = "UPDATE products SET name = ?, type = ?, production_time = ?, price = ?, stock = ?, price_1_day = ?, price_3_days = ?, terceirizado = ?, unit_cost = ? WHERE id = ?";
-                    const params = [name, normalizedType, production_time, price, syncedStock, price_1_day, price_3_days, terceirizado ? 1 : 0, unit_cost || 0, productId];
+                    const params = [name, normalizedType, production_time || '', safePrice, syncedStock, price_1_day || 0, price_3_days || 0, terceirizado ? 1 : 0, unit_cost || 0, productId];
 
                     db.run(sql, params, function (err) {
                         if (err) return res.status(500).json({ error: err.message });
@@ -88,9 +91,11 @@ exports.updateProduct = (req, res) => {
                     });
                 });
             } else {
+                const safePrice = price !== undefined ? price : (price_3_days || 0);
+                const safeStock = stock !== undefined && stock !== "" ? stock : 0;
                 // No type or empty type - update individual product only
                 const sql = "UPDATE products SET name = ?, type = ?, production_time = ?, price = ?, stock = ?, price_1_day = ?, price_3_days = ?, terceirizado = ?, unit_cost = ? WHERE id = ?";
-                const params = [name, normalizedType, production_time, price, stock, price_1_day, price_3_days, terceirizado ? 1 : 0, unit_cost || 0, productId];
+                const params = [name, normalizedType, production_time || '', safePrice, safeStock, price_1_day || 0, price_3_days || 0, terceirizado ? 1 : 0, unit_cost || 0, productId];
                 db.run(sql, params, function (err) {
                     if (err) return res.status(500).json({ error: err.message });
                     res.json({ message: 'Produto atualizado', changes: this.changes });
