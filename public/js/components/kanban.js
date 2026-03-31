@@ -654,9 +654,10 @@ export const render = () => {
                         badge = `<span class="card-badge" style="background:#fecaca; color:#b91c1c">Atrasado</span>`;
                     } else {
                         const dt = order.deadline_type || '';
-                        if (dt.toLowerCase().includes('1 dia') || dt.toLowerCase().includes('urgente')) {
-                            card.style.borderLeftColor = '#22c55e';
-                            badge = `<span class="card-badge" style="background:#22c55e; color:#fff; font-weight:bold; letter-spacing:0.5px; border:none; box-shadow:0 0 5px rgba(34,197,94,0.5); padding:2px 8px;">🚨 ${dt.toUpperCase()}</span>`;
+                        if (dt === '1D' || dt.toLowerCase().includes('1 dia') || dt.toLowerCase().includes('urgente')) {
+                            card.style.borderLeftColor = '#3b82f6';
+                            card.style.boxShadow = '0 0 8px rgba(59, 130, 246, 0.3)';
+                            badge = `<span class="card-badge" style="background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color:#fff; font-weight:bold; letter-spacing:0.5px; border:none; padding:3px 10px; border-radius:6px;">🚀 MÁX PRIORIDADE (1D)</span>`;
                         } else {
                             badge = `<span class="card-badge">${dt}</span>`;
                         }
