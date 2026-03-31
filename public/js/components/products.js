@@ -334,8 +334,30 @@ export const render = () => {
             list.innerHTML = '<p style="text-align:center; color:#94a3b8;">Nenhum sub-título criado ainda. Clique em "+ Adicionar Sub-título" para começar.</p>';
         }
 
-        list.querySelectorAll('.kit-tpl-name').forEach(inp => inp.oninput = (e) => kitTemplates[e.target.dataset.index].name = e.target.value);
-        list.querySelectorAll('.kit-tpl-price').forEach(inp => inp.oninput = (e) => kitTemplates[e.target.dataset.index].base_price = parseFloat(e.target.value) || 0);
+        const updateKitOverviewUI = () => {
+            const overview = container.querySelector('#kit-overview-list');
+            if (overview) {
+                if (kitTemplates.length === 0) {
+                    overview.innerHTML = '<span style="color:#94a3b8; font-style:italic;">Nenhum kit configurado.</span>';
+                } else {
+                    overview.innerHTML = kitTemplates.map(t => 
+                        `<div style="display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid #dbeafe;">
+                            <span>${t.name || '<i>Sem nome</i>'}</span>
+                            <strong style="color:#1d4ed8;">R$ ${(t.base_price||0).toFixed(2).replace('.',',')}</strong>
+                        </div>`
+                    ).join('');
+                }
+            }
+        };
+
+        list.querySelectorAll('.kit-tpl-name').forEach(inp => inp.oninput = (e) => {
+            kitTemplates[e.target.dataset.index].name = e.target.value;
+            updateKitOverviewUI();
+        });
+        list.querySelectorAll('.kit-tpl-price').forEach(inp => inp.oninput = (e) => {
+            kitTemplates[e.target.dataset.index].base_price = parseFloat(e.target.value) || 0;
+            updateKitOverviewUI();
+        });
         list.querySelectorAll('.remove-tpl-btn').forEach(btn => btn.onclick = (e) => { kitTemplates.splice(e.target.dataset.index, 1); renderKitTemplates(); });
         
         list.querySelectorAll('.add-kit-item-btn').forEach(btn => btn.onclick = (e) => {
@@ -358,20 +380,8 @@ export const render = () => {
             renderKitTemplates();
         });
 
-        // Update overview
-        const overview = container.querySelector('#kit-overview-list');
-        if (overview) {
-            if (kitTemplates.length === 0) {
-                overview.innerHTML = '<span style="color:#94a3b8; font-style:italic;">Nenhum kit configurado.</span>';
-            } else {
-                overview.innerHTML = kitTemplates.map(t => 
-                    `<div style="display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid #dbeafe;">
-                        <span>${t.name || '<i>Sem nome</i>'}</span>
-                        <strong style="color:#1d4ed8;">R$ ${(t.base_price||0).toFixed(2).replace('.',',')}</strong>
-                    </div>`
-                ).join('');
-            }
-        }
+        // Update overview once on initial render
+        updateKitOverviewUI();
     };
 
     container.querySelector('#btn-add-kit-template').onclick = () => {
