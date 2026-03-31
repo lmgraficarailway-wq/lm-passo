@@ -709,6 +709,7 @@ body {
 .catalogue-image-wrapper {
     width: 100%;
     height: 180px;
+    flex-shrink: 0;
     position: relative;
     background: #f8fafc;
 }
@@ -716,7 +717,8 @@ body {
 .catalogue-image {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* or 'cover' depending on preference, contain ensures no crop */
+    object-fit: cover;
+    border-radius: 16px 16px 0 0;
     border-bottom: 1px solid #f1f5f9;
 }
 
