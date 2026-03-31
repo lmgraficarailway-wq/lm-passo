@@ -372,16 +372,17 @@ export const render = () => {
             <html>
                 <head>
                     <style>
-                        @page { size: portrait; margin: 0; }
+                        @page { margin: 0; }
                         * { box-sizing: border-box; margin: 0; padding: 0; }
-                        body { width: 57mm; padding: 2mm; font-family: 'Arial', sans-serif; font-size: 10px; }
+                        body { width: 100%; max-width: 58mm; margin: 0 auto; padding: 2mm; font-family: 'Arial', sans-serif; font-size: 10px; text-align: center; }
                         .header { text-align: center; margin-bottom: 2mm; }
                         .header h2 { font-size: 14px; margin: 0; }
                         .header small { font-size: 8px; color: #555; }
                         .line { border-bottom: 1px dashed #000; margin: 2mm 0; }
+                        .info { text-align: center; }
                         .info p { margin: 1mm 0; font-size: 10px; line-height: 1.4; }
                         .info p b { display: inline; }
-                        .products { margin: 1mm 0; font-size: 10px; white-space: pre-line; line-height: 1.4; }
+                        .products { margin: 1mm 0; font-size: 10px; white-space: pre-line; line-height: 1.4; text-align: center; }
                         .total { text-align: center; font-size: 13px; font-weight: bold; margin: 2mm 0; }
                         .signature { margin-top: 6mm; border-top: 1px solid #000; text-align: center; padding-top: 2mm; font-size: 9px; }
                         .footer { text-align: center; font-size: 8px; color: #777; margin-top: 3mm; }
@@ -1015,6 +1016,9 @@ export const render = () => {
                      </div>
                 </div>
                 <div style="display:flex; gap:0.5rem">
+                    <button class="btn btn-sm btn-secondary btn-reprint" title="Reimprimir Notinha" style="height:fit-content; background:#f8fafc; color:#475569; border:1px solid #cbd5e1;">
+                        🖨️ Notinha
+                    </button>
                     <button class="btn btn-sm btn-secondary btn-nf" title="Copiar Dados Nota Fiscal" style="height:fit-content; background:#f8fafc; color:#475569; border:1px solid #cbd5e1;">
                         📄 Dados NF
                     </button>
@@ -1104,6 +1108,12 @@ export const render = () => {
                     alert('Erro de conexão: ' + err.message);
                 }
             };
+        }
+
+        // Reprint Notinha
+        const reprintBtn = content.querySelector('.btn-reprint');
+        if (reprintBtn) {
+            reprintBtn.onclick = () => printLabel(order);
         }
 
         // Nota Fiscal Copy
