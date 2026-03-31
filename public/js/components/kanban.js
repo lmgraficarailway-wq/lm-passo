@@ -6,16 +6,27 @@ export const render = () => {
     const clientId = user.client_id;
 
     let notifiedLateOrders = new Set();
-    const showToastAlert = (msg) => {
+    let notifiedUrgentOrders = new Set();
+    const showToastAlert = (msg, type = 'red') => {
         const toast = document.createElement('div');
-        toast.style.cssText = 'position:fixed; top:24px; right:24px; background:linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); border:1px solid #991b1b; color:#ffffff; padding:16px 20px; border-radius:12px; box-shadow:0 10px 25px -5px rgba(220, 38, 38, 0.5), 0 8px 10px -6px rgba(220, 38, 38, 0.2); z-index:9999; width:340px; max-width:calc(100vw - 48px); font-family:system-ui, -apple-system, sans-serif; display:flex; align-items:center; gap:16px; transform:translateX(120%); transition:transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease; opacity:0; cursor:pointer;';
+        let bgStyle = 'background:linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); border:1px solid #991b1b; box-shadow:0 10px 25px -5px rgba(220, 38, 38, 0.5), 0 8px 10px -6px rgba(220, 38, 38, 0.2);';
+        let icon = '⏰';
+        let title = 'Atenção à Produção';
+        
+        if (type === 'blue') {
+            bgStyle = 'background:linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border:1px solid #1e40af; box-shadow:0 10px 25px -5px rgba(59, 130, 246, 0.5), 0 8px 10px -6px rgba(59, 130, 246, 0.2);';
+            icon = '🚀';
+            title = 'Prioridade (PZ: 1 DIA)';
+        }
+
+        toast.style.cssText = `position:fixed; top:24px; right:24px; color:#ffffff; padding:16px 20px; border-radius:12px; z-index:9999; width:340px; max-width:calc(100vw - 48px); font-family:system-ui, -apple-system, sans-serif; display:flex; align-items:center; gap:16px; transform:translateX(120%); transition:transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease; opacity:0; cursor:pointer; ${bgStyle}`;
         toast.innerHTML = `
             <div style="background:rgba(255,255,255,0.25); width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:inset 0 2px 4px rgba(255,255,255,0.2);">
-                <span style="font-size:1.5rem; line-height:1;">⏰</span>
+                <span style="font-size:1.5rem; line-height:1;">${icon}</span>
             </div>
             <div style="flex:1;">
-                <div style="font-weight:700; font-size:1.05rem; margin-bottom:4px; letter-spacing:-0.01em;">Atenção à Produção</div>
-                <div style="font-size:0.9rem; line-height:1.4; color:#fef2f2; font-weight:500;">${msg}</div>
+                <div style="font-weight:700; font-size:1.05rem; margin-bottom:4px; letter-spacing:-0.01em;">${title}</div>
+                <div style="font-size:0.9rem; line-height:1.4; color:#eff6ff; font-weight:500;">${msg}</div>
             </div>
             <div style="font-size:1.2rem; color:rgba(255,255,255,0.6); padding-left:8px; line-height:1;" title="Fechar">✕</div>
         `;
@@ -595,6 +606,14 @@ export const render = () => {
                 if (deadlineMs - nowMs <= 7200000 && !notifiedLateOrders.has(order.id)) {
                     notifiedLateOrders.add(order.id);
                     showToastAlert(`O pedido #${getOrderNum(order)} (${order.client_name}) deve ser enviado ao balcão em breve. O prazo expira às ${new Date(order.deadline_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} do dia ${new Date(order.deadline_at).toLocaleDateString()}.`);
+                }
+            }
+
+            // Check urgent 1-day deadline for production alert
+            if (isProducao && ['aguardando_aceite', 'producao'].includes(order.status) && order.deadline_type && order.deadline_type.toUpperCase().includes('1 DIA')) {
+                if (!notifiedUrgentOrders.has(order.id)) {
+                    notifiedUrgentOrders.add(order.id);
+                    showToastAlert(`🚀 O pedido #${getOrderNum(order)} de ${order.client_name} tem prazo reduzido de 1 DIA! Acelere a entrega.`, 'blue');
                 }
             }
 
