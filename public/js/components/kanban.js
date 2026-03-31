@@ -1593,6 +1593,7 @@ export const render = () => {
     });
 
     // Add Item Logic
+    const isKitTypeLocal = (val) => (val || '').toUpperCase().includes('KIT');
     const btnAddItem = container.querySelector('#btn-add-item');
     if (btnAddItem) btnAddItem.onclick = () => {
         const productSelect = container.querySelector('#product-select');
@@ -1608,7 +1609,7 @@ export const render = () => {
         if (!product) return;
 
         // Internal service: require unit_cost (except for Kits which unroll their children's costs)
-        if (!isKitType(product.name) && isInternalMode() && !(parseFloat(product.unit_cost) > 0)) {
+        if (!isKitTypeLocal(product.name) && isInternalMode() && !(parseFloat(product.unit_cost) > 0)) {
             warning.innerText = '⚠️ Este produto não tem valor de custo cadastrado. Vá em Produtos e adicione o custo antes de usar em Serviço Interno.';
             warning.style.color = '#dc2626';
             return;
@@ -1636,7 +1637,7 @@ export const render = () => {
             }
         }
 
-        if (isKitType(product.name)) {
+        if (isKitTypeLocal(product.name)) {
             openKitBuilder(product);
             return;
         }
@@ -1754,7 +1755,7 @@ export const render = () => {
         if (!pIdStr) return;
         const p = loadedProducts.find(x => x.id == parseInt(pIdStr));
         if (!p) return alert('Produto não encontrado');
-        if (isKitType(p.name)) return alert('Não é possível adicionar um kit dentro de outro.');
+        if (isKitTypeLocal(p.name)) return alert('Não é possível adicionar um kit dentro de outro.');
         
         currentKitContext.items.push({
             child_product_id: p.id,
