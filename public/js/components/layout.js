@@ -82,8 +82,9 @@ export const render = (user, onLogout, onNavigate) => {
     if (canSeeStock) {
         menuItems += `
         <li class="nav-item">
-            <a class="nav-link" id="nav-estoque" data-view="estoque">
+            <a class="nav-link" id="nav-estoque" data-view="estoque" style="position:relative;">
                 <ion-icon name="cube-outline"></ion-icon> Estoque
+                <span id="stock-alert-badge" style="display:none; position:absolute; top:12px; right:15px; background:#ef4444; color:white; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:10px; box-shadow:0 0 8px rgba(239, 68, 68, 0.8);"></span>
             </a>
         </li>
         <li class="nav-item">
@@ -163,6 +164,33 @@ export const render = (user, onLogout, onNavigate) => {
             sidebar.querySelectorAll('.nav-link span, .sidebar-header span, .user-info div').forEach(el => el.style.display = 'none');
         }
     });
+
+    // Check low stock and alert visually
+    if (canSeeStock) {
+        setTimeout(async () => {
+            try {
+                const res = await fetch('/api/stock');
+                const { data } = await res.json();
+                const isKit = (p) => (p.name || '').toUpperCase().includes('KIT');
+                const filtered = data.filter(p => !isKit(p));
+                
+                let lowCount = 0;
+                filtered.forEach(p => {
+                    if (p.stock_status === 'baixo' || p.stock_status === 'zerado') lowCount++;
+                });
+
+                if (lowCount > 0) {
+                    const badge = container.querySelector('#stock-alert-badge');
+                    if (badge) {
+                        badge.style.display = 'inline-block';
+                        badge.textContent = lowCount > 99 ? '+99' : lowCount;
+                    }
+                }
+            } catch (err) {
+                console.error('Stock alert check failed:', err);
+            }
+        }, 800);
+    }
 
     return container;
 };
