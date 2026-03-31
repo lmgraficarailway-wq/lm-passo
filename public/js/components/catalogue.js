@@ -85,7 +85,9 @@ export const render = () => {
                 return `
                 <div class="catalogue-card">
                     <div class="catalogue-image-wrapper">
-                        <img src="${item.image_url}" alt="${safeTitle}" class="catalogue-image" onerror="this.onerror=null; this.src=''; this.alt='(Imagem Quebrada)' ">
+                        <a href="${item.image_url}" target="_blank" style="text-decoration:none;">
+                            <img src="${item.image_url}" alt="${safeTitle}" class="catalogue-image" style="min-height: 180px; text-align: center; color: var(--danger);" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' text-anchor=\\'middle\\' fill=\\'red\\' dy=\\'0.3em\\'>Erro de Formato Mídia</text></svg>'; this.alt='Clique p/ Baixar Mídia' ">
+                        </a>
                         ${isAdmin ? `
                             <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 0.5rem;">
                                 <button class="cat-edit-btn" data-id="${item.id}" data-title="${safeTitle}" data-desc="${encodeURIComponent(safeDesc)}" title="Editar Texto" style="background: rgba(255,255,255,0.9); border: none; color: var(--primary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: all 0.2s;">
