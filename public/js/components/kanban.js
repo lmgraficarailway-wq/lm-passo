@@ -367,12 +367,27 @@ export const render = () => {
     };
 
     const printLabel = (order) => {
-        const printWindow = window.open('', '', 'width=250,height=500');
-        printWindow.document.write(`
+        // Utilizando um iframe oculto para herdar o domínio do site e obrigar o Chrome
+        // a gravar as configurações de impressão (Impressora térmica, tamanho, margens).
+        let printFrame = document.getElementById('print-frame');
+        if (!printFrame) {
+            printFrame = document.createElement('iframe');
+            printFrame.id = 'print-frame';
+            printFrame.style.position = 'absolute';
+            printFrame.style.width = '0';
+            printFrame.style.height = '0';
+            printFrame.style.border = 'none';
+            document.body.appendChild(printFrame);
+        }
+
+        const doc = printFrame.contentWindow.document;
+        doc.open();
+        doc.write(`
             <html>
                 <head>
                     <style>
-                        @page { margin: 0; }
+                        /* Forçando "size: auto" permite que os limites de "58mm" selecionados pelo usuário no driver de impressão não sejam forçados a A4 */
+                        @page { margin: 0; size: auto; }
                         * { box-sizing: border-box; margin: 0; padding: 0; }
                         body { width: 100%; max-width: 58mm; margin: 0 auto; padding: 2mm; font-family: 'Arial', sans-serif; font-size: 10px; text-align: center; }
                         .header { text-align: center; margin-bottom: 2mm; }
@@ -411,15 +426,13 @@ export const render = () => {
                 </body>
             </html>
         `);
-        printWindow.document.close();
-        printWindow.focus();
-        // Close only after print dialog is dismissed (prevents crash)
-        printWindow.onafterprint = () => {
-            printWindow.close();
-        };
+        doc.close();
+
+        // Intervalo curto garantindo a renderização do iframe
         setTimeout(() => {
-            printWindow.print();
-        }, 500);
+            printFrame.contentWindow.focus();
+            printFrame.contentWindow.print();
+        }, 250);
     };
 
     // Fetch Helpers
