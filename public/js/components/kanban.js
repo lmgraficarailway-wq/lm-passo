@@ -610,7 +610,7 @@ export const render = () => {
             }
 
             // Check urgent 1-day deadline for production alert
-            if (isProducao && ['aguardando_aceite', 'producao'].includes(order.status) && order.deadline_type && order.deadline_type.toUpperCase().includes('1 DIA')) {
+            if (['aguardando_aceite', 'producao'].includes(order.status) && order.deadline_type && (order.deadline_type === '1D' || order.deadline_type.toUpperCase().includes('1 DIA'))) {
                 if (!notifiedUrgentOrders.has(order.id)) {
                     notifiedUrgentOrders.add(order.id);
                     showToastAlert(`🚀 O pedido #${getOrderNum(order)} de ${order.client_name} tem prazo reduzido de 1 DIA! Acelere a entrega.`, 'blue');
