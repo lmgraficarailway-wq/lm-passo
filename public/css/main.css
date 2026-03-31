@@ -680,3 +680,95 @@ body {
     border-radius: 0 0 6px 6px;
     margin-top: 2px;
 }
+
+/* Catalogue Grid */
+.catalogue-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+}
+
+.catalogue-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255,255,255,0.8);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s;
+}
+
+.catalogue-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+
+.catalogue-image-wrapper {
+    width: 100%;
+    height: 250px;
+    position: relative;
+    background: #f8fafc;
+}
+
+.catalogue-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* or 'cover' depending on preference, contain ensures no crop */
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.cat-delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    color: var(--danger);
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+}
+
+.cat-delete-btn:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.catalogue-content {
+    padding: 1.25rem;
+    flex: 1;
+}
+
+.catalogue-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.catalogue-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.catalogue-actions {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #f1f5f9;
+    background: rgba(248, 250, 252, 0.5);
+    display: flex;
+    gap: 0.5rem;
+}
+
+.cat-copy-btn, .cat-share-btn {
+    flex: 1;
+    font-size: 0.85rem;
+    padding: 0.6rem;
+}

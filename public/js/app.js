@@ -68,6 +68,7 @@ const loadView = (view, container) => {
         case 'kanban': modulePath = './components/kanban.js'; break;
         case 'clients': modulePath = './components/clients.js'; break;
         case 'products': modulePath = './components/products.js'; break;
+        case 'catalogue': modulePath = './components/catalogue.js'; break;
         case 'estoque': modulePath = './components/estoque.js'; break;
         case 'financial': modulePath = './components/financial.js'; break;
         case 'fornecedores': modulePath = './components/fornecedores.js'; break;
