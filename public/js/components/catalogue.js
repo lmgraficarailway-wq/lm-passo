@@ -33,8 +33,10 @@ export const render = () => {
                     <button class="modal-close" id="cat-close">&times;</button>
                 </div>
                 <form id="catalogue-form">
+                    <input type="hidden" id="cat-edit-id" value="">
+                    
                     <div class="form-group" id="file-group">
-                        <label>Upload de Arte / Foto</label>
+                        <label>Upload de Arte / Foto <small>(Deixe em branco para manter a original ao editar)</small></label>
                         <input type="file" id="cat-file" accept="image/*" style="padding: 0.5rem">
                     </div>
                     <div class="form-group">
@@ -73,9 +75,14 @@ export const render = () => {
                     <div class="catalogue-image-wrapper">
                         <img src="${item.image_url}" alt="${item.title}" class="catalogue-image">
                         ${isAdmin ? `
-                            <button class="cat-delete-btn" data-id="${item.id}" title="Excluir">
-                                <ion-icon name="trash-outline"></ion-icon>
-                            </button>
+                            <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 0.5rem;">
+                                <button class="cat-edit-btn" data-id="${item.id}" data-title="${item.title.replace(/"/g, '&quot;')}" data-desc="${encodeURIComponent(item.description)}" title="Editar Texto" style="background: rgba(255,255,255,0.9); border: none; color: var(--primary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: all 0.2s;">
+                                    <ion-icon name="create-outline"></ion-icon>
+                                </button>
+                                <button class="cat-delete-btn" data-id="${item.id}" title="Excluir" style="background: rgba(255,255,255,0.9); border: none; color: var(--danger); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: all 0.2s;">
+                                    <ion-icon name="trash-outline"></ion-icon>
+                                </button>
+                            </div>
                         ` : ''}
                     </div>
                     <div class="catalogue-content">
@@ -118,6 +125,24 @@ export const render = () => {
                             console.error(err);
                         }
                     }
+                };
+            });
+
+            container.querySelectorAll('.cat-edit-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    const title = e.currentTarget.dataset.title;
+                    const desc = decodeURIComponent(e.currentTarget.dataset.desc);
+                    
+                    container.querySelector('#cat-edit-id').value = id;
+                    container.querySelector('#cat-title').value = title;
+                    container.querySelector('#cat-desc').value = desc;
+                    container.querySelector('#cat-modal-title').textContent = 'Editar Item do Catálogo';
+                    
+                    // Tornar campo de arquivo opcional em edição
+                    container.querySelector('#cat-file').required = false;
+
+                    container.querySelector('#catalogue-modal').classList.add('open');
                 };
             });
         }
@@ -216,9 +241,15 @@ export const render = () => {
         const closeModal = () => {
             modal.classList.remove('open');
             form.reset();
+            container.querySelector('#cat-edit-id').value = '';
+            container.querySelector('#cat-modal-title').textContent = 'Novo Item';
+            container.querySelector('#cat-file').required = true;
         };
 
-        openBtn.onclick = () => modal.classList.add('open');
+        openBtn.onclick = () => {
+            closeModal();
+            modal.classList.add('open');
+        };
         closeBtn.onclick = closeModal;
         cancelBtn.onclick = closeModal;
 
@@ -226,35 +257,56 @@ export const render = () => {
             e.preventDefault();
             const submitBtn = form.querySelector('[type="submit"]');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Enviando...';
+            submitBtn.textContent = 'Salvando...';
 
-            const formData = new FormData();
+            const editId = container.querySelector('#cat-edit-id').value;
+            const title = container.querySelector('#cat-title').value;
+            const desc = container.querySelector('#cat-desc').value;
             const fileInput = container.querySelector('#cat-file');
-            
-            if (fileInput.files.length === 0) {
-                alert('Anexe uma imagem!');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Salvar Item';
-                return;
-            }
-
-            formData.append('image', fileInput.files[0]);
-            formData.append('title', container.querySelector('#cat-title').value);
-            formData.append('description', container.querySelector('#cat-desc').value);
 
             try {
-                const res = await fetch('/api/catalogue', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (res.ok) {
-                    if(window.showToastAlert) window.showToastAlert('Item salvo com sucesso', 'green');
-                    closeModal();
-                    loadItems();
+                if (editId) {
+                    // Endpoint de Edição (Somente textos suportados atualmente, a foto se mantém)
+                    const res = await fetch(`/api/catalogue/${editId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title, description: desc })
+                    });
+                    
+                    if (res.ok) {
+                        if(window.showToastAlert) window.showToastAlert('Item editado com sucesso!', 'green');
+                        closeModal();
+                        loadItems();
+                    } else {
+                        const fail = await res.json();
+                        alert(fail.error || 'Erro ao editar');
+                    }
                 } else {
-                    const fail = await res.json();
-                    alert(fail.error || 'Erro ao enviar foto');
+                    // Endpoint de Criação
+                    if (fileInput.files.length === 0) {
+                        alert('Anexe uma imagem!');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Salvar Item';
+                        return;
+                    }
+                    const formData = new FormData();
+                    formData.append('image', fileInput.files[0]);
+                    formData.append('title', title);
+                    formData.append('description', desc);
+
+                    const res = await fetch('/api/catalogue', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (res.ok) {
+                        if(window.showToastAlert) window.showToastAlert('Item salvo com sucesso', 'green');
+                        closeModal();
+                        loadItems();
+                    } else {
+                        const fail = await res.json();
+                        alert(fail.error || 'Erro ao enviar foto');
+                    }
                 }
             } catch (err) {
                 console.error(err);
