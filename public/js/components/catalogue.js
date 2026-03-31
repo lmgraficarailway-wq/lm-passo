@@ -122,6 +122,37 @@ export const render = () => {
             });
         }
 
+        // Helper function to reliably copy image + text
+        const copyToClipboard = async (imgUrl, textDesc) => {
+            const img = new Image();
+            img.crossOrigin = 'Anonymous';
+            img.src = imgUrl;
+
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+            });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            const pngBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+
+            if (navigator.clipboard && window.ClipboardItem) {
+                const item = new ClipboardItem({
+                    'image/png': pngBlob,
+                    'text/plain': new Blob([textDesc], { type: 'text/plain' })
+                });
+                await navigator.clipboard.write([item]);
+                return true;
+            } else {
+                throw new Error('Clipboard API avançada ausente no navegador.');
+            }
+        };
+
         // Copy
         container.querySelectorAll('.cat-copy-btn').forEach(btn => {
             btn.onclick = async (e) => {
@@ -129,33 +160,17 @@ export const render = () => {
                 const desc = decodeURIComponent(e.currentTarget.dataset.desc);
                 const originalText = btn.innerHTML;
                 
+                btn.innerHTML = '<ion-icon name="sync-outline"></ion-icon> Copiando...';
+                
                 try {
-                    // Try to copy image and text as Blob
-                    const r = await fetch(imgUrl);
-                    const blob = await r.blob();
-                    
-                    if (navigator.clipboard && window.ClipboardItem) {
-                        try {
-                            // PNG is natively supported on most devices for Clipboard API
-                            const type = blob.type.includes('png') ? blob.type : 'image/png';
-                            const item = new ClipboardItem({
-                                [type]: blob,
-                                "text/plain": new Blob([desc], { type: "text/plain" })
-                            });
-                            await navigator.clipboard.write([item]);
-                            btn.innerHTML = '<ion-icon name="checkmark-outline"></ion-icon> Copiado!';
-                        } catch (clipErr) {
-                            console.warn('ClipboardItem error, falling back to basic text copy:', clipErr);
-                            throw clipErr;
-                        }
-                    } else {
-                        throw new Error("API de Clipboard avançada indisponível.");
-                    }
+                    await copyToClipboard(imgUrl, desc);
+                    btn.innerHTML = '<ion-icon name="checkmark-outline"></ion-icon> Copiado!';
+                    if (window.showToastAlert) window.showToastAlert('Imagem copiada! Ao colar (CTRL+V) nos chats que suportam, o texto pode ir junto.', 'green');
                 } catch (err) {
-                    // Fallback to text only
+                    console.warn('Fallback copy error:', err);
                     if (navigator.clipboard) navigator.clipboard.writeText(desc);
                     btn.innerHTML = '<ion-icon name="checkmark-outline"></ion-icon> Texto Copiado';
-                    if (window.showToastAlert) window.showToastAlert('Texto copiado para a área de transferência. Salve a imagem separadamente se necessário.', 'orange');
+                    if (window.showToastAlert) window.showToastAlert('Erro ao copiar imagem pelo navegador. Apenas o texto foi copiado.', 'orange');
                 }
 
                 setTimeout(() => { btn.innerHTML = originalText; }, 3000);
