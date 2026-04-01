@@ -89,7 +89,7 @@ export const render = () => {
                         <div style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0.5rem; padding-bottom: 0.5rem; scrollbar-width: thin;">
                             ${images.map(img => `
                                 <a href="${img}" target="_blank" style="text-decoration:none; flex: 0 0 85%; scroll-snap-align: center;">
-                                    <img src="${img}" alt="${safeTitle}" class="catalogue-image" style="min-height: 180px; width: 100%; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' text-anchor=\\'middle\\' fill=\\'red\\' dy=\\'0.3em\\'>Erro de Mídia</text></svg>'; this.alt='Erro' ">
+                                    <img src="${img}" alt="${safeTitle}" class="catalogue-image" style="min-height: 180px; width: 100%; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'100\\'><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' text-anchor=\\'middle\\' fill=\\'red\\' dy=\\'0.3em\\'>Erro: ${img}</text></svg>'; this.alt='Erro' ">
                                 </a>
                             `).join('')}
                         </div>
@@ -98,7 +98,7 @@ export const render = () => {
                     const singleImgUrl = images[0] || '';
                     imagesHtml = `
                         <a href="${singleImgUrl}" target="_blank" style="text-decoration:none;">
-                            <img src="${singleImgUrl}" alt="${safeTitle}" class="catalogue-image" style="min-height: 180px; text-align: center; color: var(--danger);" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' text-anchor=\\'middle\\' fill=\\'red\\' dy=\\'0.3em\\'>Erro de Formato Mídia</text></svg>'; this.alt='Clique p/ Baixar Mídia' ">
+                            <img src="${singleImgUrl}" alt="${safeTitle}" class="catalogue-image" style="min-height: 180px; text-align: center; color: var(--danger);" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'100\\'><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' text-anchor=\\'middle\\' fill=\\'red\\' dy=\\'0.3em\\'>Erro: ${singleImgUrl}</text></svg>'; this.alt='Clique p/ Baixar Mídia' ">
                         </a>
                     `;
                 }
