@@ -484,22 +484,22 @@ export const render = (user) => {
                     const modal = document.createElement('div');
                     modal.id = 'dispatch-edit-modal';
                     modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
-                    modal.innerHTML = \`
+                    modal.innerHTML = `
                         <div style="background:white;border-radius:12px;padding:2rem;min-width:320px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
                             <h3 style="margin:0 0 1.25rem;color:#4c1d95;font-size:1.1rem;">✏️ Editar Custo de Despacho</h3>
                             <label style="display:block;margin-bottom:0.35rem;font-size:0.85rem;color:#475569;font-weight:600;">Transportadora</label>
                             <select id="edit-disp-carrier" style="width:100%;padding:0.5rem;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:1rem;font-size:0.95rem;">
-                                <option value="UNIDA" \${currentCarrier==='UNIDA'?'selected':''}>UNIDA</option>
-                                <option value="CORREIOS" \${currentCarrier==='CORREIOS'?'selected':''}>CORREIOS</option>
+                                <option value="UNIDA" ${currentCarrier==='UNIDA'?'selected':''}>UNIDA</option>
+                                <option value="CORREIOS" ${currentCarrier==='CORREIOS'?'selected':''}>CORREIOS</option>
                             </select>
                             <label style="display:block;margin-bottom:0.35rem;font-size:0.85rem;color:#475569;font-weight:600;">Valor (R$)</label>
-                            <input id="edit-disp-amount" type="number" step="0.01" min="0.01" value="\${currentAmount.toFixed(2)}"
+                            <input id="edit-disp-amount" type="number" step="0.01" min="0.01" value="${currentAmount.toFixed(2)}"
                                 style="width:100%;padding:0.5rem;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:1.25rem;font-size:0.95rem;box-sizing:border-box;">
                             <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
                                 <button id="edit-disp-cancel" style="padding:0.5rem 1.25rem;border:1px solid #cbd5e1;background:white;border-radius:6px;cursor:pointer;font-size:0.9rem;">Cancelar</button>
                                 <button id="edit-disp-save" style="padding:0.5rem 1.25rem;background:#7c3aed;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:600;">Salvar</button>
                             </div>
-                        </div>\`;
+                        </div>`;
                     document.body.appendChild(modal);
 
                     modal.querySelector('#edit-disp-cancel').onclick = () => modal.remove();
