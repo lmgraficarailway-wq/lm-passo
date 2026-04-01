@@ -102,25 +102,6 @@ export const render = (user) => {
         </div>
 
         <div id="fin-monthly-container"></div>
-
-        <!-- Reserved Orders Section -->
-        <div id="fin-reserved-section" style="margin-top:2rem; display:none;"
-             class="fin-reserved-panel">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 1rem; background:linear-gradient(135deg,#92400e,#d97706); color:white; border-radius:8px 8px 0 0; cursor:pointer;"
-                 id="fin-reserved-toggle">
-                <h3 style="margin:0; font-size:1.05rem;">&#127381; Pedidos A Receber (Em Produção)</h3>
-                <span id="fin-reserved-count" style="font-size:0.9rem; opacity:0.9;">0 pedidos</span>
-            </div>
-            <div id="fin-reserved-body" style="display:none;"></div>
-        </div>
-
-        <!-- Material Costs Section -->
-        <div id="fin-costs-container" style="margin-top:2rem;"></div>
-
-        <!-- Dispatch Costs Section -->
-        <div id="fin-dispatch-container" style="margin-top:2rem;"></div>
-
-
     `;
 
     const monthNames = [
@@ -129,6 +110,17 @@ export const render = (user) => {
     ];
 
     let allData = [];
+    let allReserved = [];
+    let allMaterialCosts = [];
+    let allDispatchCosts = [];
+    
+    let globals = {
+        totalGeral: 0,
+        totalReserved: 0,
+        totalMaterial: 0,
+        totalDispatch: 0
+    };
+
     const isAdmin = user && user.role === 'master';
 
     const removeAccents = (str) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -139,68 +131,119 @@ export const render = (user) => {
         const minVal = parseFloat(container.querySelector('#filter-min').value) || 0;
         const maxVal = parseFloat(container.querySelector('#filter-max').value) || Infinity;
 
-        const filtered = allData.filter(s => {
-            // Text search
+        const filteredSales = allData.filter(s => {
             if (search) {
                 const haystack = removeAccents(`${s.client_name || ''} ${s.products_summary || ''} ${s.description || ''} ${s.payment_method || ''}`.toLowerCase());
                 if (!haystack.includes(search)) return false;
             }
-            // Month filter
             if (monthFilter) {
                 const d = new Date(s.created_at);
                 const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
                 if (key !== monthFilter) return false;
             }
-            // Value range
             const val = s.total_value || 0;
             if (val < minVal || val > maxVal) return false;
 
             return true;
         });
 
-        renderData(filtered);
+        // Aplicamos a renderização à visão unificada
+        renderUnifiedData(filteredSales);
     };
 
-    const renderData = (data) => {
-        let totalGeral = 0;
+    const renderUnifiedData = (sales) => {
         let launched = 0;
+        let totalDescontos = 0;
+        let totalGeralFiltered = 0;
 
         const months = {};
-        data.forEach(s => {
-            const d = new Date(s.created_at);
+
+        const getOrCreateMonth = (dateStr) => {
+            const d = new Date(dateStr);
             const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
             if (!months[key]) {
                 months[key] = {
+                    key,
                     label: `${monthNames[d.getMonth()]} ${d.getFullYear()}`,
                     year: d.getFullYear(),
                     month: d.getMonth(),
-                    items: [],
-                    total: 0,
-                    discount: 0
+                    sales: [], salesTotal: 0, salesDiscount: 0,
+                    reserved: [], reservedTotal: 0,
+                    materials: [], materialsTotal: 0,
+                    dispatch: [], dispatchTotal: 0
                 };
             }
-            months[key].items.push(s);
-            months[key].total += (s.total_value || 0);
-            months[key].discount += (s.discount_value || 0);
-            totalGeral += (s.total_value || 0);
-            if (s.launched_to_core) launched++;;
+            return months[key];
+        };
+
+        sales.forEach(s => {
+            const m = getOrCreateMonth(s.created_at);
+            m.sales.push(s);
+            m.salesTotal += (s.total_value || 0);
+            m.salesDiscount += (s.discount_value || 0);
+            totalGeralFiltered += (s.total_value || 0);
+            totalDescontos += (s.discount_value || 0);
+            if (s.launched_to_core) launched++;
         });
+
+        allReserved.forEach(r => {
+            const m = getOrCreateMonth(r.created_at);
+            m.reserved.push(r);
+            m.reservedTotal += (r.total_value || 0);
+        });
+
+        allMaterialCosts.forEach(c => {
+            const m = getOrCreateMonth(c.created_at);
+            m.materials.push(c);
+            m.materialsTotal += (c.cost_amount || 0);
+        });
+
+        allDispatchCosts.forEach(d => {
+            const m = getOrCreateMonth(d.created_at);
+            m.dispatch.push(d);
+            m.dispatchTotal += (d.amount || 0);
+        });
+
+        // Summary cards
+        container.querySelector('#fin-total-orders').textContent = sales.length;
+        container.querySelector('#fin-total-value').textContent = `R$ ${totalGeralFiltered.toFixed(2)}`;
+        container.querySelector('#fin-launched').textContent = launched;
+        container.querySelector('#fin-pending').textContent = sales.length - launched;
+        
+        const discountCardEl = container.querySelector('#fin-total-discounts');
+        if (discountCardEl) discountCardEl.textContent = totalDescontos > 0 ? `- R$ ${totalDescontos.toFixed(2)}` : 'R$ 0,00';
+        
+        container.querySelector('#fin-material-costs').textContent = `R$ ${(globals.totalMaterial || 0).toFixed(2)}`;
+        
+        const resultado = totalGeralFiltered - (globals.totalMaterial || 0);
+        const resEl = container.querySelector('#fin-resultado');
+        resEl.textContent = `R$ ${resultado.toFixed(2)}`;
+        resEl.style.color = resultado >= 0 ? '#059669' : '#dc2626';
+
+        const aReceberEl = container.querySelector('#fin-a-receber');
+        if (aReceberEl) aReceberEl.textContent = `R$ ${(globals.totalReserved || 0).toFixed(2)}`;
+
+        const dispEl = container.querySelector('#fin-dispatch-costs');
+        if (dispEl) dispEl.textContent = `R$ ${(globals.totalDispatch || 0).toFixed(2)}`;
 
         const sortedKeys = Object.keys(months).sort((a, b) => b.localeCompare(a));
         const monthlyContainer = container.querySelector('#fin-monthly-container');
 
         if (sortedKeys.length === 0) {
-            monthlyContainer.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:2rem;">Nenhuma transação encontrada</p>';
+            monthlyContainer.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:2rem;">Nenhum dado encontrado</p>';
         } else {
             monthlyContainer.innerHTML = sortedKeys.map(key => {
                 const m = months[key];
-                const rows = m.items.map(s => {
+                const now = new Date();
+                const isCurrentMonth = m.year === now.getFullYear() && m.month === now.getMonth();
+
+                // 1. Sales Rows
+                const salesRows = m.sales.map(s => {
                     const isLaunched = s.launched_to_core ? true : false;
                     const badgeStyle = isLaunched
                         ? 'background:#d1fae5; color:#065f46; border:1px solid #6ee7b7;'
                         : 'background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; cursor:pointer;';
                     const badgeText = isLaunched ? '✅ Lançado' : '⬜ Lançar';
-
 
                     return `
                     <tr style="${isLaunched ? '' : 'background:#fffbeb;'}">
@@ -224,86 +267,155 @@ export const render = (user) => {
                     </tr>`;
                 }).join('');
 
-                const now = new Date();
-                const isCurrentMonth = m.year === now.getFullYear() && m.month === now.getMonth();
+                const salesTable = m.sales.length > 0 ? `
+                    <div style="margin-top:1rem; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">
+                        <div style="background:#f1f5f9; padding:0.6rem 1rem; font-weight:600; color:#334155; display:flex; justify-content:space-between; align-items:center;">
+                            <span>✅ Transações (Fechamento)</span>
+                            <span style="color:#166534; font-size:1.05rem;">R$ ${m.salesTotal.toFixed(2)}</span>
+                        </div>
+                        <table class="data-table" style="margin:0; border-radius:0;">
+                            <thead>
+                                <tr>
+                                    <th>Data</th><th>Cliente</th><th>Telefone</th><th>Produtos</th><th>Descrição</th>
+                                    <th>Valor Pago</th><th>Desconto</th><th>Pagamento</th><th>Core</th>${isAdmin ? '<th>Ação</th>' : ''}
+                                </tr>
+                            </thead>
+                            <tbody>${salesRows}</tbody>
+                        </table>
+                    </div>
+                ` : '';
+
+                // 2. Reserved Rows
+                const statusLabel = status => status === 'aguardando_aceite' ? '⏳ Aguardando' : '🔨 Produção';
+                const reservedRows = m.reserved.map(s => `
+                    <tr>
+                        <td>${new Date(s.created_at).toLocaleDateString('pt-BR')}</td>
+                        <td><b>${s.client_name || '-'}</b></td>
+                        <td style="font-size:0.85rem">${s.products_summary || '-'}</td>
+                        <td style="font-weight:bold; color:#d97706">R$ ${(s.total_value || 0).toFixed(2)}</td>
+                        <td>${s.payment_method || '-'}</td>
+                        <td><span style="background:${s.status === 'aguardando_aceite' ? '#fef3c7' : '#dbeafe'}; color:${s.status === 'aguardando_aceite' ? '#92400e' : '#1e40af'}; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:600;">${statusLabel(s.status)}</span></td>
+                    </tr>`).join('');
+
+                const reservedTable = m.reserved.length > 0 ? `
+                    <div style="margin-top:1.5rem; border:1px solid #fef3c7; border-radius:8px; overflow:hidden;">
+                        <div style="background:#fffbeb; padding:0.6rem 1rem; font-weight:600; color:#92400e; display:flex; justify-content:space-between; align-items:center;">
+                            <span>⏳ Pedidos A Receber (Em Produção)</span>
+                            <span style="color:#d97706; font-size:1.05rem;">R$ ${m.reservedTotal.toFixed(2)}</span>
+                        </div>
+                        <table class="data-table" style="margin:0; border-radius:0;">
+                            <thead><tr><th>Data</th><th>Cliente</th><th>Produtos</th><th>Valor Reservado</th><th>Pagamento</th><th>Status</th></tr></thead>
+                            <tbody>${reservedRows}</tbody>
+                        </table>
+                    </div>
+                ` : '';
+
+                // 3. Materials Rows
+                const matRows = m.materials.map(c => `
+                        <tr>
+                            <td>${new Date(c.created_at).toLocaleDateString('pt-BR')}</td>
+                            <td>
+                                <b>${c.product_name || '-'}</b>
+                                ${c.product_name ? `<button type="button" onclick="navigator.clipboard.writeText('LM | GRÁFICA - ${c.product_name.replace(/'/g, "\\'")}')" title="Copiar para Financeiro" style="background:none; border:none; cursor:pointer; font-size:0.95rem; margin-left:4px; filter:grayscale(1) opacity(0.5); transition:all 0.2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(1) opacity(0.5)'">📋</button>` : ''}
+                            </td>
+                            <td>${c.product_type || '-'}</td>
+                            <td style="font-size:0.85rem;">${c.description || '-'}</td>
+                            <td style="text-align:center;">${c.quantity || 1}</td>
+                            <td style="font-weight:bold; color:#dc2626;">R$ ${(c.cost_amount || 0).toFixed(2)}</td>
+                            ${isAdmin ? `<td style="text-align:center;"><button class="btn-del-cost" data-id="${c.id}" title="Apagar" style="background:none; border:none; cursor:pointer; color:#dc2626; font-size:1.1rem; padding:2px 6px; border-radius:4px;">🗑️</button></td>` : ''}
+                        </tr>`).join('');
+
+                const matTable = m.materials.length > 0 ? `
+                    <div style="margin-top:1.5rem; border:1px solid #fecaca; border-radius:8px; overflow:hidden;">
+                        <div style="background:#fef2f2; padding:0.6rem 1rem; font-weight:600; color:#991b1b; display:flex; justify-content:space-between; align-items:center;">
+                            <span>📦 Custos de Materiais (Despesas)</span>
+                            <span style="color:#dc2626; font-size:1.05rem;">R$ ${m.materialsTotal.toFixed(2)}</span>
+                        </div>
+                        <table class="data-table" style="margin:0; border-radius:0;">
+                            <thead><tr><th>Data</th><th>Produto</th><th>Tipo</th><th>Descrição</th><th>Qtd</th><th>Custo</th>${isAdmin ? '<th style="width:40px"></th>' : ''}</tr></thead>
+                            <tbody>${matRows}</tbody>
+                        </table>
+                    </div>
+                ` : '';
+
+                // 4. Dispatch Rows
+                const dispRows = m.dispatch.map(d => `
+                        <tr>
+                            <td>${new Date(d.created_at).toLocaleDateString('pt-BR')}</td>
+                            <td><b>${d.carrier || '-'}</b></td>
+                            <td>${d.client_name || '-'}</td>
+                            <td>Pedido #${d.order_id || '-'}</td>
+                            <td style="font-weight:bold; color:#dc2626;">R$ ${(d.amount || 0).toFixed(2)}</td>
+                            ${isAdmin ? `<td style="text-align:center; white-space:nowrap;">
+                                <button class="btn-edit-dispatch" data-id="${d.id}" data-carrier="${(d.carrier||'').replace(/"/g,'&quot;')}" data-amount="${d.amount}" title="Editar" style="background:none;border:none;cursor:pointer;color:#7c3aed;font-size:1.1rem;padding:2px 5px;border-radius:4px;">✏️</button>
+                                <button class="btn-del-dispatch" data-id="${d.id}" title="Apagar" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:1.1rem;padding:2px 5px;border-radius:4px;">🗑️</button>
+                            </td>` : ''}
+                        </tr>`).join('');
+
+                const dispTable = m.dispatch.length > 0 ? `
+                    <div style="margin-top:1.5rem; border:1px solid #e9d5ff; border-radius:8px; overflow:hidden;">
+                        <div style="background:#faf5ff; padding:0.6rem 1rem; font-weight:600; color:#6b21a8; display:flex; justify-content:space-between; align-items:center;">
+                            <span>🚚 Custos de Despacho</span>
+                            <span style="color:#dc2626; font-size:1.05rem;">R$ ${m.dispatchTotal.toFixed(2)}</span>
+                        </div>
+                        <table class="data-table" style="margin:0; border-radius:0;">
+                            <thead><tr><th>Data</th><th>Transportadora</th><th>Cliente</th><th>Pedido</th><th>Valor</th>${isAdmin ? '<th style="width:80px">Ações</th>' : ''}</tr></thead>
+                            <tbody>${dispRows}</tbody>
+                        </table>
+                    </div>
+                ` : '';
 
                 return `
                 <div style="margin-bottom:2rem;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 1rem; background:linear-gradient(135deg, #2e1065, #4c1d95); color:white; border-radius:8px 8px 0 0; cursor:pointer;" onclick="const t = this.nextElementSibling; t.style.display = t.style.display === 'none' ? 'table' : 'none'">
-                        <h3 style="margin:0; font-size:1.1rem;">📅 ${m.label}</h3>
-                        <span style="font-size:0.9rem; opacity:0.9;">${m.items.length} transações</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem; background:linear-gradient(135deg, #2e1065, #4c1d95); color:white; border-radius:8px; cursor:pointer; flex-wrap:wrap; gap:1rem;" onclick="const t = this.nextElementSibling; t.style.display = t.style.display === 'none' ? 'block' : 'none'">
+                        
+                        <div style="flex:1; min-width:200px;">
+                            <h3 style="margin:0; font-size:1.2rem; font-weight:700;">📅 ${m.label}</h3>
+                        </div>
+
+                        <div style="display:flex; gap:1.5rem; flex-wrap:wrap;">
+                            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                                <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8;">A Receber</span>
+                                <span style="font-size:1.05rem; font-weight:700; color:#fcd34d;">R$ ${m.reservedTotal.toFixed(2)}</span>
+                            </div>
+                            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                                <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8;">Despacho</span>
+                                <span style="font-size:1.05rem; font-weight:700; color:#fca5a5;">R$ ${m.dispatchTotal.toFixed(2)}</span>
+                            </div>
+                            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                                <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8;">Despesas</span>
+                                <span style="font-size:1.05rem; font-weight:700; color:#fca5a5;">R$ ${m.materialsTotal.toFixed(2)}</span>
+                            </div>
+                            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                                <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8;">Fechamento Base</span>
+                                <span style="font-size:1.05rem; font-weight:700; color:#4ade80;">R$ ${m.salesTotal.toFixed(2)}</span>
+                            </div>
+                            
+                            <div style="display:flex; flex-direction:column; align-items:flex-end; border-left:1px solid rgba(255,255,255,0.2); padding-left:1.5rem;">
+                                <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; font-weight:600;">Saldo em Caixa</span>
+                                <span style="font-size:1.15rem; font-weight:800; color:${(m.salesTotal - m.dispatchTotal - m.materialsTotal) >= 0 ? '#86efac' : '#fca5a5'};">
+                                    R$ ${(m.salesTotal - m.dispatchTotal - m.materialsTotal).toFixed(2)}
+                                </span>
+                            </div>
+                        </div>
+
                     </div>
-                    <table class="data-table" style="border-radius:0 0 8px 8px; margin-top:0; ${isCurrentMonth ? '' : 'display:none;'}">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Cliente</th>
-                                <th>Telefone</th>
-                                <th>Produtos</th>
-                                <th>Descrição</th>
-                                <th>Valor Pago</th>
-                                <th>Desconto</th>
-                                <th>Pagamento</th>
-                                <th>Core</th>
-                                ${isAdmin ? '<th>Ação</th>' : ''}
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                        ${(() => {
-                        // Payment method breakdown
-                        const byMethod = {};
-                        m.items.forEach(s => {
-                            const pm = s.payment_method || 'Outros';
-                            if (!byMethod[pm]) byMethod[pm] = { count: 0, total: 0 };
-                            byMethod[pm].count++;
-                            byMethod[pm].total += (s.total_value || 0);
-                        });
-                        const methodKeys = Object.keys(byMethod).sort();
-                        const methodRows = methodKeys.map(pm => `
-                            <tr style="background:#f8f9fa;">
-                                <td colspan="6" style="text-align:right; font-size:0.9rem; color:#475569; padding:6px 12px;">
-                                    💳 <b>${pm}</b> <span style="color:#94a3b8">(${byMethod[pm].count} pedido${byMethod[pm].count > 1 ? 's' : ''})</span>
-                                </td>
-                                <td style="font-weight:bold; color:#7c3aed; font-size:0.95rem;">R$ ${byMethod[pm].total.toFixed(2)}</td>
-                                <td colspan="${isAdmin ? 3 : 2}"></td>
-                            </tr>
-                        `).join('');
-
-                        const now = new Date();
-                        const isCurrentMonth = m.year === now.getFullYear() && m.month === now.getMonth();
-                        const closingLabel = isCurrentMonth ? '📊 Parcial' : '📊 Fechamento';
-
-                        return `<tfoot>
-                            <tr><td colspan="${isAdmin ? 10 : 9}" style="padding:0"><hr style="border:none; border-top:2px dashed #e0d4f5; margin:0;"></td></tr>
-                            ${methodRows}
-                            ${m.discount > 0 ? `
-                            <tr style="background:#fff7ed;">
-                                <td colspan="5" style="text-align:right; font-size:0.95rem; color:#b45309; padding:8px 12px;">🏷️ Total Descontos ${m.label}:</td>
-                                <td style="font-size:1rem; font-weight:700; color:#dc2626;">- R$ ${m.discount.toFixed(2)}</td>
-                                <td></td>
-                                <td colspan="${isAdmin ? 3 : 2}"></td>
-                            </tr>` : ''}
-                            <tr style="background:linear-gradient(135deg, #f0fdf4, #dcfce7); font-weight:bold;">
-                                <td colspan="6" style="text-align:right; font-size:1.05rem; color:#166534; padding:10px 12px;">${closingLabel} ${m.label}:</td>
-                                <td style="font-size:1.15rem; color:#166534;">R$ ${m.total.toFixed(2)}</td>
-                                <td colspan="${isAdmin ? 3 : 2}"></td>
-                            </tr>
-                        </tfoot>`;
-                    })()}
-                    </table>
-                </div>`;
+                    <div style="padding:0.5rem; display:${isCurrentMonth ? 'block' : 'none'};">
+                        ${salesTable}
+                        ${reservedTable}
+                        ${dispTable}
+                        ${matTable}
+                        ${(!salesTable && !reservedTable && !dispTable && !matTable) ? '<p style="color:#94a3b8; text-align:center; padding:2rem;">Nenhum detalhe disponível</p>' : ''}
+                    </div>
+                </div>
+                `;
             }).join('');
         }
 
-        // Summary cards
-        const totalDescontos = data.reduce((sum, s) => sum + (s.discount_value || 0), 0);
-        container.querySelector('#fin-total-orders').textContent = data.length;
-        container.querySelector('#fin-total-value').textContent = `R$ ${totalGeral.toFixed(2)}`;
-        container.querySelector('#fin-launched').textContent = launched;
-        container.querySelector('#fin-pending').textContent = data.length - launched;
-        const discountCardEl = container.querySelector('#fin-total-discounts');
-        if (discountCardEl) discountCardEl.textContent = totalDescontos > 0 ? `- R$ ${totalDescontos.toFixed(2)}` : 'R$ 0,00';
+        bindLaunchAndAdminButtons();
+    };
 
+    const bindLaunchAndAdminButtons = () => {
         // Bind launch buttons
         container.querySelectorAll('.launch-btn').forEach(btn => {
             btn.onclick = async () => {
@@ -332,183 +444,122 @@ export const render = (user) => {
             };
         });
 
-    };
-
-    // Load and render material costs
-    const loadMaterialCosts = async () => {
-        try {
-            const res = await fetch('/api/reports/material-costs');
-            const { data, total_cost } = await res.json();
-
-            // Update cards
-            container.querySelector('#fin-material-costs').textContent = `R$ ${(total_cost || 0).toFixed(2)}`;
-
-            // Calculate resultado
-            const totalRevenue = allData.reduce((sum, s) => sum + (s.total_value || 0), 0);
-            const resultado = totalRevenue - (total_cost || 0);
-            const resEl = container.querySelector('#fin-resultado');
-            resEl.textContent = `R$ ${resultado.toFixed(2)}`;
-            resEl.style.color = resultado >= 0 ? '#059669' : '#dc2626';
-
-            // Render costs section
-            const costsContainer = container.querySelector('#fin-costs-container');
-            if (!data || data.length === 0) {
-                costsContainer.innerHTML = '';
-                return;
-            }
-
-            // Group costs by month
-            const costsByMonth = {};
-            data.forEach(c => {
-                const d = new Date(c.created_at);
-                const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
-                if (!costsByMonth[key]) {
-                    costsByMonth[key] = {
-                        label: `${monthNames[d.getMonth()]} ${d.getFullYear()}`,
-                        items: [],
-                        total: 0
-                    };
-                }
-                costsByMonth[key].items.push(c);
-                costsByMonth[key].total += (c.cost_amount || 0);
+        if (isAdmin) {
+             container.querySelectorAll('.btn-del-cost').forEach(btn => {
+                btn.onclick = async () => {
+                    if (!confirm('Apagar este lançamento de custo de material?')) return;
+                    const res = await fetch(`/api/material-costs/${btn.dataset.id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        loadFinancial();
+                    } else {
+                        const json = await res.json().catch(() => ({}));
+                        alert('Erro: ' + (json.error || 'Falha ao apagar'));
+                    }
+                };
             });
 
-            const sortedKeys = Object.keys(costsByMonth).sort((a, b) => b.localeCompare(a));
+            container.querySelectorAll('.btn-del-dispatch').forEach(btn => {
+                btn.onclick = async () => {
+                    if (!confirm('⚠️ Apagar este custo de despacho? Esta ação não pode ser desfeita.')) return;
+                    const r = await fetch(`/api/dispatch-costs/${btn.dataset.id}`, { method: 'DELETE' });
+                    if (r.ok) {
+                        loadFinancial();
+                    } else {
+                        const j = await r.json().catch(() => ({}));
+                        alert('Erro: ' + (j.error || 'Falha ao apagar'));
+                    }
+                };
+            });
 
-            costsContainer.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                    <h3 style="margin:0; font-size:1.15rem; color:#1e293b;">💰 Custos de Materiais (Pedidos Internos)</h3>
-                    <span style="font-size:0.9rem; color:#dc2626; font-weight:700;">Total: R$ ${(total_cost || 0).toFixed(2)}</span>
-                </div>
-                ${sortedKeys.map(key => {
-                const m = costsByMonth[key];
-                const rows = m.items.map(c => `
-                        <tr>
-                            <td>${new Date(c.created_at).toLocaleDateString('pt-BR')}</td>
-                            <td>
-                                <b>${c.product_name || '-'}</b>
-                                ${c.product_name ? `<button type="button" onclick="navigator.clipboard.writeText('LM | GRÁFICA - ${c.product_name.replace(/'/g, "\\'")}')" title="Copiar para Financeiro" style="background:none; border:none; cursor:pointer; font-size:0.95rem; margin-left:4px; filter:grayscale(1) opacity(0.5); transition:all 0.2s;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='grayscale(1) opacity(0.5)'">📋</button>` : ''}
-                            </td>
-                            <td>${c.product_type || '-'}</td>
-                            <td style="font-size:0.85rem;">${c.description || '-'}</td>
-                            <td style="text-align:center;">${c.quantity || 1}</td>
-                            <td style="font-weight:bold; color:#dc2626;">R$ ${(c.cost_amount || 0).toFixed(2)}</td>
-                            ${isAdmin ? `<td style="text-align:center;"><button class="btn-del-cost" data-id="${c.id}" title="Apagar este lançamento" style="background:none; border:none; cursor:pointer; color:#dc2626; font-size:1.1rem; padding:2px 6px; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑️</button></td>` : ''}
-                        </tr>
-                    `).join('');
+            container.querySelectorAll('.btn-edit-dispatch').forEach(btn => {
+                btn.onclick = () => {
+                    const id = btn.dataset.id;
+                    const currentCarrier = btn.dataset.carrier;
+                    const currentAmount = parseFloat(btn.dataset.amount) || 0;
 
-                const [mYear, mMonthStr] = key.split('-');
-                const mMonth = parseInt(mMonthStr, 10);
-                const now = new Date();
-                const isCurrentMonth = parseInt(mYear) === now.getFullYear() && mMonth === now.getMonth();
+                    const old = document.getElementById('dispatch-edit-modal');
+                    if (old) old.remove();
 
-                return `
-                    <div style="margin-bottom:1.5rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 1rem; background:linear-gradient(135deg, #7f1d1d, #991b1b); color:white; border-radius:8px 8px 0 0; cursor:pointer;" onclick="const t = this.nextElementSibling; t.style.display = t.style.display === 'none' ? 'table' : 'none'">
-                            <h4 style="margin:0; font-size:1rem;">📅 ${m.label}</h4>
-                            <span style="font-size:0.85rem; opacity:0.9;">${m.items.length} lançamento${m.items.length > 1 ? 's' : ''}</span>
-                        </div>
-                        <table class="data-table" style="border-radius:0 0 8px 8px; margin-top:0; ${isCurrentMonth ? '' : 'display:none;'}">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Produto</th>
-                                    <th>Tipo</th>
-                                    <th>Descrição</th>
-                                    <th>Qtd</th>
-                                    <th>Custo</th>
-                                    ${isAdmin ? '<th style="width:40px"></th>' : ''}
-                                </tr>
-                            </thead>
-                            <tbody>${rows}</tbody>
-                            <tfoot>
-                                <tr style="background:#fef2f2; font-weight:bold;">
-                                    <td colspan="${isAdmin ? 6 : 5}" style="text-align:right; color:#991b1b; padding:8px 12px;">Total ${m.label}:</td>
-                                    <td style="color:#dc2626; font-size:1.05rem;">R$ ${m.total.toFixed(2)}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>`;
-            }).join('')}
-            `;
+                    const modal = document.createElement('div');
+                    modal.id = 'dispatch-edit-modal';
+                    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+                    modal.innerHTML = \`
+                        <div style="background:white;border-radius:12px;padding:2rem;min-width:320px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                            <h3 style="margin:0 0 1.25rem;color:#4c1d95;font-size:1.1rem;">✏️ Editar Custo de Despacho</h3>
+                            <label style="display:block;margin-bottom:0.35rem;font-size:0.85rem;color:#475569;font-weight:600;">Transportadora</label>
+                            <select id="edit-disp-carrier" style="width:100%;padding:0.5rem;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:1rem;font-size:0.95rem;">
+                                <option value="UNIDA" \${currentCarrier==='UNIDA'?'selected':''}>UNIDA</option>
+                                <option value="CORREIOS" \${currentCarrier==='CORREIOS'?'selected':''}>CORREIOS</option>
+                            </select>
+                            <label style="display:block;margin-bottom:0.35rem;font-size:0.85rem;color:#475569;font-weight:600;">Valor (R$)</label>
+                            <input id="edit-disp-amount" type="number" step="0.01" min="0.01" value="\${currentAmount.toFixed(2)}"
+                                style="width:100%;padding:0.5rem;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:1.25rem;font-size:0.95rem;box-sizing:border-box;">
+                            <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+                                <button id="edit-disp-cancel" style="padding:0.5rem 1.25rem;border:1px solid #cbd5e1;background:white;border-radius:6px;cursor:pointer;font-size:0.9rem;">Cancelar</button>
+                                <button id="edit-disp-save" style="padding:0.5rem 1.25rem;background:#7c3aed;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:600;">Salvar</button>
+                            </div>
+                        </div>\`;
+                    document.body.appendChild(modal);
 
-            // Bind delete cost buttons (admin only)
-            if (isAdmin) {
-                costsContainer.querySelectorAll('.btn-del-cost').forEach(btn => {
-                    btn.onclick = async () => {
-                        if (!confirm('Apagar este lançamento de custo de material?')) return;
-                        const res = await fetch(`/api/material-costs/${btn.dataset.id}`, { method: 'DELETE' });
-                        if (res.ok) {
-                            loadMaterialCosts();
+                    modal.querySelector('#edit-disp-cancel').onclick = () => modal.remove();
+                    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+
+                    modal.querySelector('#edit-disp-save').onclick = async () => {
+                        const carrier = modal.querySelector('#edit-disp-carrier').value;
+                        const amount = parseFloat(modal.querySelector('#edit-disp-amount').value);
+                        if (!carrier || isNaN(amount) || amount <= 0) {
+                            alert('Preencha todos os campos corretamente.');
+                            return;
+                        }
+                        const saveBtn = modal.querySelector('#edit-disp-save');
+                        saveBtn.disabled = true; saveBtn.textContent = 'Salvando...';
+                        const r = await fetch(\`/api/dispatch-costs/\${id}\`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ carrier, amount })
+                        });
+                        if (r.ok) {
+                            modal.remove();
+                            loadFinancial();
                         } else {
-                            const json = await res.json().catch(() => ({}));
-                            alert('Erro: ' + (json.error || 'Falha ao apagar'));
+                            const j = await r.json().catch(() => ({}));
+                            alert('Erro: ' + (j.error || 'Falha ao salvar'));
+                            saveBtn.disabled = false; saveBtn.textContent = 'Salvar';
                         }
                     };
-                });
-            }
-        } catch (e) {
-            console.error('Error loading material costs:', e);
+                };
+            });
         }
     };
 
     const loadFinancial = async () => {
         try {
-            const res = await fetch('/api/reports/sales');
-            const { data, reserved, total_reservado } = await res.json();
-            allData = data || [];
+            const [salesRes, matRes, dispRes] = await Promise.all([
+                fetch('/api/reports/sales'),
+                fetch('/api/reports/material-costs'),
+                fetch('/api/reports/dispatch-costs')
+            ]);
+            
+            const [salesDataObj, matDataObj, dispDataObj] = await Promise.all([
+                salesRes.json(),
+                matRes.json(),
+                dispRes.json()
+            ]);
 
-            // Update 'A Receber' card
-            const aReceberEl = container.querySelector('#fin-a-receber');
-            if (aReceberEl) aReceberEl.textContent = `R$ ${(total_reservado || 0).toFixed(2)}`;
+            allData = salesDataObj.data || [];
+            allReserved = salesDataObj.reserved || [];
+            allMaterialCosts = matDataObj.data || [];
+            allDispatchCosts = dispDataObj.data || [];
 
-            // Render reserved orders section
-            const reservedSection = container.querySelector('#fin-reserved-section');
-            const reservedBody = container.querySelector('#fin-reserved-body');
-            const reservedCount = container.querySelector('#fin-reserved-count');
-            if (reserved && reserved.length > 0 && reservedSection) {
-                reservedSection.style.display = 'block';
-                reservedCount.textContent = `${reserved.length} pedido${reserved.length > 1 ? 's' : ''} — R$ ${(total_reservado || 0).toFixed(2)}`;
+            globals.totalReserved = salesDataObj.total_reservado || 0;
+            globals.totalMaterial = matDataObj.total_cost || 0;
+            globals.totalDispatch = dispDataObj.total || 0;
 
-                const statusLabel = s => s.status === 'aguardando_aceite' ? '⏳ Aguardando' : '🔨 Produção';
-                const rows = reserved.map(s => `
-                    <tr>
-                        <td>${new Date(s.created_at).toLocaleDateString('pt-BR')}</td>
-                        <td><b>${s.client_name || '-'}</b></td>
-                        <td style="font-size:0.85rem">${s.products_summary || '-'}</td>
-                        <td style="font-weight:bold; color:#d97706">R$ ${(s.total_value || 0).toFixed(2)}</td>
-                        <td>${s.payment_method || '-'}</td>
-                        <td><span style="background:${s.status === 'aguardando_aceite' ? '#fef3c7' : '#dbeafe'}; color:${s.status === 'aguardando_aceite' ? '#92400e' : '#1e40af'}; padding:2px 8px; border-radius:12px; font-size:0.75rem; font-weight:600;">${statusLabel(s)}</span></td>
-                    </tr>`).join('');
-
-                reservedBody.innerHTML = `
-                    <table class="data-table" style="border-radius:0 0 8px 8px; margin-top:0;">
-                        <thead><tr>
-                            <th>Data</th><th>Cliente</th><th>Produtos</th>
-                            <th>Valor Reservado</th><th>Pagamento</th><th>Status</th>
-                        </tr></thead>
-                        <tbody>${rows}</tbody>
-                        <tfoot><tr style="background:#fff8e1; font-weight:bold;">
-                            <td colspan="3" style="text-align:right; color:#92400e; padding:8px 12px;">Total A Receber:</td>
-                            <td style="color:#d97706; font-size:1.05rem;">R$ ${(total_reservado || 0).toFixed(2)}</td>
-                            <td colspan="2"></td>
-                        </tr></tfoot>
-                    </table>`;
-
-                // Toggle collapse
-                container.querySelector('#fin-reserved-toggle').onclick = () => {
-                    const body = container.querySelector('#fin-reserved-body');
-                    body.style.display = body.style.display === 'none' ? 'block' : 'none';
-                };
-            } else if (reservedSection) {
-                reservedSection.style.display = 'none';
-            }
-
-            // Populate month filter dropdown
+            // Populate month filter dropdown using ONLY allData dates (Sales)
             const monthSet = new Set();
             allData.forEach(s => {
                 const d = new Date(s.created_at);
-                const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
+                const key = \`\${d.getFullYear()}-\${String(d.getMonth()).padStart(2, '0')}\`;
                 monthSet.add(key);
             });
             const monthSelect = container.querySelector('#filter-month');
@@ -516,170 +567,12 @@ export const render = (user) => {
             monthSelect.innerHTML = '<option value="">Todos os meses</option>' +
                 [...monthSet].sort((a, b) => b.localeCompare(a)).map(key => {
                     const [y, m] = key.split('-');
-                    return `<option value="${key}" ${key === currentVal ? 'selected' : ''}>${monthNames[parseInt(m)]} ${y}</option>`;
+                    return \`<option value="\${key}" \${key === currentVal ? 'selected' : ''}>\${monthNames[parseInt(m)]} \${y}</option>\`;
                 }).join('');
 
             applyFilters();
-            // Also load material costs
-            loadMaterialCosts();
-            // Also load dispatch costs
-            loadDispatchCosts();
         } catch (e) {
-            console.error('Erro ao carregar financeiro:', e);
-        }
-    };
-
-    // Load and render dispatch costs
-    const loadDispatchCosts = async () => {
-        try {
-            const res = await fetch('/api/reports/dispatch-costs');
-            const { data, total } = await res.json();
-
-            // Update dispatch cost card
-            const dispEl = container.querySelector('#fin-dispatch-costs');
-            if (dispEl) dispEl.textContent = `R$ ${(total || 0).toFixed(2)}`;
-
-            const dispContainer = container.querySelector('#fin-dispatch-container');
-            if (!data || data.length === 0) { if (dispContainer) dispContainer.innerHTML = ''; return; }
-
-            // Group by month
-            const byMonth = {};
-            data.forEach(d => {
-                const dt = new Date(d.created_at);
-                const key = `${dt.getFullYear()}-${String(dt.getMonth()).padStart(2, '0')}`;
-                if (!byMonth[key]) byMonth[key] = { label: `${monthNames[dt.getMonth()]} ${dt.getFullYear()}`, items: [], total: 0 };
-                byMonth[key].items.push(d);
-                byMonth[key].total += (d.amount || 0);
-            });
-
-            const sortedKeys = Object.keys(byMonth).sort((a, b) => b.localeCompare(a));
-            dispContainer.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                    <h3 style="margin:0; font-size:1.15rem; color:#1e293b;">🚚 Custos de Despacho</h3>
-                    <span style="font-size:0.9rem; color:#dc2626; font-weight:700;">Total: R$ ${(total || 0).toFixed(2)}</span>
-                </div>
-                ${sortedKeys.map(key => {
-                    const m = byMonth[key];
-                    const rows = m.items.map(d => `
-                        <tr>
-                            <td>${new Date(d.created_at).toLocaleDateString('pt-BR')}</td>
-                            <td><b>${d.carrier || '-'}</b></td>
-                            <td>${d.client_name || '-'}</td>
-                            <td>Pedido #${d.order_id || '-'}</td>
-                            <td style="font-weight:bold; color:#dc2626;">R$ ${(d.amount || 0).toFixed(2)}</td>
-                            ${isAdmin ? `<td style="text-align:center; white-space:nowrap;">
-                                <button class="btn-edit-dispatch" data-id="${d.id}" data-carrier="${(d.carrier||'').replace(/"/g,'&quot;')}" data-amount="${d.amount}"
-                                    title="Editar" style="background:none;border:none;cursor:pointer;color:#7c3aed;font-size:1.1rem;padding:2px 5px;border-radius:4px;transition:background 0.2s;"
-                                    onmouseover="this.style.background='#f3e8ff'" onmouseout="this.style.background='none'">✏️</button>
-                                <button class="btn-del-dispatch" data-id="${d.id}"
-                                    title="Apagar" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:1.1rem;padding:2px 5px;border-radius:4px;transition:background 0.2s;"
-                                    onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑️</button>
-                            </td>` : ''}
-                        </tr>`).join('');
-                    const [mYear, mMonthStr] = key.split('-');
-                    const mMonth = parseInt(mMonthStr, 10);
-                    const now = new Date();
-                    const isCurrentMonth = parseInt(mYear) === now.getFullYear() && mMonth === now.getMonth();
-
-                    return `
-                        <div style="margin-bottom:1.5rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 1rem; background:linear-gradient(135deg,#4c1d95,#7c3aed); color:white; border-radius:8px 8px 0 0; cursor:pointer;" onclick="const t = this.nextElementSibling; t.style.display = t.style.display === 'none' ? 'table' : 'none'">
-                                <h4 style="margin:0; font-size:1rem;">📅 ${m.label}</h4>
-                                <span style="font-size:0.85rem; opacity:0.9;">${m.items.length} despacho${m.items.length > 1 ? 's' : ''}</span>
-                            </div>
-                            <table class="data-table" style="border-radius:0 0 8px 8px; margin-top:0; ${isCurrentMonth ? '' : 'display:none;'}">
-                                <thead><tr>
-                                    <th>Data</th><th>Transportadora</th><th>Cliente</th><th>Pedido</th><th>Valor</th>
-                                    ${isAdmin ? '<th style="width:80px">Ações</th>' : ''}
-                                </tr></thead>
-                                <tbody>${rows}</tbody>
-                                <tfoot><tr style="background:#fef2f2; font-weight:bold;">
-                                    <td colspan="${isAdmin ? 5 : 4}" style="text-align:right; color:#991b1b; padding:8px 12px;">Total ${m.label}:</td>
-                                    <td style="color:#dc2626; font-size:1.05rem;">R$ ${m.total.toFixed(2)}</td>
-                                    ${isAdmin ? '<td></td>' : ''}
-                                </tr></tfoot>
-                            </table>
-                        </div>`;
-                }).join('')}
-            `;
-
-            if (isAdmin) {
-                // Delete buttons
-                dispContainer.querySelectorAll('.btn-del-dispatch').forEach(btn => {
-                    btn.onclick = async () => {
-                        if (!confirm('⚠️ Apagar este custo de despacho? Esta ação não pode ser desfeita.')) return;
-                        const r = await fetch(`/api/dispatch-costs/${btn.dataset.id}`, { method: 'DELETE' });
-                        if (r.ok) {
-                            loadDispatchCosts();
-                        } else {
-                            const j = await r.json().catch(() => ({}));
-                            alert('Erro: ' + (j.error || 'Falha ao apagar'));
-                        }
-                    };
-                });
-
-                // Edit buttons with modal
-                dispContainer.querySelectorAll('.btn-edit-dispatch').forEach(btn => {
-                    btn.onclick = () => {
-                        const id = btn.dataset.id;
-                        const currentCarrier = btn.dataset.carrier;
-                        const currentAmount = parseFloat(btn.dataset.amount) || 0;
-
-                        const old = document.getElementById('dispatch-edit-modal');
-                        if (old) old.remove();
-
-                        const modal = document.createElement('div');
-                        modal.id = 'dispatch-edit-modal';
-                        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
-                        modal.innerHTML = `
-                            <div style="background:white;border-radius:12px;padding:2rem;min-width:320px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-                                <h3 style="margin:0 0 1.25rem;color:#4c1d95;font-size:1.1rem;">✏️ Editar Custo de Despacho</h3>
-                                <label style="display:block;margin-bottom:0.35rem;font-size:0.85rem;color:#475569;font-weight:600;">Transportadora</label>
-                                <select id="edit-disp-carrier" style="width:100%;padding:0.5rem;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:1rem;font-size:0.95rem;">
-                                    <option value="UNIDA" ${currentCarrier==='UNIDA'?'selected':''}>UNIDA</option>
-                                    <option value="CORREIOS" ${currentCarrier==='CORREIOS'?'selected':''}>CORREIOS</option>
-                                </select>
-                                <label style="display:block;margin-bottom:0.35rem;font-size:0.85rem;color:#475569;font-weight:600;">Valor (R$)</label>
-                                <input id="edit-disp-amount" type="number" step="0.01" min="0.01" value="${currentAmount.toFixed(2)}"
-                                    style="width:100%;padding:0.5rem;border:1px solid #cbd5e1;border-radius:6px;margin-bottom:1.25rem;font-size:0.95rem;box-sizing:border-box;">
-                                <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
-                                    <button id="edit-disp-cancel" style="padding:0.5rem 1.25rem;border:1px solid #cbd5e1;background:white;border-radius:6px;cursor:pointer;font-size:0.9rem;">Cancelar</button>
-                                    <button id="edit-disp-save" style="padding:0.5rem 1.25rem;background:#7c3aed;color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;font-weight:600;">Salvar</button>
-                                </div>
-                            </div>`;
-                        document.body.appendChild(modal);
-
-                        modal.querySelector('#edit-disp-cancel').onclick = () => modal.remove();
-                        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
-
-                        modal.querySelector('#edit-disp-save').onclick = async () => {
-                            const carrier = modal.querySelector('#edit-disp-carrier').value;
-                            const amount = parseFloat(modal.querySelector('#edit-disp-amount').value);
-                            if (!carrier || isNaN(amount) || amount <= 0) {
-                                alert('Preencha todos os campos corretamente.');
-                                return;
-                            }
-                            const saveBtn = modal.querySelector('#edit-disp-save');
-                            saveBtn.disabled = true; saveBtn.textContent = 'Salvando...';
-                            const r = await fetch(`/api/dispatch-costs/${id}`, {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ carrier, amount })
-                            });
-                            if (r.ok) {
-                                modal.remove();
-                                loadDispatchCosts();
-                            } else {
-                                const j = await r.json().catch(() => ({}));
-                                alert('Erro: ' + (j.error || 'Falha ao salvar'));
-                                saveBtn.disabled = false; saveBtn.textContent = 'Salvar';
-                            }
-                        };
-                    };
-                });
-            }
-        } catch (e) {
-            console.error('Erro ao carregar custos de despacho:', e);
+            console.error('Erro ao carregar dados do financeiro reunificado:', e);
         }
     };
 
@@ -695,8 +588,6 @@ export const render = (user) => {
         container.querySelector('#filter-max').value = '';
         applyFilters();
     };
-
-
 
     loadFinancial();
     return container;
