@@ -66,6 +66,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
+    // SSE Streams cannot be intercepted by SW or cached, otherwise they buffer infinitely and crash the app
+    if (url.pathname.includes('/stream')) {
+        return; // Bypass Service Worker entirely
+    }
+
     // API calls: always try network first
     if (url.pathname.startsWith('/api/')) {
         event.respondWith(
