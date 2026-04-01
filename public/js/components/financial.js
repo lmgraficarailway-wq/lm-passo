@@ -224,13 +224,16 @@ export const render = (user) => {
                     </tr>`;
                 }).join('');
 
+                const now = new Date();
+                const isCurrentMonth = m.year === now.getFullYear() && m.month === now.getMonth();
+
                 return `
                 <div style="margin-bottom:2rem;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 1rem; background:linear-gradient(135deg, #2e1065, #4c1d95); color:white; border-radius:8px 8px 0 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 1rem; background:linear-gradient(135deg, #2e1065, #4c1d95); color:white; border-radius:8px 8px 0 0; cursor:pointer;" onclick="const t = this.nextElementSibling; t.style.display = t.style.display === 'none' ? 'table' : 'none'">
                         <h3 style="margin:0; font-size:1.1rem;">📅 ${m.label}</h3>
                         <span style="font-size:0.9rem; opacity:0.9;">${m.items.length} transações</span>
                     </div>
-                    <table class="data-table" style="border-radius:0 0 8px 8px; margin-top:0;">
+                    <table class="data-table" style="border-radius:0 0 8px 8px; margin-top:0; ${isCurrentMonth ? '' : 'display:none;'}">
                         <thead>
                             <tr>
                                 <th>Data</th>
@@ -394,13 +397,18 @@ export const render = (user) => {
                         </tr>
                     `).join('');
 
+                const [mYear, mMonthStr] = key.split('-');
+                const mMonth = parseInt(mMonthStr, 10);
+                const now = new Date();
+                const isCurrentMonth = parseInt(mYear) === now.getFullYear() && mMonth === now.getMonth();
+
                 return `
                     <div style="margin-bottom:1.5rem;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 1rem; background:linear-gradient(135deg, #7f1d1d, #991b1b); color:white; border-radius:8px 8px 0 0;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 1rem; background:linear-gradient(135deg, #7f1d1d, #991b1b); color:white; border-radius:8px 8px 0 0; cursor:pointer;" onclick="const t = this.nextElementSibling; t.style.display = t.style.display === 'none' ? 'table' : 'none'">
                             <h4 style="margin:0; font-size:1rem;">📅 ${m.label}</h4>
                             <span style="font-size:0.85rem; opacity:0.9;">${m.items.length} lançamento${m.items.length > 1 ? 's' : ''}</span>
                         </div>
-                        <table class="data-table" style="border-radius:0 0 8px 8px; margin-top:0;">
+                        <table class="data-table" style="border-radius:0 0 8px 8px; margin-top:0; ${isCurrentMonth ? '' : 'display:none;'}">
                             <thead>
                                 <tr>
                                     <th>Data</th>
@@ -568,13 +576,18 @@ export const render = (user) => {
                                     onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑️</button>
                             </td>` : ''}
                         </tr>`).join('');
+                    const [mYear, mMonthStr] = key.split('-');
+                    const mMonth = parseInt(mMonthStr, 10);
+                    const now = new Date();
+                    const isCurrentMonth = parseInt(mYear) === now.getFullYear() && mMonth === now.getMonth();
+
                     return `
                         <div style="margin-bottom:1.5rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 1rem; background:linear-gradient(135deg,#4c1d95,#7c3aed); color:white; border-radius:8px 8px 0 0;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 1rem; background:linear-gradient(135deg,#4c1d95,#7c3aed); color:white; border-radius:8px 8px 0 0; cursor:pointer;" onclick="const t = this.nextElementSibling; t.style.display = t.style.display === 'none' ? 'table' : 'none'">
                                 <h4 style="margin:0; font-size:1rem;">📅 ${m.label}</h4>
                                 <span style="font-size:0.85rem; opacity:0.9;">${m.items.length} despacho${m.items.length > 1 ? 's' : ''}</span>
                             </div>
-                            <table class="data-table" style="border-radius:0 0 8px 8px; margin-top:0;">
+                            <table class="data-table" style="border-radius:0 0 8px 8px; margin-top:0; ${isCurrentMonth ? '' : 'display:none;'}">
                                 <thead><tr>
                                     <th>Data</th><th>Transportadora</th><th>Cliente</th><th>Pedido</th><th>Valor</th>
                                     ${isAdmin ? '<th style="width:80px">Ações</th>' : ''}
