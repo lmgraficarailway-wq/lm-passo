@@ -159,7 +159,8 @@ export const render = (user) => {
         const months = {};
 
         const getOrCreateMonth = (dateStr) => {
-            const d = new Date(dateStr);
+            let d = new Date(dateStr);
+            if (isNaN(d.valueOf())) d = new Date();
             const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
             if (!months[key]) {
                 months[key] = {
