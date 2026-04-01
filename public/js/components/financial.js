@@ -140,7 +140,8 @@ export const render = (user) => {
             monthlyContainer.innerHTML = sortedKeys.map(key => {
                 const m = months[key];
                 const now = new Date();
-                const isCurrentMonth = m.year === now.getFullYear() && m.month === now.getMonth();
+                const searchStr = container.querySelector('#filter-search').value.trim();
+                const isCurrentMonth = (m.year === now.getFullYear() && m.month === now.getMonth()) || searchStr.length > 0;
 
                 const mLaunchedCount = m.launchedCount || 0;
                 const mPendingCount = m.sales.length - mLaunchedCount;
