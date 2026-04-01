@@ -110,6 +110,17 @@ router.post('/catalogue', upload.array('images', 10), catalogueController.create
 router.put('/catalogue/:id', upload.array('images', 10), catalogueController.updateItem);
 router.delete('/catalogue/:id', catalogueController.deleteItem);
 
+router.get('/debug-cat', (req, res) => {
+    const fs = require('fs');
+    const db = require('../database/db');
+    db.all('SELECT id, image_url FROM catalogue_items LIMIT 5', (err, rows) => {
+        const folder = path.join(process.cwd(), 'public/uploads');
+        const exists = fs.existsSync(folder);
+        const files = exists ? fs.readdirSync(folder).slice(0, 5) : [];
+        res.json({ err: err?.message, rows, folder, exists, files, cwd: process.cwd(), dirname: __dirname });
+    });
+});
+
 const chatController = require('../controllers/chat_controller');
 router.get('/chat/stream', chatController.stream);
 router.get('/chat/history', chatController.getHistory);
