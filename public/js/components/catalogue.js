@@ -302,12 +302,27 @@ export const render = () => {
 
             try {
                 if (editId) {
-                    // Endpoint de Edição (Somente textos suportados atualmente, a foto se mantém)
-                    const res = await fetch(`/api/catalogue/${editId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ title, description: desc })
-                    });
+                    let res;
+                    if (fileInput.files.length > 0) {
+                        const formData = new FormData();
+                        for (let i = 0; i < fileInput.files.length; i++) {
+                            formData.append('images', fileInput.files[i]);
+                        }
+                        formData.append('title', title);
+                        formData.append('description', desc);
+                        
+                        res = await fetch(`/api/catalogue/${editId}`, {
+                            method: 'PUT',
+                            body: formData
+                        });
+                    } else {
+                        // Endpoint de Edição (Somente textos suportados atualmente, a foto se mantém)
+                        res = await fetch(`/api/catalogue/${editId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title, description: desc })
+                        });
+                    }
                     
                     if (res.ok) {
                         if(window.showToastAlert) window.showToastAlert('Item editado com sucesso!', 'green');
