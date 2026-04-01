@@ -86,10 +86,22 @@ export const render = () => {
                 const images = item.images && item.images.length > 0 ? item.images : [item.image_url];
                 if (images.length > 1) {
                     imagesHtml = `
+                const renderMediaItem = (url, title) => {
+                    const lUrl = (url || '').toLowerCase();
+                    if (lUrl.endsWith('.pdf')) {
+                        return `<div style="height: 180px; width: 100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f1f5f9; border-radius:8px; border:2px dashed #cbd5e1; color:#dc2626;"><svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor"><path d="M7 2h10l5 5v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 2v16h13V8h-4V4H7zm4 11h2v-4h-2v4zm0-6h3c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-3V9z"/></svg><span style="margin-top:0.5rem; font-weight:600; font-size:0.9rem">Arquivo PDF</span><span style="font-size:0.75rem; color:#64748b">Clique para Abrir</span></div>`;
+                    } else if (lUrl.endsWith('.cdr') || lUrl.endsWith('.eps')) {
+                        return `<div style="height: 180px; width: 100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f8fafc; border-radius:8px; border:2px dashed #cbd5e1; color:#16a34a;"><svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm3 3h6v2H9V9zm0 4h6v2H9v-2z"/></svg><span style="margin-top:0.5rem; font-weight:600; font-size:0.9rem">Arquivo Vetor (Corel/EPS)</span><span style="font-size:0.75rem; color:#64748b">Clique para Baixar</span></div>`;
+                    }
+                    return `<img src="${url}" alt="${safeTitle}" class="catalogue-image" style="min-height: 180px; width: 100%; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'100\\'><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' text-anchor=\\'middle\\' fill=\\'red\\' dy=\\'0.3em\\'>Erro: ${url}</text></svg>'; this.alt='Erro' ">`;
+                };
+
+                if (images.length > 1) {
+                    imagesHtml = `
                         <div style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0.5rem; padding-bottom: 0.5rem; scrollbar-width: thin;">
-                            ${images.map(img => `
-                                <a href="${img}" target="_blank" style="text-decoration:none; flex: 0 0 85%; scroll-snap-align: center;">
-                                    <img src="${img}" alt="${safeTitle}" class="catalogue-image" style="min-height: 180px; width: 100%; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'100\\'><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' text-anchor=\\'middle\\' fill=\\'red\\' dy=\\'0.3em\\'>Erro: ${img}</text></svg>'; this.alt='Erro' ">
+                            ${images.map(imgUrl => `
+                                <a href="${imgUrl}" target="_blank" style="text-decoration:none; flex: 0 0 85%; scroll-snap-align: center;">
+                                    ${renderMediaItem(imgUrl, safeTitle)}
                                 </a>
                             `).join('')}
                         </div>
@@ -98,7 +110,7 @@ export const render = () => {
                     const singleImgUrl = images[0] || '';
                     imagesHtml = `
                         <a href="${singleImgUrl}" target="_blank" style="text-decoration:none;">
-                            <img src="${singleImgUrl}" alt="${safeTitle}" class="catalogue-image" style="min-height: 180px; text-align: center; color: var(--danger);" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'100\\'><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' text-anchor=\\'middle\\' fill=\\'red\\' dy=\\'0.3em\\'>Erro: ${singleImgUrl}</text></svg>'; this.alt='Clique p/ Baixar Mídia' ">
+                            ${renderMediaItem(singleImgUrl, safeTitle)}
                         </a>
                     `;
                 }
