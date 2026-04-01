@@ -111,10 +111,10 @@ router.put('/catalogue/:id', upload.array('images', 10), catalogueController.upd
 router.delete('/catalogue/:id', catalogueController.deleteItem);
 
 const chatController = require('../controllers/chat_controller');
-router.get('/chat/stream', authMiddleware, chatController.stream);
-router.get('/chat/history', authMiddleware, chatController.getHistory);
-router.post('/chat/message', authMiddleware, chatController.sendMessage);
-router.post('/chat/typing', authMiddleware, chatController.typing);
+router.get('/chat/stream', chatController.stream);
+router.get('/chat/history', chatController.getHistory);
+router.post('/chat/message', chatController.sendMessage);
+router.post('/chat/typing', chatController.typing);
 
 // Open URL in Microsoft Edge (Windows only)
 const { exec } = require('child_process');
