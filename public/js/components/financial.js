@@ -556,10 +556,10 @@ export const render = (user) => {
     };
 
     // Filter event listeners
-    container.querySelector('#filter-search').oninput = applyFilters;
+    container.querySelector('#filter-search').onkeydown = (e) => { if (e.key === 'Enter') applyFilters(); };
     container.querySelector('#filter-month').onchange = applyFilters;
-    container.querySelector('#filter-min').oninput = applyFilters;
-    container.querySelector('#filter-max').oninput = applyFilters;
+    container.querySelector('#filter-min').onchange = applyFilters;
+    container.querySelector('#filter-max').onchange = applyFilters;
     container.querySelector('#btn-clear-filter').onclick = () => {
         container.querySelector('#filter-search').value = '';
         container.querySelector('#filter-month').value = '';
