@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lm-passo-v22';
+const CACHE_NAME = 'lm-passo-v24';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -68,6 +68,11 @@ self.addEventListener('fetch', (event) => {
 
     // SSE Streams cannot be intercepted by SW or cached, otherwise they buffer infinitely and crash the app
     if (url.pathname.includes('/stream')) {
+        return; // Bypass Service Worker entirely
+    }
+
+    // Uploads cannot be safely cached natively via SW because browsers use Range 206 headers for media and Cache Storage crashes on 206
+    if (url.pathname.startsWith('/uploads/')) {
         return; // Bypass Service Worker entirely
     }
 
