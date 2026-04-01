@@ -132,7 +132,7 @@ export const initChatWidget = (user, parentContainer) => {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = `
         <button class="chat-widget-btn" id="team-chat-btn">
-            <ion-icon name="chatbubbles-outline"></ion-icon>
+            <img src="/logo.png" alt="LM Passo Chat" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.8);">
             <div class="chat-badge" id="chat-badge">0</div>
         </button>
 
