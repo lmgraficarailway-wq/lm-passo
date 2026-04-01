@@ -514,7 +514,7 @@ export const render = (user) => {
                         }
                         const saveBtn = modal.querySelector('#edit-disp-save');
                         saveBtn.disabled = true; saveBtn.textContent = 'Salvando...';
-                        const r = await fetch(\`/api/dispatch-costs/\${id}\`, {
+                        const r = await fetch(`/api/dispatch-costs/${id}`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ carrier, amount })
@@ -560,7 +560,7 @@ export const render = (user) => {
             const monthSet = new Set();
             allData.forEach(s => {
                 const d = new Date(s.created_at);
-                const key = \`\${d.getFullYear()}-\${String(d.getMonth()).padStart(2, '0')}\`;
+                const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
                 monthSet.add(key);
             });
             const monthSelect = container.querySelector('#filter-month');
@@ -568,7 +568,7 @@ export const render = (user) => {
             monthSelect.innerHTML = '<option value="">Todos os meses</option>' +
                 [...monthSet].sort((a, b) => b.localeCompare(a)).map(key => {
                     const [y, m] = key.split('-');
-                    return \`<option value="\${key}" \${key === currentVal ? 'selected' : ''}>\${monthNames[parseInt(m)]} \${y}</option>\`;
+                    return `<option value="${key}" ${key === currentVal ? 'selected' : ''}>${monthNames[parseInt(m)]} ${y}</option>`;
                 }).join('');
 
             applyFilters();
