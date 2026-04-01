@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lm-passo-v24';
+const CACHE_NAME = 'lm-passo-v25';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -73,7 +73,9 @@ self.addEventListener('fetch', (event) => {
 
     // Uploads cannot be safely cached natively via SW because browsers use Range 206 headers for media and Cache Storage crashes on 206
     if (url.pathname.startsWith('/uploads/')) {
-        return; // Bypass Service Worker entirely
+        // Explicitly proxy the fetch to network instead of a bare return, which fails on some WebKit wrappers
+        event.respondWith(fetch(event.request));
+        return;
     }
 
     // API calls: always try network first
