@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lm-passo-v30';
+const CACHE_NAME = 'lm-passo-v31';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -71,10 +71,17 @@ self.addEventListener('fetch', (event) => {
         return; // Bypass Service Worker entirely
     }
 
-    // Uploads cannot be safely cached natively via SW because browsers use Range 206 headers for media and Cache Storage crashes on 206
+    // /uploads — NEVER cache, always fetch directly from network with a clean request
+    // Using a brand-new Request avoids inheriting Range/If-Range headers from the browser
+    // that can conflict with acceptRanges:false on the server and cause 200 vs 206 mismatches
     if (url.pathname.startsWith('/uploads/')) {
-        // Explicitly proxy the fetch to network instead of a bare return, which fails on some WebKit wrappers
-        event.respondWith(fetch(event.request));
+        event.respondWith(
+            fetch(new Request(url.href, {
+                method: 'GET',
+                credentials: 'same-origin',
+                cache: 'no-store'
+            })).catch(() => new Response('Image not found', { status: 404 }))
+        );
         return;
     }
 

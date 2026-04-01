@@ -65,8 +65,15 @@ if (fs.existsSync(diskPublic)) {
 } else {
     app.use(express.static(path.join(__dirname, 'public'), { acceptRanges: false })); // ← fallback: embedded
 }
-// Serve external uploads (user files) always from disk - bypass ranges to prevent old SW crashes
-app.use('/uploads', express.static(path.join(process.cwd(), 'public/uploads'), { acceptRanges: false }));
+// Serve uploads with explicit headers — bypass compression and set correct cache headers
+// This prevents content-type issues and SW cache conflicts
+app.use('/uploads', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Accept-Ranges', 'none');
+    next();
+}, express.static(path.join(process.cwd(), 'public', 'uploads'), { acceptRanges: false, etag: false }));
 
 // Health check (Railway / Render)
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
