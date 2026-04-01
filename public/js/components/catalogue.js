@@ -82,10 +82,6 @@ export const render = () => {
                 const safeDesc = (item.description || '');
                 const displayDesc = safeDesc.replace(/\\n/g, '<br>');
 
-                let imagesHtml = '';
-                const images = item.images && item.images.length > 0 ? item.images : [item.image_url];
-                if (images.length > 1) {
-                    imagesHtml = `
                 const renderMediaItem = (url, title) => {
                     const lUrl = (url || '').toLowerCase();
                     if (lUrl.endsWith('.pdf')) {
@@ -93,9 +89,12 @@ export const render = () => {
                     } else if (lUrl.endsWith('.cdr') || lUrl.endsWith('.eps')) {
                         return `<div style="height: 180px; width: 100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f8fafc; border-radius:8px; border:2px dashed #cbd5e1; color:#16a34a;"><svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm3 3h6v2H9V9zm0 4h6v2H9v-2z"/></svg><span style="margin-top:0.5rem; font-weight:600; font-size:0.9rem">Arquivo Vetor (Corel/EPS)</span><span style="font-size:0.75rem; color:#64748b">Clique para Baixar</span></div>`;
                     }
-                    return `<img src="${url}" alt="${safeTitle}" class="catalogue-image" style="min-height: 180px; width: 100%; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'100\\'><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' text-anchor=\\'middle\\' fill=\\'red\\' dy=\\'0.3em\\'>Erro: ${url}</text></svg>'; this.alt='Erro' ">`;
+                    return `<img src="${url}" alt="${title}" class="catalogue-image" style="min-height: 180px; width: 100%; object-fit: cover; border-radius: 8px;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'100\\'><text x=\\'50%\\' y=\\'50%\\' font-size=\\'12\\' text-anchor=\\'middle\\' fill=\\'red\\' dy=\\'0.3em\\'>Erro: ${url}</text></svg>'; this.alt='Erro' ">`;
                 };
 
+                let imagesHtml = '';
+                const images = item.images && item.images.length > 0 ? item.images : [item.image_url];
+                
                 if (images.length > 1) {
                     imagesHtml = `
                         <div style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0.5rem; padding-bottom: 0.5rem; scrollbar-width: thin;">
