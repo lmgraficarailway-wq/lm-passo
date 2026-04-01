@@ -21,6 +21,8 @@ export const initChatWidget = (user, parentContainer) => {
             filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
             color: #7c3aed;
             font-size: 60px;
+            width: 60px;
+            height: 60px;
         }
         .chat-widget-btn:hover { transform: scale(1.1); }
         .chat-badge {
@@ -130,7 +132,10 @@ export const initChatWidget = (user, parentContainer) => {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = `
         <button class="chat-widget-btn" id="team-chat-btn">
-            <ion-icon name="chatbox-ellipses"></ion-icon>
+            <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 60px; height: 60px;">
+                <ion-icon name="chatbox" style="font-size: 60px; color: #7c3aed; position: absolute; z-index: 1; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));"></ion-icon>
+                <img src="/logo.png" style="width: 26px; height: 26px; position: absolute; z-index: 2; margin-bottom: 5px; border-radius: 4px; object-fit: contain; filter: grayscale(100%) brightness(0) invert(1);">
+            </div>
             <div class="chat-badge" id="chat-badge">0</div>
         </button>
 
