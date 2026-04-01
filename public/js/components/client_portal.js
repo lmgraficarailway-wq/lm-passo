@@ -21,7 +21,7 @@ export const render = () => {
         <div class="stock-cards" id="cp-cards" style="margin-bottom:1rem">
             <div class="stock-card">
                 <div class="stock-card-icon" style="background:#3b82f620; color:#3b82f6">
-                    <ion-icon name="receipt-outline"></ion-icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
                 <div class="stock-card-info">
                     <div class="stock-card-value" id="cp-total">-</div>
@@ -30,7 +30,7 @@ export const render = () => {
             </div>
             <div class="stock-card">
                 <div class="stock-card-icon" style="background:#f59e0b20; color:#f59e0b">
-                    <ion-icon name="time-outline"></ion-icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
                 <div class="stock-card-info">
                     <div class="stock-card-value" id="cp-in-progress">-</div>
@@ -39,7 +39,7 @@ export const render = () => {
             </div>
             <div class="stock-card">
                 <div class="stock-card-icon" style="background:#10b98120; color:#10b981">
-                    <ion-icon name="checkmark-circle-outline"></ion-icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
                 <div class="stock-card-info">
                     <div class="stock-card-value" id="cp-done">-</div>
@@ -48,7 +48,7 @@ export const render = () => {
             </div>
             <div class="stock-card">
                 <div class="stock-card-icon" style="background:#7c3aed20; color:#7c3aed">
-                    <ion-icon name="cash-outline"></ion-icon>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                 </div>
                 <div class="stock-card-info">
                     <div class="stock-card-value" id="cp-total-value">R$ 0</div>
