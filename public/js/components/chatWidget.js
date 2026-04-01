@@ -132,9 +132,8 @@ export const initChatWidget = (user, parentContainer) => {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = `
         <button class="chat-widget-btn" id="team-chat-btn">
-            <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 60px; height: 60px;">
-                <ion-icon name="chatbox" style="font-size: 60px; color: #7c3aed; position: absolute; z-index: 1; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));"></ion-icon>
-                <img src="/logo.png" style="width: 26px; height: 26px; position: absolute; z-index: 2; margin-bottom: 5px; border-radius: 4px; object-fit: contain; filter: grayscale(100%) brightness(0) invert(1);">
+            <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: #7c3aed; border-radius: 16px; border-bottom-right-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <img src="/logo.png" style="width: 32px; height: 32px; position: absolute; z-index: 2; object-fit: contain; filter: grayscale(100%) brightness(0) invert(1);">
             </div>
             <div class="chat-badge" id="chat-badge">0</div>
         </button>

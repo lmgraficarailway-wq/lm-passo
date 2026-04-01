@@ -203,7 +203,7 @@ export const render = (user, onLogout, onNavigate) => {
     }
 
     // Initialize Global Team Chat
-    import('./chatWidget.js').then(module => {
+    import('./chatWidget.js?v=' + Date.now()).then(module => {
         module.initChatWidget(user, container);
     }).catch(err => console.error('Failed to load chat widget:', err));
 
