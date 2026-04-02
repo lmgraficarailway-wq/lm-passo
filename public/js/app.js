@@ -74,6 +74,7 @@ const loadView = (view, container) => {
         case 'fornecedores': modulePath = './components/fornecedores.js'; break;
         case 'compras': modulePath = './components/compras.js'; break;
         case 'admin': modulePath = './components/admin.js'; break;
+        case 'demand': modulePath = './components/demand.js'; break;
         case 'client_portal': modulePath = './components/client_portal.js'; break;
         case 'client_financial': modulePath = './components/client_financial.js'; break;
         default: modulePath = './components/kanban.js';
