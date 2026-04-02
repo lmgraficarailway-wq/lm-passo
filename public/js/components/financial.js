@@ -313,18 +313,30 @@ export const render = (user) => {
                 ` : '';
 
                 // 4. Dispatch Rows
-                const dispRows = m.dispatch.map(d => `
-                        <tr>
+                const dispRows = m.dispatch.map(d => {
+                    const isDLaunched = d.launched_to_core ? true : false;
+                    const dBadgeStyle = isDLaunched
+                        ? 'background:#d1fae5; color:#065f46; border:1px solid #6ee7b7;'
+                        : 'background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; cursor:pointer;';
+                    const dBadgeText = isDLaunched ? '✅ Lançado' : '⬜ Lançar';
+                    return `
+                        <tr style="${isDLaunched ? '' : 'background:#fffbeb;'}">
                             <td>${new Date(d.created_at).toLocaleDateString('pt-BR')}</td>
                             <td><b>${d.carrier || '-'}</b></td>
                             <td>${d.client_name || '-'}</td>
                             <td>Pedido #${d.order_id || '-'}</td>
                             <td style="font-weight:bold; color:#dc2626;">R$ ${(d.amount || 0).toFixed(2)}</td>
+                            <td>
+                                <button class="btn btn-sm dispatch-launch-btn" data-id="${d.id}" data-launched="${isDLaunched ? '1' : '0'}" style="${dBadgeStyle} padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:600;">
+                                    ${dBadgeText}
+                                </button>
+                            </td>
                             ${isAdmin ? `<td style="text-align:center; white-space:nowrap;">
                                 <button class="btn-edit-dispatch" data-id="${d.id}" data-carrier="${(d.carrier||'').replace(/"/g,'&quot;')}" data-amount="${d.amount}" title="Editar" style="background:none;border:none;cursor:pointer;color:#7c3aed;font-size:1.1rem;padding:2px 5px;border-radius:4px;">✏️</button>
                                 <button class="btn-del-dispatch" data-id="${d.id}" title="Apagar" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:1.1rem;padding:2px 5px;border-radius:4px;">🗑️</button>
                             </td>` : ''}
-                        </tr>`).join('');
+                        </tr>`;
+                }).join('');
 
                 const dispTable = m.dispatch.length > 0 ? `
                     <div style="margin-top:1.5rem; border:1px solid #e9d5ff; border-radius:8px; overflow:hidden;">
@@ -333,7 +345,7 @@ export const render = (user) => {
                             <span style="color:#dc2626; font-size:1.05rem;">R$ ${m.dispatchTotal.toFixed(2)}</span>
                         </div>
                         <table class="data-table" style="margin:0; border-radius:0;">
-                            <thead><tr><th>Data</th><th>Transportadora</th><th>Cliente</th><th>Pedido</th><th>Valor</th>${isAdmin ? '<th style="width:80px">Ações</th>' : ''}</tr></thead>
+                            <thead><tr><th>Data</th><th>Transportadora</th><th>Cliente</th><th>Pedido</th><th>Valor</th><th>Core</th>${isAdmin ? '<th style="width:80px">Ações</th>' : ''}</tr></thead>
                             <tbody>${dispRows}</tbody>
                         </table>
                     </div>
@@ -435,6 +447,20 @@ export const render = (user) => {
                         const json = await res.json().catch(() => ({}));
                         alert('Erro: ' + (json.error || 'Falha ao apagar'));
                     }
+                };
+            });
+
+            // Bind dispatch launch buttons
+            container.querySelectorAll('.dispatch-launch-btn').forEach(btn => {
+                btn.onclick = async () => {
+                    const isCurrentlyLaunched = btn.dataset.launched === '1';
+                    const newState = !isCurrentlyLaunched;
+                    await fetch(`/api/dispatch-costs/${btn.dataset.id}/launch-core`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ launched: newState })
+                    });
+                    loadFinancial();
                 };
             });
 
