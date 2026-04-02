@@ -1019,13 +1019,15 @@ export const render = () => {
         }
 
         content.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:start">
-                <div>
+            <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:0.5rem;">
+                <div style="flex:1; min-width:200px;">
                      <div class="form-group"><label>Cliente:</label> <div>${order.client_name}${order.client_phone ? ` <span style="color:#64748b; font-size:0.9em;">— 📞 ${order.client_phone}</span>` : ''}</div></div>
-
                      <div class="form-group">
-                        <label>Produtos:</label> 
-                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:flex-start;">
+                        <label>Produtos:</label>
+                        <div style="white-space: pre-line; background: #f0fdf4; padding: 0.5rem; border: 1px solid #bbf7d0; border-radius: 4px;">${order.product_name}</div>
+                     </div>
+                </div>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:flex-start; flex-shrink:0;">
                     ${['em_balcao', 'finalizado', 'arquivado'].includes(order.status) ? (() => {
                         const isLaunched = !!order.launched_to_core;
                         const launchBtnStyle = isLaunched
@@ -1043,8 +1045,6 @@ export const render = () => {
                     <button class="btn btn-sm btn-secondary btn-whatsapp" title="Copiar para WhatsApp" style="height:fit-content">
                         📱 Copiar
                     </button>
-                </div>
-                     </div>
                 </div>
             </div>
             <div class="form-group"><label>Descrição:</label> <div style="background:#f8fafc; padding:0.5rem; border-radius:4px; white-space:pre-wrap;">${order.description}</div></div>
@@ -1118,6 +1118,36 @@ export const render = () => {
             content.querySelector('.btn-save-path').textContent = '✅';
             setTimeout(() => content.querySelector('.btn-save-path').textContent = '💾', 1500);
         };
+
+        // Launch to Core toggle
+        const launchCoreBtn = content.querySelector('.btn-launch-core-modal');
+        if (launchCoreBtn) {
+            launchCoreBtn.onclick = async () => {
+                const currentlyLaunched = !!order.launched_to_core;
+                const newState = !currentlyLaunched;
+                launchCoreBtn.disabled = true;
+                launchCoreBtn.textContent = '...';
+                const res = await fetch(`/api/orders/${order.id}/launch-core`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ launched: newState })
+                });
+                if (res.ok) {
+                    order.launched_to_core = newState ? 1 : 0;
+                    if (newState) {
+                        launchCoreBtn.textContent = '✅ Lançado';
+                        launchCoreBtn.style.cssText = 'height:fit-content; background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:600;';
+                    } else {
+                        launchCoreBtn.textContent = '⬜ Lançar';
+                        launchCoreBtn.style.cssText = 'height:fit-content; background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:600;';
+                    }
+                } else {
+                    launchCoreBtn.textContent = currentlyLaunched ? '✅ Lançado' : '⬜ Lançar';
+                    alert('Erro ao atualizar status de lançamento.');
+                }
+                launchCoreBtn.disabled = false;
+            };
+        }
 
         // Open folder in Explorer
         content.querySelector('.btn-open-folder').onclick = async () => {
