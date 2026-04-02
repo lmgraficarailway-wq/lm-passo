@@ -44,11 +44,12 @@ export const render = () => {
                         <th>Usuário</th>
                         <th>Nome</th>
                         <th>Perfil</th>
+                        <th>Senha</th>
                         <th style="text-align:right">Ações</th>
                     </tr>
                 </thead>
                 <tbody id="users-list">
-                    <tr><td colspan="4">Carregando...</td></tr>
+                    <tr><td colspan="5">Carregando...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -149,11 +150,50 @@ export const render = () => {
             const { data } = await res.json();
             const tbody = container.querySelector('#users-list');
 
-            tbody.innerHTML = data.map(u => `
+            // Fetch passwords (master only)
+            let passwordMap = {};
+            try {
+                const pwRes = await fetch('/api/auth/users/passwords');
+                if (pwRes.ok) {
+                    const pwData = await pwRes.json();
+                    (pwData.data || []).forEach(u => { passwordMap[u.id] = u.plain_password || ''; });
+                }
+            } catch(e) {}
+
+            tbody.innerHTML = data.map(u => {
+                const pw = passwordMap[u.id] || '';
+                const hasPw = pw.length > 0;
+                return `
                 <tr>
                     <td><b>${u.username}</b></td>
                     <td>${u.name}</td>
                     <td>${roleLabel(u.role)}</td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:0.35rem;">
+                            <span class="pw-mask" data-id="${u.id}" style="
+                                font-family:monospace;
+                                font-size:0.82rem;
+                                background:#f1f5f9;
+                                border:1px solid #cbd5e1;
+                                border-radius:5px;
+                                padding:2px 8px;
+                                letter-spacing:2px;
+                                color:#475569;
+                                min-width:60px;
+                                display:inline-block;
+                            ">${hasPw ? '••••••' : '—'}</span>
+                            ${hasPw ? `<button class="btn-eye" data-id="${u.id}" data-pw="${pw.replace(/"/g,'&quot;')}" title="Ver senha" style="
+                                background:none;
+                                border:none;
+                                cursor:pointer;
+                                font-size:1rem;
+                                padding:2px 4px;
+                                color:#64748b;
+                                border-radius:4px;
+                                transition:color 0.2s;
+                            ">👁️</button>` : ''}
+                        </div>
+                    </td>
                     <td style="text-align:right">
                         <div style="display:flex; gap:0.4rem; justify-content:flex-end; flex-wrap:wrap;">
                             <button class="btn btn-secondary btn-sm btn-edit-role"
@@ -175,7 +215,24 @@ export const render = () => {
                         </div>
                     </td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
+
+            // Eye toggle buttons
+            tbody.querySelectorAll('.btn-eye').forEach(btn => {
+                let visible = false;
+                btn.onclick = () => {
+                    visible = !visible;
+                    const mask = tbody.querySelector(`.pw-mask[data-id="${btn.dataset.id}"]`);
+                    if (mask) {
+                        mask.textContent = visible ? btn.dataset.pw : '••••••';
+                        mask.style.letterSpacing = visible ? '0' : '2px';
+                        mask.style.color = visible ? '#0f172a' : '#475569';
+                        mask.style.fontWeight = visible ? '700' : 'normal';
+                    }
+                    btn.textContent = visible ? '🙈' : '👁️';
+                };
+            });
 
             // Edit Role
             tbody.querySelectorAll('.btn-edit-role').forEach(btn => {
