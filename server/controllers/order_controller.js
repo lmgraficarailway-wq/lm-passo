@@ -549,7 +549,7 @@ exports.getSalesReport = (req, res) => {
                c.name as client_name, c.phone as client_phone
         FROM orders o
         LEFT JOIN clients c ON o.client_id = c.id
-        WHERE o.status IN ('em_balcao', 'finalizado', 'arquivado')
+        WHERE o.status IN ('producao', 'em_balcao', 'finalizado', 'arquivado')
         ORDER BY o.created_at DESC
     `;
     const sqlReserved = `
@@ -558,7 +558,7 @@ exports.getSalesReport = (req, res) => {
                c.name as client_name, c.phone as client_phone
         FROM orders o
         LEFT JOIN clients c ON o.client_id = c.id
-        WHERE o.status IN ('aguardando_aceite', 'producao') AND o.is_internal = 0
+        WHERE o.status = 'aguardando_aceite' AND o.is_internal = 0
         ORDER BY o.created_at DESC
     `;
     db.all(sqlReal, [], (err, rows) => {
@@ -599,7 +599,7 @@ exports.getClientFinancial = (req, res) => {
         SELECT o.id, o.created_at, o.description, o.total_value, o.discount_value, o.payment_method,
                o.products_summary, o.event_name, o.payment_code
         FROM orders o
-        WHERE o.client_id = ? AND o.status IN ('em_balcao', 'finalizado', 'arquivado')
+        WHERE o.client_id = ? AND o.status IN ('producao', 'em_balcao', 'finalizado', 'arquivado')
         ORDER BY o.created_at DESC
     `;
     db.all(sql, [clientId], (err, rows) => {

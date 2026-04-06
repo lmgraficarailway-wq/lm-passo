@@ -281,6 +281,26 @@ router.get('/backup/db', (req, res) => {
 // ── Restart Server ─────────────────────────────────────────────────────────────
 // Exit code 0 signals the .bat to restart the process automatically.
 // Only masters can trigger this.
+// ── Temporary: Git Push via HTTP ───────────────────────────────────────────
+// Allows pushing to remote from the browser (no terminal needed). Master only.
+router.post('/admin/git-push', (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '') || req.query.token || '';
+    if (!token) return res.status(401).json({ error: 'Não autorizado' });
+    try {
+        const decoded = jwt.verify(token, BACKUP_SECRET);
+        if (decoded.role !== 'master') return res.status(403).json({ error: 'Apenas master pode fazer push' });
+    } catch {
+        return res.status(401).json({ error: 'Token inválido' });
+    }
+    const cwd = process.cwd();
+    exec('git add . && git commit -m "sync: auto-push from local server" && git push origin main', { cwd }, (err, stdout, stderr) => {
+        if (err && !stdout.includes('nothing to commit') && !stderr.includes('Everything up-to-date')) {
+            return res.json({ success: false, error: err.message, stdout, stderr });
+        }
+        res.json({ success: true, stdout: stdout || 'Nothing new to push (already up-to-date)', stderr });
+    });
+});
+
 router.post('/admin/restart', (req, res) => {
     const token = req.headers.authorization?.replace('Bearer ', '') || req.query.token || '';
     if (!token) return res.status(401).json({ error: 'Não autorizado' });

@@ -2,48 +2,35 @@
 title LM Passo - Servidor
 cd /d "%~dp0"
 
-:RESTART
-echo ============================================
-echo       LM PASSO - Iniciando Servidor...
-echo ============================================
+:INICIO
 echo.
-:: Encerra qualquer instancia anterior do servidor
+echo  ==========================================
+echo    LM PASSO - Iniciando...
+echo  ==========================================
+echo.
+
+:: Mata processo node anterior se existir
 taskkill /F /IM node.exe >nul 2>&1
 timeout /t 1 /nobreak >nul
 
-:: Inicia o servidor em background e espera ele estar pronto
-start /B node server.js > server_output.txt 2>&1
+:: Tenta adicionar regra de firewall silenciosamente (so funciona se for admin)
+netsh advfirewall firewall add rule name="LM Passo - Porta 3000" dir=in action=allow protocol=TCP localport=3000 >nul 2>&1
 
-:: Aguarda 3 segundos para o servidor inicializar
-echo Aguardando servidor iniciar...
-timeout /t 3 /nobreak >nul
+:: Abre o browser apos 3 segundos (em processo separado)
+start /B cmd /c "timeout /t 3 /nobreak >nul && start http://localhost:3000"
 
-:: Abre o navegador apenas na primeira inicializacao
-if "%FIRST_START%"=="" (
-    set FIRST_START=1
-    start "" "http://localhost:3000"
-)
+:: Inicia o servidor (fica visivel nesta janela)
+node server.js
 
-:: Mantém a janela aberta mostrando status
-echo.
-echo ============================================
-echo  Servidor rodando em http://localhost:3000
-echo  Rede: http://192.168.1.127:3000
-echo  Pressione Ctrl+C para encerrar
-echo ============================================
-echo.
-
-:: Loop para manter janela aberta e detectar se o servidor cair
-:WAIT_LOOP
-timeout /t 2 /nobreak >nul
-:: Verifica se node ainda está rodando
-tasklist /FI "IMAGENAME eq node.exe" 2>nul | find /I "node.exe" >nul
-if %ERRORLEVEL% NEQ 0 (
-    :: Node caiu - verifica o codigo de saida pelo output
-    findstr /C:"reiniciando" server_output.txt >nul 2>&1
+:: Se saiu com codigo 0 = pedido de reinicio (botao Reiniciar no Admin)
+if %ERRORLEVEL% EQU 0 (
     echo.
-    echo [SERVIDOR PAROU - REINICIANDO...]
+    echo  Reiniciando servidor...
     timeout /t 1 /nobreak >nul
-    goto RESTART
+    goto INICIO
 )
-goto WAIT_LOOP
+
+:: Qualquer outro codigo = erro ou fechamento manual
+echo.
+echo  Servidor encerrado. Pressione qualquer tecla para fechar.
+pause >nul

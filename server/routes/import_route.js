@@ -49,6 +49,51 @@ function insertRows(table, rows) {
     });
 }
 
+// ── Export endpoint (pull data back to local) ────────────────────────────────
+const EXPORT_TABLES = [
+    'clients',
+    'users',
+    'suppliers',
+    'products',
+    'product_color_variants',
+    'orders',
+    'order_items',
+    'comments',
+    'stock_movements',
+    'purchase_requests',
+    'material_cost_movements',
+    'catalogue_items',
+    'dispatch_costs',
+];
+
+router.get('/export-data', async (req, res) => {
+    const secret = req.query.secret || req.headers['x-export-secret'];
+    if (secret !== IMPORT_SECRET) {
+        return res.status(403).json({ error: 'Acesso negado' });
+    }
+
+    const result = {};
+    try {
+        for (const table of EXPORT_TABLES) {
+            result[table] = await new Promise((resolve) => {
+                db.all(`SELECT * FROM ${table}`, [], (err, rows) => {
+                    if (err) {
+                        console.warn(`Export: tabela ${table} não encontrada — ignorando`);
+                        resolve([]);
+                    } else {
+                        resolve(rows);
+                    }
+                });
+            });
+            console.log(`Export: ${table} — ${result[table].length} registros`);
+        }
+        res.json({ success: true, data: result });
+    } catch (err) {
+        console.error('Export error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 router.post('/import-data', async (req, res) => {
     const { secret, data } = req.body;
 
