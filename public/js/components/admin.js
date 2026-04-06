@@ -43,6 +43,16 @@ export const render = () => {
                 <button id="btn-restart-server" style="background:white; color:#991b1b; border:none; padding:0.55rem 1.1rem; border-radius:7px; font-weight:700; cursor:pointer; font-size:0.9rem; white-space:nowrap;">🔄 Reiniciar</button>
             </div>
 
+            <!-- Catalogue Recovery Card -->
+            <div style="background:linear-gradient(135deg,#064e3b,#065f46); color:white; border-radius:10px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+                <div>
+                    <div style="font-size:1.05rem; font-weight:700; margin-bottom:0.25rem;">🖼️ Recuperar Catálogo</div>
+                    <div style="font-size:0.85rem; opacity:0.85;">Importa automaticamente as imagens da pasta <code style="background:rgba(255,255,255,0.15);padding:1px 5px;border-radius:3px;">/uploads</code> para o catálogo. Use se as fotos sumiram do banco.</div>
+                    <div id="import-result" style="margin-top:0.5rem;font-size:0.82rem;font-weight:600;"></div>
+                </div>
+                <button id="btn-import-catalogue" style="background:white; color:#065f46; border:none; padding:0.55rem 1.1rem; border-radius:7px; font-weight:700; cursor:pointer; font-size:0.9rem; white-space:nowrap; flex-shrink:0;">📥 Importar Fotos</button>
+            </div>
+
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
                 <h3 style="margin:0; color:#334155">👥 Usuários do Sistema</h3>
                 <button class="btn btn-primary" id="btn-new-user" style="width:auto;">+ Novo Usuário</button>
@@ -441,6 +451,40 @@ export const render = () => {
             };
             // Give server 1.5s to go down before polling
             setTimeout(pollReady, 1500);
+        };
+    }
+
+    // Import Catalogue from Disk Handler
+    const btnImport = container.querySelector('#btn-import-catalogue');
+    const importResult = container.querySelector('#import-result');
+    if (btnImport) {
+        btnImport.onclick = async () => {
+            if (!confirm('📥 Importar todas as imagens da pasta /uploads para o catálogo?\n\nIsso criará novos itens para cada imagem ainda não cadastrada. Você poderá editar os títulos depois.')) return;
+
+            btnImport.disabled = true;
+            btnImport.textContent = '⏳ Importando...';
+            importResult.textContent = '';
+
+            try {
+                const res = await fetch('/api/catalogue/import-from-disk', { method: 'POST' });
+                const json = await res.json();
+
+                if (res.ok) {
+                    importResult.style.color = '#86efac';
+                    importResult.textContent = `✅ ${json.message}`;
+                    btnImport.textContent = '✅ Concluído';
+                } else {
+                    importResult.style.color = '#fca5a5';
+                    importResult.textContent = `❌ Erro: ${json.error}`;
+                    btnImport.disabled = false;
+                    btnImport.textContent = '📥 Importar Fotos';
+                }
+            } catch(err) {
+                importResult.style.color = '#fca5a5';
+                importResult.textContent = `❌ Erro de conexão: ${err.message}`;
+                btnImport.disabled = false;
+                btnImport.textContent = '📥 Importar Fotos';
+            }
         };
     }
 
