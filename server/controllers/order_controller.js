@@ -827,23 +827,21 @@ exports.getMaterialCostsReport = (req, res) => {
     });
 };
 
-// Product Demand Report — top/bottom products by quantity ordered (monthly & quarterly)
+// Product Demand Report — top/bottom products by quantity ordered (monthly, quarterly & annual)
 exports.getProductDemand = (req, res) => {
     const now = new Date();
     const year = now.getFullYear();
-    const month = now.getMonth(); // 0-indexed
 
-    // Current month range
-    const monthStart = new Date(year, month, 1).toISOString().slice(0, 10);
-    const monthEnd   = new Date(year, month + 1, 0, 23, 59, 59).toISOString().slice(0, 10);
-
-    // Quarterly: last 3 full months + current month (rolling 3 months)
-    const quarterStart = new Date(year, month - 2, 1).toISOString().slice(0, 10);
+    const MONTH_NAMES = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
 
     const buildQuery = (dateFrom, dateTo) => `
         SELECT
             COALESCE(oi.product_snapshot_name, p.name, 'Produto Desconhecido') as product_name,
-            SUM(oi.quantity) as total_qty
+            SUM(oi.quantity) as total_qty,
+            COUNT(DISTINCT o.id) as total_orders
         FROM order_items oi
         JOIN orders o ON oi.order_id = o.id
         LEFT JOIN products p ON oi.product_id = p.id
@@ -855,28 +853,87 @@ exports.getProductDemand = (req, res) => {
         ORDER BY total_qty DESC
     `;
 
-    db.all(buildQuery(monthStart, monthEnd), [], (err, monthlyRows) => {
-        if (err) return res.status(500).json({ error: err.message });
+    const processRows = (rows, limit = 5) => {
+        if (!rows || rows.length === 0) return { top: [], bottom: [], total_qty: 0, total_orders: 0 };
+        const totalQty = rows.reduce((s, r) => s + (r.total_qty || 0), 0);
+        const totalOrders = rows.reduce((s, r) => s + (r.total_orders || 0), 0);
+        const top = rows.slice(0, limit);
+        const bottom = rows.length > limit ? rows.slice(-limit).reverse() : [];
+        const topNames = new Set(top.map(r => r.product_name));
+        return {
+            top,
+            bottom: bottom.filter(r => !topNames.has(r.product_name)),
+            total_qty: totalQty,
+            total_orders: totalOrders
+        };
+    };
 
-        db.all(buildQuery(quarterStart, monthEnd), [], (err2, quarterlyRows) => {
-            if (err2) return res.status(500).json({ error: err2.message });
+    // Build all 12 monthly queries and 4 quarterly queries in parallel using callbacks chain
+    const monthQueries = [];
+    for (let m = 0; m < 12; m++) {
+        const from = new Date(year, m, 1).toISOString().slice(0, 10);
+        const to   = new Date(year, m + 1, 0, 23, 59, 59).toISOString().slice(0, 10);
+        monthQueries.push({ month: m + 1, label: MONTH_NAMES[m], from, to });
+    }
 
-            const process = (rows) => {
-                if (!rows || rows.length === 0) return { top: [], bottom: [] };
-                const top    = rows.slice(0, 5);
-                const bottom = rows.slice(-5).reverse();
-                // Avoid showing same item in both lists when total <= 5
-                const topNames = new Set(top.map(r => r.product_name));
-                return {
-                    top,
-                    bottom: bottom.filter(r => !topNames.has(r.product_name))
-                };
-            };
+    const quarterDefs = [
+        { label: 'T1 — Jan / Fev / Mar', months: [1,2,3], from: `${year}-01-01`, to: `${year}-03-31` },
+        { label: 'T2 — Abr / Mai / Jun', months: [4,5,6], from: `${year}-04-01`, to: `${year}-06-30` },
+        { label: 'T3 — Jul / Ago / Set', months: [7,8,9], from: `${year}-07-01`, to: `${year}-09-30` },
+        { label: 'T4 — Out / Nov / Dez', months: [10,11,12], from: `${year}-10-01`, to: `${year}-12-31` }
+    ];
 
-            res.json({
-                monthly:   { period: `${monthStart} — ${monthEnd}`, ...process(monthlyRows) },
-                quarterly: { period: `${quarterStart} — ${monthEnd}`, ...process(quarterlyRows) }
-            });
+    const annualFrom = `${year}-01-01`;
+    const annualTo   = `${year}-12-31`;
+
+    // Run all queries: 12 months + 4 quarters + 1 annual = 17 queries
+    const allQueries = [
+        ...monthQueries.map(mq => ({ key: `m_${mq.month}`, sql: buildQuery(mq.from, mq.to) })),
+        ...quarterDefs.map((qd, i) => ({ key: `q_${i}`, sql: buildQuery(qd.from, qd.to) })),
+        { key: 'annual', sql: buildQuery(annualFrom, annualTo) }
+    ];
+
+    const results = {};
+    let done = 0;
+    let hasError = false;
+
+    allQueries.forEach(({ key, sql }) => {
+        db.all(sql, [], (err, rows) => {
+            if (hasError) return;
+            if (err) {
+                hasError = true;
+                return res.status(500).json({ error: err.message });
+            }
+            results[key] = rows || [];
+            done++;
+            if (done === allQueries.length) {
+                // Build response
+                const months = monthQueries.map(mq => ({
+                    month: mq.month,
+                    label: mq.label,
+                    period: `${mq.from} — ${mq.to}`,
+                    ...processRows(results[`m_${mq.month}`], 5)
+                }));
+
+                const quarters = quarterDefs.map((qd, i) => ({
+                    label: qd.label,
+                    period: `${qd.from} — ${qd.to}`,
+                    ...processRows(results[`q_${i}`], 5)
+                }));
+
+                const annualData = processRows(results['annual'], 10);
+
+                res.json({
+                    year,
+                    months,
+                    quarters,
+                    annual: {
+                        label: String(year),
+                        period: `${annualFrom} — ${annualTo}`,
+                        ...annualData
+                    }
+                });
+            }
         });
     });
 };
