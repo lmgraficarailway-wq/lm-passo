@@ -86,16 +86,16 @@ export const render = () => {
                 // ─── URL Sanitizer ───────────────────────────────────────────
                 // Ensures every image path becomes a clean /uploads/filename URL
                 // regardless of how it was originally stored in the DB.
-                // A cache-busting timestamp is appended so the browser never
-                // serves a stale version of an image from disk cache.
                 const sanitizeUrl = (raw) => {
                     if (!raw) return '';
                     raw = raw.trim();
                     // Already a full HTTP URL — leave as-is
                     if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+                    // Strip query string before extracting filename
+                    const cleanRaw = raw.split('?')[0];
                     // Extract just the filename (handles: "filename.jpg", "/uploads/filename.jpg", "uploads/filename.jpg")
-                    const filename = raw.split('/').pop();
-                    return `/uploads/${filename}?v=${Date.now()}`;
+                    const filename = cleanRaw.split('/').pop();
+                    return `/uploads/${filename}`;
                 };
 
                 const renderMediaItem = (rawUrl, title) => {
