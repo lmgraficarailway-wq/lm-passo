@@ -118,9 +118,10 @@ export const render = () => {
                             </div>
                         </a>`;
                     }
-                    // Image formats: jpg, jpeg, png, gif, webp, bmp, jfif, avif, tiff, svg
-                    const imgExts = ['jpg','jpeg','png','gif','webp','bmp','jfif','avif','tiff','svg'];
-                    const ext = lUrl.split('.').pop();
+                    // Image formats — including jfif (JPEG variant common on Windows)
+                    const imgExts = ['jpg','jpeg','jfif','jpe','png','gif','webp','bmp','avif','tiff','tif','svg'];
+                    // Strip query string before extracting extension
+                    const ext = lUrl.split('?')[0].split('.').pop().toLowerCase();
                     if (!imgExts.includes(ext)) {
                         // Unknown format — show a generic download link
                         return `<a href="${url}" target="_blank" style="text-decoration:none;display:block;">
@@ -131,13 +132,12 @@ export const render = () => {
                             </div>
                         </a>`;
                     }
-                    const filename = url.split('/').pop();
                     return `<img 
                         src="${url}" 
                         alt="${title}" 
                         class="catalogue-image" 
-                        style="min-height:180px;width:100%;object-fit:cover;border-radius:8px;"
-                        onerror="this.onerror=null; this.style.display='none'; this.insertAdjacentHTML('afterend', '<div style=\\'height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fef2f2;border-radius:8px;border:2px dashed #fca5a5;color:#dc2626;font-size:0.8rem;padding:1rem;text-align:center;\\'><svg viewBox=\\'0 0 24 24\\' width=\\'36\\' height=\\'36\\' fill=\\'currentColor\\'><path d=\\'M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z\\'/></svg><b style=\\'margin-top:0.5rem;\\'>Erro ao carregar:</b><span style=\\'word-break:break-all;margin-top:0.25rem;\\'>${filename}</span></div>');"
+                        style="min-height:180px;width:100%;object-fit:cover;border-radius:8px;background:#f1f5f9;"
+                        onerror="this.style.cssText='min-height:180px;width:100%;display:flex;align-items:center;justify-content:center;background:#fef2f2;border-radius:8px;border:2px dashed #fca5a5;'; this.alt='❌ Imagem indisponível'; console.warn('Imagem não carregou:', this.src);"
                     >`;
                 };
 

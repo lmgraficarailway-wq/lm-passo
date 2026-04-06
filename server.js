@@ -45,6 +45,10 @@ try {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Register MIME types that Express doesn't know by default
+// .jfif is a JPEG variant common on Windows — without this, browsers may reject it
+express.static.mime.define({ 'image/jpeg': ['jfif', 'jpe'] }, true);
+
 // Middleware
 app.use(compression()); // gzip all responses
 app.use(cors());
