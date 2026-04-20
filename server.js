@@ -570,33 +570,43 @@ app.get('/', (req, res) => {
 
 // Start Server
 const os = require('os');
-app.listen(PORT, '0.0.0.0', () => {
-    const nets = os.networkInterfaces();
-    let localIp = 'localhost';
-    for (const iface of Object.values(nets)) {
-        for (const alias of iface) {
-            if (alias.family === 'IPv4' && !alias.internal) {
-                localIp = alias.address;
-                break;
+const { restoreFromFirebase } = require('./server/utils/firebaseImport');
+
+async function startServer() {
+    // 1. Garante que o banco de dados tem dados (Restaura do Firebase se for um servidor temporário recém-ligado)
+    await restoreFromFirebase();
+
+    // 2. Só depois de confirmar os dados, liberamos as portas para acesso
+    app.listen(PORT, '0.0.0.0', () => {
+        const nets = os.networkInterfaces();
+        let localIp = 'localhost';
+        for (const iface of Object.values(nets)) {
+            for (const alias of iface) {
+                if (alias.family === 'IPv4' && !alias.internal) {
+                    localIp = alias.address;
+                    break;
+                }
             }
         }
-    }
-    console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`Acesso em rede:  http://${localIp}:${PORT}`);
+        console.log(`Server running on http://localhost:${PORT}`);
+        console.log(`Acesso em rede:  http://${localIp}:${PORT}`);
 
-    // ── Auto-Backup Firebase em Tempo Real (Sync Queue) ──────────────────────
-    try {
-        const { startWorker } = require('./server/utils/firebaseSync');
-        startWorker();
-    } catch (err) {
-        console.error('Falha ao iniciar o worker do Firebase:', err.message);
-    }
+        // ── Auto-Backup Firebase em Tempo Real (Sync Queue) ──────────────────────
+        try {
+            const { startWorker } = require('./server/utils/firebaseSync');
+            startWorker();
+        } catch (err) {
+            console.error('Falha ao iniciar o worker do Firebase:', err.message);
+        }
 
-    // Salva antes de fechar o servidor pela janela do terminal (X ou Ctrl+C)
-    process.on('SIGINT', () => {
-        console.log('\n[Sistema] Encerrando servidor...');
-        process.exit(0);
+        // Salva antes de fechar o servidor pela janela do terminal (X ou Ctrl+C)
+        process.on('SIGINT', () => {
+            console.log('\n[Sistema] Encerrando servidor...');
+            process.exit(0);
+        });
+        // ───────────────────────────────────────────────────────────────────────────
     });
-    // ───────────────────────────────────────────────────────────────────────────
-});
+}
+
+startServer();
 
