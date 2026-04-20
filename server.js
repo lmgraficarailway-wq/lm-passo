@@ -3,8 +3,23 @@ const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
 const path = require('path');
-const db = require('./server/database/db');
 const fs = require('fs');
+
+// Ensure DB directory exists (for Railway/Render persistent volume)
+let dbPath = process.env.DB_PATH || path.join(process.cwd(), 'database.sqlite');
+try {
+    const dbDir = path.dirname(dbPath);
+    if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
+    }
+} catch (e) {
+    console.error('⚠️ Aviso: Sem permissão para criar pasta do banco em', process.env.DB_PATH);
+    console.error('⚠️ Usando banco de dados local temporário no diretório atual.');
+    dbPath = path.join(process.cwd(), 'database.sqlite');
+    process.env.DB_PATH = dbPath; // Atualiza para o resto do sistema usar o local
+}
+
+const db = require('./server/database/db');
 
 // Error Logging Function
 const logError = (err) => {
@@ -31,12 +46,6 @@ process.on('unhandledRejection', (reason, promise) => {
     logError(reason);
     process.exit(1);
 });
-
-// Ensure DB directory exists (for Railway persistent volume at /data)
-const dbDir = path.dirname(process.env.DB_PATH || path.join(process.cwd(), 'database.sqlite'));
-if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
-}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
