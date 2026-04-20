@@ -13,12 +13,21 @@ const DB_PATH = path.resolve(process.cwd(), 'database.sqlite');
 async function restoreFromFirebase() {
     return new Promise(async (resolve, reject) => {
         try {
-            // Se o arquivo existir e tiver mais que 20KB, assumimos que está intacto e não precisa restaurar.
-            // Em provedores como o Render, o arquivo pode sumir completamente.
+            // Verifica se o banco existe e se possui dados na tabela clients (se tiver > 0, assume que tá intacto)
             if (fs.existsSync(DB_PATH)) {
-                const stats = fs.statSync(DB_PATH);
-                if (stats.size > 20000) { 
-                    console.log('✅ Banco de dados intacto (>' + Math.round(stats.size/1024) + 'KB). Pulando auto-restauração.');
+                const checkDb = new sqlite3.Database(DB_PATH);
+                const hasData = await new Promise((res) => {
+                    checkDb.get("SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name='clients'", (err, row) => {
+                        if (!row || row.count === 0) return res(false);
+                        checkDb.get("SELECT COUNT(*) as count FROM clients", (err, row) => {
+                            res(row && row.count > 0);
+                        });
+                    });
+                });
+                checkDb.close();
+
+                if (hasData) {
+                    console.log('✅ Banco de dados intacto (com dados). Pulando auto-restauração.');
                     return resolve(true);
                 }
             }
