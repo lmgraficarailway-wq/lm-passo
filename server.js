@@ -54,9 +54,11 @@ app.use(express.static(diskPublic));
 // ── Rotas da API ─────────────────────────────────────────────────────────────
 const apiRoutes = require('./server/routes/api.routes');
 const authRoutes = require('./server/routes/auth.routes');
+const diagRoutes = require('./server/routes/diag.routes');
 
 app.use('/api', apiRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/diag', diagRoutes);
 
 // Rota para o frontend (SPA Fallback)
 app.get('*', (req, res) => {
