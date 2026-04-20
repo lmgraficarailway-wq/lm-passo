@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { getServiceAccount } = require('./firebaseAuth');
 
-const DB_PATH = path.resolve(process.cwd(), 'database.sqlite');
+const DB_PATH = process.env.DB_PATH || path.resolve(process.cwd(), 'database.sqlite');
 
 /**
  * Função para importar as tabelas.
@@ -13,26 +13,47 @@ const DB_PATH = path.resolve(process.cwd(), 'database.sqlite');
 async function restoreFromFirebase() {
     return new Promise(async (resolve, reject) => {
         try {
+            console.log('🔍 Verificando necessidade de auto-restauração...');
+            
             // Aguarda 2 segundos para garantir que o db.js terminou de criar as tabelas e os triggers (Race Condition)
             await new Promise(res => setTimeout(res, 2000));
 
             // Verifica se o banco existe e se possui dados na tabela clients (se tiver > 0, assume que tá intacto)
             if (fs.existsSync(DB_PATH)) {
+                console.log('  Found DB file at:', DB_PATH);
                 const checkDb = new sqlite3.Database(DB_PATH);
+                
                 const hasData = await new Promise((res) => {
                     checkDb.get("SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name='clients'", (err, row) => {
-                        if (!row || row.count === 0) return res(false);
-                        checkDb.get("SELECT COUNT(*) as count FROM clients", (err, row) => {
-                            res(row && row.count > 0);
+                        if (err) {
+                            console.log('  ⚠️ Erro ao verificar sqlite_master:', err.message);
+                            return res(false);
+                        }
+                        if (!row || row.count === 0) {
+                            console.log('  ⚠️ Tabela clients não existe no sqlite_master.');
+                            return res(false);
+                        }
+                        
+                        checkDb.get("SELECT COUNT(*) as count FROM clients", (err2, row2) => {
+                            if (err2) {
+                                console.log('  ⚠️ Erro ao contar registros em clients:', err2.message);
+                                return res(false);
+                            }
+                            const count = row2 ? row2.count : 0;
+                            console.log(`  📊 Registros encontrados em clients: ${count}`);
+                            res(count > 0);
                         });
                     });
                 });
-                checkDb.close();
+                
+                try { checkDb.close(); } catch(e) {}
 
                 if (hasData) {
                     console.log('✅ Banco de dados intacto (com dados). Pulando auto-restauração.');
                     return resolve(true);
                 }
+            } else {
+                console.log('  ❌ Arquivo de banco de dados não encontrado em:', DB_PATH);
             }
 
             const serviceAccount = getServiceAccount();
@@ -52,7 +73,6 @@ async function restoreFromFirebase() {
             const firestoreDb = admin.firestore();
 
             // Precisamos que o arquivo SQLite e a estrutura existam antes de inserir os dados.
-            // O db.js principal faz isso via initDb(). Vamos assumir que initDb() já rodou no server.js
             const localDb = new sqlite3.Database(DB_PATH);
 
             const collections = {
@@ -76,7 +96,7 @@ async function restoreFromFirebase() {
                 }
                 const rows = snap.docs.map(doc => doc.data());
                 
-                await new Promise((resolveTable, rejectTable) => {
+                await new Promise((resolveTable) => {
                     const placeholders = columns.map(() => '?').join(', ');
                     const sql = `INSERT OR REPLACE INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`;
                     let completed = 0;
@@ -95,7 +115,7 @@ async function restoreFromFirebase() {
                                 if (err) console.error('Erro na inserção de', table, err.message);
                                 if (completed === rows.length) {
                                     stmt.finalize();
-                                    localDb.run('COMMIT', resolveTable);
+                                    localDb.run('COMMIT', () => resolveTable());
                                 }
                             });
                         });
@@ -112,7 +132,7 @@ async function restoreFromFirebase() {
 
         } catch (error) {
             console.error('\n❌ Falha Crítica na Auto-restauração:', error);
-            resolve(false); // Resolvemos com false em vez de reject para não travar o servidor se estiver sem internet
+            resolve(false); 
         }
     });
 }

@@ -267,7 +267,7 @@
       "type": "ADESIVOS ",
       "production_time": "1",
       "price": null,
-      "stock": 180,
+      "stock": 176,
       "price_1_day": 8,
       "price_3_days": 4,
       "min_stock": 5,
@@ -1522,6 +1522,249 @@
       "launched_to_core": 0
     }
   ],
+  "users": [
+    {
+      "id": 2,
+      "username": "financeiro",
+      "password": "$2b$10$Kr64/Wfgppu11RadvdPV7.uOm2DIE6LdK0TdHyYMRMzpTzpKIE5jO",
+      "role": "financeiro",
+      "name": "Financeiro",
+      "client_id": null,
+      "plain_password": "",
+      "avatar": null
+    },
+    {
+      "id": 3,
+      "username": "vendedor",
+      "password": "$2b$08$UZ985WR1OsP6twti56L3GO2EQS4EtBNlerxga/A3SSgDqPNyqg2BC",
+      "role": "vendedor",
+      "name": "Vendedor",
+      "client_id": null,
+      "plain_password": "123456",
+      "avatar": "/uploads/1776375440513-56521745.JPG"
+    },
+    {
+      "id": 4,
+      "username": "producao",
+      "password": "$2b$08$HJ9B5epPksElhRJu1EFtrORpQvOMPliZgdW5DsfordYSDjv/vynTi",
+      "role": "producao",
+      "name": "Produção",
+      "client_id": null,
+      "plain_password": "123456",
+      "avatar": "/uploads/1776375432635-950132499.JPG"
+    },
+    {
+      "id": 5,
+      "username": "interno",
+      "password": "$2b$10$Ojio2M2LWPOvADt2Li7mMePcEP/Bx2C9Ccne0TAz5pAaZOWw9bqIu",
+      "role": "interno",
+      "name": "Interno",
+      "client_id": null,
+      "plain_password": "",
+      "avatar": null
+    },
+    {
+      "id": 6,
+      "username": "cliente_arena",
+      "password": "$2b$08$F.KeLtdaj7FYIZ4QmdqSSuA8cL5YPfZJEIfPY42jENwMExde8lOxW",
+      "role": "cliente",
+      "name": "ARENA ",
+      "client_id": 7,
+      "plain_password": "",
+      "avatar": null
+    },
+    {
+      "id": 7,
+      "username": "supervisor",
+      "password": "$2b$10$je7.4bdzNAsN6K4OSkgsB.4JjrQSmTBCE6loqwrvlOhLG44soI/uu",
+      "role": "master",
+      "name": "Supervisor",
+      "client_id": null,
+      "plain_password": "supervisor123",
+      "avatar": "/uploads/1776375437217-223677288.JPG"
+    },
+    {
+      "id": 8,
+      "username": "gerente",
+      "password": "$2b$10$af/KSBLl8NWhuxRpSKouS.DV7IapyH/sbpC9ZXAjAMBzZHqYG7V0G",
+      "role": "master",
+      "name": "Gerente",
+      "client_id": null,
+      "plain_password": "gerente123",
+      "avatar": "/uploads/1776375425206-864674755.JPG"
+    }
+  ],
+  "product_color_variants": [
+    {
+      "id": 54,
+      "product_id": 57,
+      "color": "AMARELO",
+      "quantity": 2780,
+      "created_at": "2026-03-16 14:06:41"
+    },
+    {
+      "id": 55,
+      "product_id": 57,
+      "color": "AZUL",
+      "quantity": 5370,
+      "created_at": "2026-03-16 14:06:41"
+    },
+    {
+      "id": 56,
+      "product_id": 57,
+      "color": "AZUL ESCURO",
+      "quantity": 5010,
+      "created_at": "2026-03-16 14:06:41"
+    },
+    {
+      "id": 57,
+      "product_id": 57,
+      "color": "BRANCO",
+      "quantity": 380,
+      "created_at": "2026-03-16 14:06:41"
+    },
+    {
+      "id": 58,
+      "product_id": 57,
+      "color": "DOURADO",
+      "quantity": 5030,
+      "created_at": "2026-03-16 14:06:41"
+    },
+    {
+      "id": 59,
+      "product_id": 57,
+      "color": "LARANJA",
+      "quantity": 3150,
+      "created_at": "2026-03-16 14:06:41"
+    },
+    {
+      "id": 60,
+      "product_id": 57,
+      "color": "PRATA",
+      "quantity": 5140,
+      "created_at": "2026-03-16 14:06:41"
+    },
+    {
+      "id": 61,
+      "product_id": 57,
+      "color": "ROSA",
+      "quantity": 3950,
+      "created_at": "2026-03-16 14:06:41"
+    },
+    {
+      "id": 62,
+      "product_id": 57,
+      "color": "VERDE",
+      "quantity": 4790,
+      "created_at": "2026-03-16 14:06:41"
+    },
+    {
+      "id": 63,
+      "product_id": 57,
+      "color": "VERMELHO",
+      "quantity": 4510,
+      "created_at": "2026-03-16 14:06:41"
+    },
+    {
+      "id": 64,
+      "product_id": 58,
+      "color": "AZUL ESCURO",
+      "quantity": 1590,
+      "created_at": "2026-03-16 14:08:30"
+    },
+    {
+      "id": 65,
+      "product_id": 58,
+      "color": "AZUL CLARO",
+      "quantity": 2540,
+      "created_at": "2026-03-16 14:08:30"
+    },
+    {
+      "id": 66,
+      "product_id": 58,
+      "color": "AMARELO",
+      "quantity": 1150,
+      "created_at": "2026-03-16 14:08:30"
+    },
+    {
+      "id": 67,
+      "product_id": 58,
+      "color": "LARANJA",
+      "quantity": 250,
+      "created_at": "2026-03-16 14:08:30"
+    },
+    {
+      "id": 68,
+      "product_id": 58,
+      "color": "ROSA",
+      "quantity": 550,
+      "created_at": "2026-03-16 14:08:30"
+    },
+    {
+      "id": 69,
+      "product_id": 58,
+      "color": "VERDE",
+      "quantity": 1890,
+      "created_at": "2026-03-16 14:08:30"
+    },
+    {
+      "id": 70,
+      "product_id": 70,
+      "color": "AZUL ESCURO",
+      "quantity": 1000,
+      "created_at": "2026-03-16 14:11:23"
+    },
+    {
+      "id": 71,
+      "product_id": 70,
+      "color": "AZUL CLARO",
+      "quantity": 14100,
+      "created_at": "2026-03-16 14:11:23"
+    },
+    {
+      "id": 72,
+      "product_id": 70,
+      "color": "AMARELO",
+      "quantity": 240,
+      "created_at": "2026-03-16 14:11:23"
+    },
+    {
+      "id": 73,
+      "product_id": 70,
+      "color": "LARANJA",
+      "quantity": 1140,
+      "created_at": "2026-03-16 14:11:23"
+    },
+    {
+      "id": 74,
+      "product_id": 70,
+      "color": "ROSA ",
+      "quantity": 997,
+      "created_at": "2026-03-16 14:11:23"
+    },
+    {
+      "id": 75,
+      "product_id": 70,
+      "color": "VERDE",
+      "quantity": 1000,
+      "created_at": "2026-03-16 14:11:23"
+    },
+    {
+      "id": 76,
+      "product_id": 70,
+      "color": "BRANCO",
+      "quantity": 2710,
+      "created_at": "2026-03-16 14:11:23"
+    },
+    {
+      "id": 77,
+      "product_id": 70,
+      "color": "ROXO ",
+      "quantity": 1090,
+      "created_at": "2026-03-16 14:11:23"
+    }
+  ],
+  "material_cost_movements": [],
   "orders": [
     {
       "id": 81,
@@ -4038,243 +4281,40 @@
       "stock_reserved": 0,
       "payment_code": "",
       "ai_estimated_time": 75
-    }
-  ],
-  "product_color_variants": [
-    {
-      "id": 54,
-      "product_id": 57,
-      "color": "AMARELO",
-      "quantity": 2780,
-      "created_at": "2026-03-16 14:06:41"
     },
     {
-      "id": 55,
-      "product_id": 57,
-      "color": "AZUL",
-      "quantity": 5370,
-      "created_at": "2026-03-16 14:06:41"
-    },
-    {
-      "id": 56,
-      "product_id": 57,
-      "color": "AZUL ESCURO",
-      "quantity": 5010,
-      "created_at": "2026-03-16 14:06:41"
-    },
-    {
-      "id": 57,
-      "product_id": 57,
-      "color": "BRANCO",
-      "quantity": 380,
-      "created_at": "2026-03-16 14:06:41"
-    },
-    {
-      "id": 58,
-      "product_id": 57,
-      "color": "DOURADO",
-      "quantity": 5030,
-      "created_at": "2026-03-16 14:06:41"
-    },
-    {
-      "id": 59,
-      "product_id": 57,
-      "color": "LARANJA",
-      "quantity": 3150,
-      "created_at": "2026-03-16 14:06:41"
-    },
-    {
-      "id": 60,
-      "product_id": 57,
-      "color": "PRATA",
-      "quantity": 5140,
-      "created_at": "2026-03-16 14:06:41"
-    },
-    {
-      "id": 61,
-      "product_id": 57,
-      "color": "ROSA",
-      "quantity": 3950,
-      "created_at": "2026-03-16 14:06:41"
-    },
-    {
-      "id": 62,
-      "product_id": 57,
-      "color": "VERDE",
-      "quantity": 4790,
-      "created_at": "2026-03-16 14:06:41"
-    },
-    {
-      "id": 63,
-      "product_id": 57,
-      "color": "VERMELHO",
-      "quantity": 4510,
-      "created_at": "2026-03-16 14:06:41"
-    },
-    {
-      "id": 64,
-      "product_id": 58,
-      "color": "AZUL ESCURO",
-      "quantity": 1590,
-      "created_at": "2026-03-16 14:08:30"
-    },
-    {
-      "id": 65,
-      "product_id": 58,
-      "color": "AZUL CLARO",
-      "quantity": 2540,
-      "created_at": "2026-03-16 14:08:30"
-    },
-    {
-      "id": 66,
-      "product_id": 58,
-      "color": "AMARELO",
-      "quantity": 1150,
-      "created_at": "2026-03-16 14:08:30"
-    },
-    {
-      "id": 67,
-      "product_id": 58,
-      "color": "LARANJA",
-      "quantity": 250,
-      "created_at": "2026-03-16 14:08:30"
-    },
-    {
-      "id": 68,
-      "product_id": 58,
-      "color": "ROSA",
-      "quantity": 550,
-      "created_at": "2026-03-16 14:08:30"
-    },
-    {
-      "id": 69,
-      "product_id": 58,
-      "color": "VERDE",
-      "quantity": 1890,
-      "created_at": "2026-03-16 14:08:30"
-    },
-    {
-      "id": 70,
-      "product_id": 70,
-      "color": "AZUL ESCURO",
-      "quantity": 1000,
-      "created_at": "2026-03-16 14:11:23"
-    },
-    {
-      "id": 71,
-      "product_id": 70,
-      "color": "AZUL CLARO",
-      "quantity": 14100,
-      "created_at": "2026-03-16 14:11:23"
-    },
-    {
-      "id": 72,
-      "product_id": 70,
-      "color": "AMARELO",
-      "quantity": 240,
-      "created_at": "2026-03-16 14:11:23"
-    },
-    {
-      "id": 73,
-      "product_id": 70,
-      "color": "LARANJA",
-      "quantity": 1140,
-      "created_at": "2026-03-16 14:11:23"
-    },
-    {
-      "id": 74,
-      "product_id": 70,
-      "color": "ROSA ",
-      "quantity": 997,
-      "created_at": "2026-03-16 14:11:23"
-    },
-    {
-      "id": 75,
-      "product_id": 70,
-      "color": "VERDE",
-      "quantity": 1000,
-      "created_at": "2026-03-16 14:11:23"
-    },
-    {
-      "id": 76,
-      "product_id": 70,
-      "color": "BRANCO",
-      "quantity": 2710,
-      "created_at": "2026-03-16 14:11:23"
-    },
-    {
-      "id": 77,
-      "product_id": 70,
-      "color": "ROXO ",
-      "quantity": 1090,
-      "created_at": "2026-03-16 14:11:23"
-    }
-  ],
-  "material_cost_movements": [],
-  "suppliers": [
-    {
-      "id": 1,
-      "name": "CARBOPEL PAPEIS",
-      "phone": "11920910480",
-      "website": "https://carbopel.com.br/distribuidora-de-papeis/",
-      "description": "FORNECEDOR DE PAPEL",
-      "created_at": "2026-02-23 13:13:54"
-    },
-    {
-      "id": 2,
-      "name": "BOTTONS CHIP",
-      "phone": "11951182202",
-      "website": "",
-      "description": "FORNECEDOR DE BOTTONS",
-      "created_at": "2026-02-23 13:38:30"
-    },
-    {
-      "id": 3,
-      "name": "PRIMO BAND PULSEIRAS",
-      "phone": "19982580851",
-      "website": "https://primobands.com.br/",
-      "description": "FORNECEDOR DE PULSEIRAS",
-      "created_at": "2026-02-23 13:40:08"
-    },
-    {
-      "id": 4,
-      "name": "ZAPP GRÁFICA",
-      "phone": "31925666500",
-      "website": "https://zapgrafica.com.br/home",
-      "description": "SERVIÇOS TERCEIRIZADOS",
-      "created_at": "2026-02-23 13:41:06"
-    },
-    {
-      "id": 5,
-      "name": "PASSE VIP",
-      "phone": "21969087989",
-      "website": "https://passevip.com.br/",
-      "description": "PULSEIRAS PERSONALZIADAS - CETIM E TECIDO",
-      "created_at": "2026-02-23 13:42:36"
-    },
-    {
-      "id": 6,
-      "name": "INKTEC",
-      "phone": "41999601888",
-      "website": "https://www.inktec.com.br/",
-      "description": "FORNECEDOR DE TINTAS PARA IMPRESSORAS A JATO",
-      "created_at": "2026-02-23 13:44:07"
-    },
-    {
-      "id": 7,
-      "name": "SUPPERPAPEL",
-      "phone": "41930188182",
-      "website": "https://www.supperpapel.com.br/",
-      "description": "FORNECEDOR PAPEL",
-      "created_at": "2026-02-23 13:45:31"
-    },
-    {
-      "id": 8,
-      "name": "BHBAND",
-      "phone": "31 98234-5042",
-      "website": "https://www.bhband.com.br/",
-      "description": "FORNECEDOR DE FICHAS",
-      "created_at": "2026-02-23 13:47:29"
+      "id": 211,
+      "client_id": 78,
+      "product_id": null,
+      "description": "https://canva.link/lzuqmrl02m79rb9\n",
+      "total_value": 16,
+      "payment_method": "Pix",
+      "created_by": 3,
+      "created_at": "2026-04-20 16:23:25",
+      "status": "aguardando_aceite",
+      "deadline_type": "3D",
+      "deadline_at": "2026-04-23T16:23:25.733Z",
+      "production_notes": "4x ADESIVO A4 GLOSSY OU MATTE - JATO: 8.0 min",
+      "launched_to_core": 0,
+      "attachments": "1776702205878-332849594.pdf",
+      "is_internal": 0,
+      "moved_by": null,
+      "moved_at": null,
+      "is_terceirizado": 0,
+      "discount_value": 0,
+      "file_path": "",
+      "rejection_reason": null,
+      "pickup_photo": null,
+      "checklist": null,
+      "group_id": null,
+      "quantity": 1,
+      "products_summary": "ADESIVO A4 GLOSSY OU MATTE - JATO (4x)",
+      "stock_used": null,
+      "loss_justification": null,
+      "event_name": "",
+      "stock_reserved": 1,
+      "payment_code": "",
+      "ai_estimated_time": 8
     }
   ],
   "team_chat": [
@@ -5173,6 +5213,146 @@
       "reply_to_msg": null,
       "reply_to_author": null,
       "attachment_url": null
+    },
+    {
+      "id": 121,
+      "user_id": 1,
+      "user_name": "Administrador",
+      "user_role": "master",
+      "message": "kkkkk",
+      "created_at": "2026-04-20 13:59:03",
+      "is_edited": 0,
+      "edited_at": null,
+      "reply_to_id": null,
+      "reply_to_msg": null,
+      "reply_to_author": null,
+      "attachment_url": null
+    },
+    {
+      "id": 122,
+      "user_id": 1,
+      "user_name": "Administrador",
+      "user_role": "master",
+      "message": "ve ai",
+      "created_at": "2026-04-20 13:59:06",
+      "is_edited": 0,
+      "edited_at": null,
+      "reply_to_id": null,
+      "reply_to_msg": null,
+      "reply_to_author": null,
+      "attachment_url": null
+    },
+    {
+      "id": 123,
+      "user_id": 8,
+      "user_name": "Gerente (Admin)",
+      "user_role": "master",
+      "message": "deu bom",
+      "created_at": "2026-04-20 13:59:19",
+      "is_edited": 0,
+      "edited_at": null,
+      "reply_to_id": null,
+      "reply_to_msg": null,
+      "reply_to_author": null,
+      "attachment_url": null
+    },
+    {
+      "id": 124,
+      "user_id": 8,
+      "user_name": "Gerente (Admin)",
+      "user_role": "master",
+      "message": "seu acesso está como supervisor tá Manel ?",
+      "created_at": "2026-04-20 14:00:01",
+      "is_edited": 0,
+      "edited_at": null,
+      "reply_to_id": null,
+      "reply_to_msg": null,
+      "reply_to_author": null,
+      "attachment_url": null
+    },
+    {
+      "id": 125,
+      "user_id": 8,
+      "user_name": "Gerente (Admin)",
+      "user_role": "master",
+      "message": "senha: supervisor123",
+      "created_at": "2026-04-20 14:00:26",
+      "is_edited": 0,
+      "edited_at": null,
+      "reply_to_id": null,
+      "reply_to_msg": null,
+      "reply_to_author": null,
+      "attachment_url": null
+    },
+    {
+      "id": 126,
+      "user_id": 3,
+      "user_name": "Vendedor",
+      "user_role": "vendedor",
+      "message": "Warley, tô subindo o Lucas do pau brasil para tu.",
+      "created_at": "2026-04-20 14:00:40",
+      "is_edited": 0,
+      "edited_at": null,
+      "reply_to_id": null,
+      "reply_to_msg": null,
+      "reply_to_author": null,
+      "attachment_url": null
+    },
+    {
+      "id": 127,
+      "user_id": 3,
+      "user_name": "Vendedor",
+      "user_role": "vendedor",
+      "message": "Quer fazer panfleto, mas não tem arte, nem quantidades.",
+      "created_at": "2026-04-20 14:01:00",
+      "is_edited": 0,
+      "edited_at": null,
+      "reply_to_id": null,
+      "reply_to_msg": null,
+      "reply_to_author": null,
+      "attachment_url": null
+    },
+    {
+      "id": 128,
+      "user_id": 3,
+      "user_name": "Vendedor",
+      "user_role": "vendedor",
+      "message": "Está em orçamento.",
+      "created_at": "2026-04-20 14:01:08",
+      "is_edited": 0,
+      "edited_at": null,
+      "reply_to_id": null,
+      "reply_to_msg": null,
+      "reply_to_author": null,
+      "attachment_url": null
+    },
+    {
+      "id": 129,
+      "user_id": 8,
+      "user_name": "Gerente (Admin)",
+      "user_role": "master",
+      "message": "vou verificar aqui",
+      "created_at": "2026-04-20 14:02:18",
+      "is_edited": 0,
+      "edited_at": null,
+      "reply_to_id": null,
+      "reply_to_msg": null,
+      "reply_to_author": null,
+      "attachment_url": null
+    },
+    {
+      "id": 130,
+      "user_id": 8,
+      "user_name": "Gerente (Admin)",
+      "user_role": "master",
+      "message": "estou em contato com ele aqui",
+      "created_at": "2026-04-20 14:05:21",
+      "is_edited": 0,
+      "edited_at": null,
+      "reply_to_id": null,
+      "reply_to_msg": null,
+      "reply_to_author": null,
+      "attachment_url": null
     }
   ],
   "product_kit_templates": [
@@ -5285,906 +5465,70 @@
       "base_price": 630
     }
   ],
-  "order_items": [
-    {
-      "id": 126,
-      "order_id": 81,
-      "product_id": 15,
-      "quantity": 200,
-      "price": 0.45,
-      "product_snapshot_name": "INGRESSO GRÁFICO JATO MENOR",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 137,
-      "order_id": 92,
-      "product_id": 16,
-      "quantity": 200,
-      "price": 0.8,
-      "product_snapshot_name": "INGRESSO GRÁFICO LASER MÉDIO",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 140,
-      "order_id": 94,
-      "product_id": 22,
-      "quantity": 500,
-      "price": 0.2,
-      "product_snapshot_name": "PANFLETO 10X15 - COLORIDO - FRENTE",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 151,
-      "order_id": 98,
-      "product_id": 16,
-      "quantity": 300,
-      "price": 0.6,
-      "product_snapshot_name": "INGRESSO GRÁFICO LASER MÉDIO",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 156,
-      "order_id": 100,
-      "product_id": 57,
-      "quantity": 120,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 55,
-      "color_name": "AZUL"
-    },
-    {
-      "id": 157,
-      "order_id": 100,
-      "product_id": 57,
-      "quantity": 120,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 62,
-      "color_name": "VERDE"
-    },
-    {
-      "id": 158,
-      "order_id": 100,
-      "product_id": 57,
-      "quantity": 120,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 63,
-      "color_name": "VERMELHO"
-    },
-    {
-      "id": 159,
-      "order_id": 100,
-      "product_id": 57,
-      "quantity": 120,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 54,
-      "color_name": "AMARELO"
-    },
-    {
-      "id": 160,
-      "order_id": 100,
-      "product_id": 57,
-      "quantity": 120,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 59,
-      "color_name": "LARANJA"
-    },
-    {
-      "id": 161,
-      "order_id": 100,
-      "product_id": 57,
-      "quantity": 120,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 61,
-      "color_name": "ROSA"
-    },
-    {
-      "id": 165,
-      "order_id": 104,
-      "product_id": 4,
-      "quantity": 6,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 168,
-      "order_id": 106,
-      "product_id": 80,
-      "quantity": 500,
-      "price": 0.5,
-      "product_snapshot_name": "INGRESSO GRÁFICO + PASS JATO MÉDIO ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 169,
-      "order_id": 107,
-      "product_id": 80,
-      "quantity": 500,
-      "price": 0.5,
-      "product_snapshot_name": "INGRESSO GRÁFICO + PASS JATO MÉDIO ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 170,
-      "order_id": 108,
-      "product_id": 4,
-      "quantity": 2,
-      "price": 18,
-      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 171,
-      "order_id": 108,
-      "product_id": 13,
-      "quantity": 1,
-      "price": 10,
-      "product_snapshot_name": "ADESIVOS A4 VINIL - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 172,
-      "order_id": 109,
-      "product_id": 54,
-      "quantity": 5,
-      "price": 4,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 173,
-      "order_id": 110,
-      "product_id": 15,
-      "quantity": 400,
-      "price": 0.45,
-      "product_snapshot_name": "INGRESSO GRÁFICO JATO MENOR",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 174,
-      "order_id": 111,
-      "product_id": 15,
-      "quantity": 100,
-      "price": 0.55,
-      "product_snapshot_name": "INGRESSO GRÁFICO JATO MENOR",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 176,
-      "order_id": 113,
-      "product_id": 54,
-      "quantity": 6,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 177,
-      "order_id": 114,
-      "product_id": 71,
-      "quantity": 1,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL TRANSPARENTE - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 178,
-      "order_id": 114,
-      "product_id": 4,
-      "quantity": 4,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 179,
-      "order_id": 114,
-      "product_id": 5,
-      "quantity": 10,
-      "price": 3.5,
-      "product_snapshot_name": "VENTAROLA ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 180,
-      "order_id": 115,
-      "product_id": 54,
-      "quantity": 3,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 182,
-      "order_id": 117,
-      "product_id": 57,
-      "quantity": 100,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": null,
-      "color_name": "Sem personalização"
-    },
-    {
-      "id": 184,
-      "order_id": 119,
-      "product_id": 82,
-      "quantity": 70,
-      "price": 0.8,
-      "product_snapshot_name": "INGRESSO GRÁFICO LASER MENOR",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 185,
-      "order_id": 120,
-      "product_id": 51,
-      "quantity": 5,
-      "price": 16,
-      "product_snapshot_name": "CRACHÁS + CORDINHA ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 186,
-      "order_id": 121,
-      "product_id": 54,
-      "quantity": 10,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 187,
-      "order_id": 122,
-      "product_id": 4,
-      "quantity": 3,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 188,
-      "order_id": 123,
-      "product_id": 4,
-      "quantity": 2,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 189,
-      "order_id": 124,
-      "product_id": 54,
-      "quantity": 64,
-      "price": 4,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 190,
-      "order_id": 125,
-      "product_id": 6,
-      "quantity": 1,
-      "price": 35,
-      "product_snapshot_name": "TATUAGEM TEMPORÁRIA",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 191,
-      "order_id": 126,
-      "product_id": 57,
-      "quantity": 500,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 54,
-      "color_name": "AMARELO"
-    },
-    {
-      "id": 192,
-      "order_id": 127,
-      "product_id": 38,
-      "quantity": 75,
-      "price": 1.8,
-      "product_snapshot_name": "BOTTON 4,5 - ALFINETE ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 193,
-      "order_id": 128,
-      "product_id": 16,
-      "quantity": 150,
-      "price": 0.6,
-      "product_snapshot_name": "INGRESSO GRÁFICO LASER MÉDIO",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 194,
-      "order_id": 129,
-      "product_id": 52,
-      "quantity": 1,
-      "price": 7,
-      "product_snapshot_name": "CARTAZ A3 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 205,
-      "order_id": 137,
-      "product_id": 6,
-      "quantity": 1,
-      "price": 35,
-      "product_snapshot_name": "TATUAGEM TEMPORÁRIA",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 206,
-      "order_id": 138,
-      "product_id": 4,
-      "quantity": 3,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 207,
-      "order_id": 139,
-      "product_id": 4,
-      "quantity": 4,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 211,
-      "order_id": 143,
-      "product_id": 22,
-      "quantity": 500,
-      "price": 0.2,
-      "product_snapshot_name": "PANFLETO 10X15 - COLORIDO - FRENTE",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 212,
-      "order_id": 144,
-      "product_id": 54,
-      "quantity": 1,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 214,
-      "order_id": 146,
-      "product_id": 87,
-      "quantity": 25,
-      "price": 0.95,
-      "product_snapshot_name": "INGRESSOS GRÁFICO + PASS LASER GRANDE",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 215,
-      "order_id": 147,
-      "product_id": 94,
-      "quantity": 13,
-      "price": 4,
-      "product_snapshot_name": "IMPRESSÃO A4 LASER - FRENTE E VERSO ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 216,
-      "order_id": 148,
-      "product_id": 71,
-      "quantity": 1,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL TRANSPARENTE - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 217,
-      "order_id": 149,
-      "product_id": 57,
-      "quantity": 50,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 63,
-      "color_name": "VERMELHO"
-    },
-    {
-      "id": 218,
-      "order_id": 150,
-      "product_id": 83,
-      "quantity": 300,
-      "price": 0.7,
-      "product_snapshot_name": "INGRESSOS GRÁFICO + PASS LASER MÉDIO",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 219,
-      "order_id": 151,
-      "product_id": 57,
-      "quantity": 40,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 59,
-      "color_name": "LARANJA"
-    },
-    {
-      "id": 220,
-      "order_id": 151,
-      "product_id": 57,
-      "quantity": 60,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 55,
-      "color_name": "AZUL"
-    },
-    {
-      "id": 229,
-      "order_id": 159,
-      "product_id": 62,
-      "quantity": 18,
-      "price": 3.5,
-      "product_snapshot_name": "MÁSCARA PERSONALZIADA ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 230,
-      "order_id": 160,
-      "product_id": 4,
-      "quantity": 1,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 231,
-      "order_id": 161,
-      "product_id": 96,
-      "quantity": 5,
-      "price": 15,
-      "product_snapshot_name": "CREDENCIAL ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 232,
-      "order_id": 162,
-      "product_id": 52,
-      "quantity": 2,
-      "price": 5.8,
-      "product_snapshot_name": "CARTAZ A3 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 233,
-      "order_id": 162,
-      "product_id": 97,
-      "quantity": 1,
-      "price": 2,
-      "product_snapshot_name": "LAMINAÇÃO A3",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 234,
-      "order_id": 163,
-      "product_id": 7,
-      "quantity": 5,
-      "price": 8,
-      "product_snapshot_name": "ADESIVO A3 COLA CRILL - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 235,
-      "order_id": 164,
-      "product_id": 4,
-      "quantity": 2,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 236,
-      "order_id": 165,
-      "product_id": 57,
-      "quantity": 500,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 58,
-      "color_name": "DOURADO"
-    },
-    {
-      "id": 237,
-      "order_id": 165,
-      "product_id": 57,
-      "quantity": 500,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 59,
-      "color_name": "LARANJA"
-    },
-    {
-      "id": 238,
-      "order_id": 166,
-      "product_id": 57,
-      "quantity": 2000,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 54,
-      "color_name": "AMARELO"
-    },
-    {
-      "id": 239,
-      "order_id": 166,
-      "product_id": 57,
-      "quantity": 1000,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 61,
-      "color_name": "ROSA"
-    },
-    {
-      "id": 240,
-      "order_id": 167,
-      "product_id": 54,
-      "quantity": 6,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 241,
-      "order_id": 168,
-      "product_id": 54,
-      "quantity": 6,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 242,
-      "order_id": 169,
-      "product_id": 54,
-      "quantity": 30,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 243,
-      "order_id": 170,
-      "product_id": 54,
-      "quantity": 20,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 244,
-      "order_id": 171,
-      "product_id": 88,
-      "quantity": 5,
-      "price": 4,
-      "product_snapshot_name": "CORDÃO CRACHÁ SEM PERSONALIZAÇÃO",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 245,
-      "order_id": 172,
-      "product_id": 13,
-      "quantity": 1,
-      "price": 8,
-      "product_snapshot_name": "ADESIVOS A4 VINIL - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 246,
-      "order_id": 172,
-      "product_id": 97,
-      "quantity": 1,
-      "price": 2,
-      "product_snapshot_name": "LAMINAÇÃO A3",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 247,
-      "order_id": 172,
-      "product_id": 97,
-      "quantity": 1,
-      "price": 2,
-      "product_snapshot_name": "LAMINAÇÃO A3",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 251,
-      "order_id": 177,
-      "product_id": 94,
-      "quantity": 160,
-      "price": 4,
-      "product_snapshot_name": "IMPRESSÃO A4 LASER - FRENTE E VERSO ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 252,
-      "order_id": 178,
-      "product_id": 57,
-      "quantity": 250,
-      "price": 0.35,
-      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
-      "color_variant_id": 57,
-      "color_name": "BRANCO"
-    },
-    {
-      "id": 254,
-      "order_id": 180,
-      "product_id": 54,
-      "quantity": 4,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 255,
-      "order_id": 181,
-      "product_id": 54,
-      "quantity": 35,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 256,
-      "order_id": 182,
-      "product_id": 54,
-      "quantity": 10,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 258,
-      "order_id": 184,
-      "product_id": 54,
-      "quantity": 35,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 260,
-      "order_id": 186,
-      "product_id": 54,
-      "quantity": 6,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 263,
-      "order_id": 189,
-      "product_id": 16,
-      "quantity": 100,
-      "price": 0.8,
-      "product_snapshot_name": "INGRESSO GRÁFICO LASER MÉDIO",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 264,
-      "order_id": 190,
-      "product_id": 7,
-      "quantity": 2,
-      "price": 8,
-      "product_snapshot_name": "ADESIVO A3 COLA CRILL - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 265,
-      "order_id": 190,
-      "product_id": 13,
-      "quantity": 1,
-      "price": 8,
-      "product_snapshot_name": "ADESIVOS A4 VINIL - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 266,
-      "order_id": 190,
-      "product_id": 38,
-      "quantity": 20,
-      "price": 1.8,
-      "product_snapshot_name": "BOTTON 4,5 - ALFINETE ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 267,
-      "order_id": 191,
-      "product_id": 13,
-      "quantity": 5,
-      "price": 8,
-      "product_snapshot_name": "ADESIVOS A4 VINIL - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 269,
-      "order_id": 193,
-      "product_id": 81,
-      "quantity": 5000,
-      "price": 0.45,
-      "product_snapshot_name": "INGRESSO GRÁFICO JATO MÉDIO ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 279,
-      "order_id": 198,
-      "product_id": 71,
-      "quantity": 2,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL TRANSPARENTE - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 280,
-      "order_id": 199,
-      "product_id": 4,
-      "quantity": 6,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 283,
-      "order_id": 202,
-      "product_id": 54,
-      "quantity": 25,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 284,
-      "order_id": 203,
-      "product_id": 4,
-      "quantity": 19,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 285,
-      "order_id": 204,
-      "product_id": 16,
-      "quantity": 100,
-      "price": 0.8,
-      "product_snapshot_name": "INGRESSO GRÁFICO LASER MÉDIO",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 286,
-      "order_id": 205,
-      "product_id": 54,
-      "quantity": 33,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 287,
-      "order_id": 206,
-      "product_id": 80,
-      "quantity": 450,
-      "price": 0.5,
-      "product_snapshot_name": "INGRESSO GRÁFICO + PASS JATO MÉDIO ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 288,
-      "order_id": 207,
-      "product_id": 42,
-      "quantity": 4,
-      "price": 24,
-      "product_snapshot_name": "BLOCO 15X21 - 2 VIAS ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 289,
-      "order_id": 208,
-      "product_id": 54,
-      "quantity": 8,
-      "price": 3,
-      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 290,
-      "order_id": 209,
-      "product_id": 4,
-      "quantity": 2,
-      "price": 15,
-      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
-      "color_variant_id": null,
-      "color_name": null
-    },
-    {
-      "id": 291,
-      "order_id": 210,
-      "product_id": 58,
-      "quantity": 150,
-      "price": 0.2,
-      "product_snapshot_name": "PULSEIRAS NÃO PERSONALZIADAS NYLON",
-      "color_variant_id": 66,
-      "color_name": "AMARELO"
+  "suppliers": [
+    {
+      "id": 1,
+      "name": "CARBOPEL PAPEIS",
+      "phone": "11920910480",
+      "website": "https://carbopel.com.br/distribuidora-de-papeis/",
+      "description": "FORNECEDOR DE PAPEL",
+      "created_at": "2026-02-23 13:13:54"
+    },
+    {
+      "id": 2,
+      "name": "BOTTONS CHIP",
+      "phone": "11951182202",
+      "website": "",
+      "description": "FORNECEDOR DE BOTTONS",
+      "created_at": "2026-02-23 13:38:30"
+    },
+    {
+      "id": 3,
+      "name": "PRIMO BAND PULSEIRAS",
+      "phone": "19982580851",
+      "website": "https://primobands.com.br/",
+      "description": "FORNECEDOR DE PULSEIRAS",
+      "created_at": "2026-02-23 13:40:08"
+    },
+    {
+      "id": 4,
+      "name": "ZAPP GRÁFICA",
+      "phone": "31925666500",
+      "website": "https://zapgrafica.com.br/home",
+      "description": "SERVIÇOS TERCEIRIZADOS",
+      "created_at": "2026-02-23 13:41:06"
+    },
+    {
+      "id": 5,
+      "name": "PASSE VIP",
+      "phone": "21969087989",
+      "website": "https://passevip.com.br/",
+      "description": "PULSEIRAS PERSONALZIADAS - CETIM E TECIDO",
+      "created_at": "2026-02-23 13:42:36"
+    },
+    {
+      "id": 6,
+      "name": "INKTEC",
+      "phone": "41999601888",
+      "website": "https://www.inktec.com.br/",
+      "description": "FORNECEDOR DE TINTAS PARA IMPRESSORAS A JATO",
+      "created_at": "2026-02-23 13:44:07"
+    },
+    {
+      "id": 7,
+      "name": "SUPPERPAPEL",
+      "phone": "41930188182",
+      "website": "https://www.supperpapel.com.br/",
+      "description": "FORNECEDOR PAPEL",
+      "created_at": "2026-02-23 13:45:31"
+    },
+    {
+      "id": 8,
+      "name": "BHBAND",
+      "phone": "31 98234-5042",
+      "website": "https://www.bhband.com.br/",
+      "description": "FORNECEDOR DE FICHAS",
+      "created_at": "2026-02-23 13:47:29"
     }
   ],
   "stock_movements": [
@@ -9598,6 +8942,15 @@
       "reason": "Confirmação Pedido #210 — Cor: AMARELO",
       "user_id": null,
       "created_at": "2026-04-20 11:36:49"
+    },
+    {
+      "id": 380,
+      "product_id": 11,
+      "quantity_change": -4,
+      "type": "reserva_pedido",
+      "reason": "Reserva Pedido #211",
+      "user_id": null,
+      "created_at": "2026-04-20 16:23:25"
     }
   ],
   "comments": [
@@ -9805,76 +9158,916 @@
       "created_at": "2026-04-17 20:34:18"
     }
   ],
-  "users": [
+  "order_items": [
     {
-      "id": 2,
-      "username": "financeiro",
-      "password": "$2b$10$Kr64/Wfgppu11RadvdPV7.uOm2DIE6LdK0TdHyYMRMzpTzpKIE5jO",
-      "role": "financeiro",
-      "name": "Financeiro",
-      "client_id": null,
-      "plain_password": "",
-      "avatar": null
+      "id": 126,
+      "order_id": 81,
+      "product_id": 15,
+      "quantity": 200,
+      "price": 0.45,
+      "product_snapshot_name": "INGRESSO GRÁFICO JATO MENOR",
+      "color_variant_id": null,
+      "color_name": null
     },
     {
-      "id": 3,
-      "username": "vendedor",
-      "password": "$2b$08$UZ985WR1OsP6twti56L3GO2EQS4EtBNlerxga/A3SSgDqPNyqg2BC",
-      "role": "vendedor",
-      "name": "Vendedor",
-      "client_id": null,
-      "plain_password": "123456",
-      "avatar": "/uploads/1776375440513-56521745.JPG"
+      "id": 137,
+      "order_id": 92,
+      "product_id": 16,
+      "quantity": 200,
+      "price": 0.8,
+      "product_snapshot_name": "INGRESSO GRÁFICO LASER MÉDIO",
+      "color_variant_id": null,
+      "color_name": null
     },
     {
-      "id": 4,
-      "username": "producao",
-      "password": "$2b$08$HJ9B5epPksElhRJu1EFtrORpQvOMPliZgdW5DsfordYSDjv/vynTi",
-      "role": "producao",
-      "name": "Produção",
-      "client_id": null,
-      "plain_password": "123456",
-      "avatar": "/uploads/1776375432635-950132499.JPG"
+      "id": 140,
+      "order_id": 94,
+      "product_id": 22,
+      "quantity": 500,
+      "price": 0.2,
+      "product_snapshot_name": "PANFLETO 10X15 - COLORIDO - FRENTE",
+      "color_variant_id": null,
+      "color_name": null
     },
     {
-      "id": 5,
-      "username": "interno",
-      "password": "$2b$10$Ojio2M2LWPOvADt2Li7mMePcEP/Bx2C9Ccne0TAz5pAaZOWw9bqIu",
-      "role": "interno",
-      "name": "Interno",
-      "client_id": null,
-      "plain_password": "",
-      "avatar": null
+      "id": 151,
+      "order_id": 98,
+      "product_id": 16,
+      "quantity": 300,
+      "price": 0.6,
+      "product_snapshot_name": "INGRESSO GRÁFICO LASER MÉDIO",
+      "color_variant_id": null,
+      "color_name": null
     },
     {
-      "id": 6,
-      "username": "cliente_arena",
-      "password": "$2b$08$F.KeLtdaj7FYIZ4QmdqSSuA8cL5YPfZJEIfPY42jENwMExde8lOxW",
-      "role": "cliente",
-      "name": "ARENA ",
-      "client_id": 7,
-      "plain_password": "",
-      "avatar": null
+      "id": 156,
+      "order_id": 100,
+      "product_id": 57,
+      "quantity": 120,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 55,
+      "color_name": "AZUL"
     },
     {
-      "id": 7,
-      "username": "supervisor",
-      "password": "$2b$10$je7.4bdzNAsN6K4OSkgsB.4JjrQSmTBCE6loqwrvlOhLG44soI/uu",
-      "role": "master",
-      "name": "Supervisor",
-      "client_id": null,
-      "plain_password": "supervisor123",
-      "avatar": "/uploads/1776375437217-223677288.JPG"
+      "id": 157,
+      "order_id": 100,
+      "product_id": 57,
+      "quantity": 120,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 62,
+      "color_name": "VERDE"
     },
     {
-      "id": 8,
-      "username": "gerente",
-      "password": "$2b$10$af/KSBLl8NWhuxRpSKouS.DV7IapyH/sbpC9ZXAjAMBzZHqYG7V0G",
-      "role": "master",
-      "name": "Gerente",
-      "client_id": null,
-      "plain_password": "gerente123",
-      "avatar": "/uploads/1776375425206-864674755.JPG"
+      "id": 158,
+      "order_id": 100,
+      "product_id": 57,
+      "quantity": 120,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 63,
+      "color_name": "VERMELHO"
+    },
+    {
+      "id": 159,
+      "order_id": 100,
+      "product_id": 57,
+      "quantity": 120,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 54,
+      "color_name": "AMARELO"
+    },
+    {
+      "id": 160,
+      "order_id": 100,
+      "product_id": 57,
+      "quantity": 120,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 59,
+      "color_name": "LARANJA"
+    },
+    {
+      "id": 161,
+      "order_id": 100,
+      "product_id": 57,
+      "quantity": 120,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 61,
+      "color_name": "ROSA"
+    },
+    {
+      "id": 165,
+      "order_id": 104,
+      "product_id": 4,
+      "quantity": 6,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 168,
+      "order_id": 106,
+      "product_id": 80,
+      "quantity": 500,
+      "price": 0.5,
+      "product_snapshot_name": "INGRESSO GRÁFICO + PASS JATO MÉDIO ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 169,
+      "order_id": 107,
+      "product_id": 80,
+      "quantity": 500,
+      "price": 0.5,
+      "product_snapshot_name": "INGRESSO GRÁFICO + PASS JATO MÉDIO ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 170,
+      "order_id": 108,
+      "product_id": 4,
+      "quantity": 2,
+      "price": 18,
+      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 171,
+      "order_id": 108,
+      "product_id": 13,
+      "quantity": 1,
+      "price": 10,
+      "product_snapshot_name": "ADESIVOS A4 VINIL - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 172,
+      "order_id": 109,
+      "product_id": 54,
+      "quantity": 5,
+      "price": 4,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 173,
+      "order_id": 110,
+      "product_id": 15,
+      "quantity": 400,
+      "price": 0.45,
+      "product_snapshot_name": "INGRESSO GRÁFICO JATO MENOR",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 174,
+      "order_id": 111,
+      "product_id": 15,
+      "quantity": 100,
+      "price": 0.55,
+      "product_snapshot_name": "INGRESSO GRÁFICO JATO MENOR",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 176,
+      "order_id": 113,
+      "product_id": 54,
+      "quantity": 6,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 177,
+      "order_id": 114,
+      "product_id": 71,
+      "quantity": 1,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL TRANSPARENTE - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 178,
+      "order_id": 114,
+      "product_id": 4,
+      "quantity": 4,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 179,
+      "order_id": 114,
+      "product_id": 5,
+      "quantity": 10,
+      "price": 3.5,
+      "product_snapshot_name": "VENTAROLA ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 180,
+      "order_id": 115,
+      "product_id": 54,
+      "quantity": 3,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 182,
+      "order_id": 117,
+      "product_id": 57,
+      "quantity": 100,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": null,
+      "color_name": "Sem personalização"
+    },
+    {
+      "id": 184,
+      "order_id": 119,
+      "product_id": 82,
+      "quantity": 70,
+      "price": 0.8,
+      "product_snapshot_name": "INGRESSO GRÁFICO LASER MENOR",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 185,
+      "order_id": 120,
+      "product_id": 51,
+      "quantity": 5,
+      "price": 16,
+      "product_snapshot_name": "CRACHÁS + CORDINHA ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 186,
+      "order_id": 121,
+      "product_id": 54,
+      "quantity": 10,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 187,
+      "order_id": 122,
+      "product_id": 4,
+      "quantity": 3,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 188,
+      "order_id": 123,
+      "product_id": 4,
+      "quantity": 2,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 189,
+      "order_id": 124,
+      "product_id": 54,
+      "quantity": 64,
+      "price": 4,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 190,
+      "order_id": 125,
+      "product_id": 6,
+      "quantity": 1,
+      "price": 35,
+      "product_snapshot_name": "TATUAGEM TEMPORÁRIA",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 191,
+      "order_id": 126,
+      "product_id": 57,
+      "quantity": 500,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 54,
+      "color_name": "AMARELO"
+    },
+    {
+      "id": 192,
+      "order_id": 127,
+      "product_id": 38,
+      "quantity": 75,
+      "price": 1.8,
+      "product_snapshot_name": "BOTTON 4,5 - ALFINETE ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 193,
+      "order_id": 128,
+      "product_id": 16,
+      "quantity": 150,
+      "price": 0.6,
+      "product_snapshot_name": "INGRESSO GRÁFICO LASER MÉDIO",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 194,
+      "order_id": 129,
+      "product_id": 52,
+      "quantity": 1,
+      "price": 7,
+      "product_snapshot_name": "CARTAZ A3 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 205,
+      "order_id": 137,
+      "product_id": 6,
+      "quantity": 1,
+      "price": 35,
+      "product_snapshot_name": "TATUAGEM TEMPORÁRIA",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 206,
+      "order_id": 138,
+      "product_id": 4,
+      "quantity": 3,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 207,
+      "order_id": 139,
+      "product_id": 4,
+      "quantity": 4,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 211,
+      "order_id": 143,
+      "product_id": 22,
+      "quantity": 500,
+      "price": 0.2,
+      "product_snapshot_name": "PANFLETO 10X15 - COLORIDO - FRENTE",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 212,
+      "order_id": 144,
+      "product_id": 54,
+      "quantity": 1,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 214,
+      "order_id": 146,
+      "product_id": 87,
+      "quantity": 25,
+      "price": 0.95,
+      "product_snapshot_name": "INGRESSOS GRÁFICO + PASS LASER GRANDE",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 215,
+      "order_id": 147,
+      "product_id": 94,
+      "quantity": 13,
+      "price": 4,
+      "product_snapshot_name": "IMPRESSÃO A4 LASER - FRENTE E VERSO ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 216,
+      "order_id": 148,
+      "product_id": 71,
+      "quantity": 1,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL TRANSPARENTE - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 217,
+      "order_id": 149,
+      "product_id": 57,
+      "quantity": 50,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 63,
+      "color_name": "VERMELHO"
+    },
+    {
+      "id": 218,
+      "order_id": 150,
+      "product_id": 83,
+      "quantity": 300,
+      "price": 0.7,
+      "product_snapshot_name": "INGRESSOS GRÁFICO + PASS LASER MÉDIO",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 219,
+      "order_id": 151,
+      "product_id": 57,
+      "quantity": 40,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 59,
+      "color_name": "LARANJA"
+    },
+    {
+      "id": 220,
+      "order_id": 151,
+      "product_id": 57,
+      "quantity": 60,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 55,
+      "color_name": "AZUL"
+    },
+    {
+      "id": 229,
+      "order_id": 159,
+      "product_id": 62,
+      "quantity": 18,
+      "price": 3.5,
+      "product_snapshot_name": "MÁSCARA PERSONALZIADA ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 230,
+      "order_id": 160,
+      "product_id": 4,
+      "quantity": 1,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 231,
+      "order_id": 161,
+      "product_id": 96,
+      "quantity": 5,
+      "price": 15,
+      "product_snapshot_name": "CREDENCIAL ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 232,
+      "order_id": 162,
+      "product_id": 52,
+      "quantity": 2,
+      "price": 5.8,
+      "product_snapshot_name": "CARTAZ A3 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 233,
+      "order_id": 162,
+      "product_id": 97,
+      "quantity": 1,
+      "price": 2,
+      "product_snapshot_name": "LAMINAÇÃO A3",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 234,
+      "order_id": 163,
+      "product_id": 7,
+      "quantity": 5,
+      "price": 8,
+      "product_snapshot_name": "ADESIVO A3 COLA CRILL - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 235,
+      "order_id": 164,
+      "product_id": 4,
+      "quantity": 2,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 236,
+      "order_id": 165,
+      "product_id": 57,
+      "quantity": 500,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 58,
+      "color_name": "DOURADO"
+    },
+    {
+      "id": 237,
+      "order_id": 165,
+      "product_id": 57,
+      "quantity": 500,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 59,
+      "color_name": "LARANJA"
+    },
+    {
+      "id": 238,
+      "order_id": 166,
+      "product_id": 57,
+      "quantity": 2000,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 54,
+      "color_name": "AMARELO"
+    },
+    {
+      "id": 239,
+      "order_id": 166,
+      "product_id": 57,
+      "quantity": 1000,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 61,
+      "color_name": "ROSA"
+    },
+    {
+      "id": 240,
+      "order_id": 167,
+      "product_id": 54,
+      "quantity": 6,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 241,
+      "order_id": 168,
+      "product_id": 54,
+      "quantity": 6,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 242,
+      "order_id": 169,
+      "product_id": 54,
+      "quantity": 30,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 243,
+      "order_id": 170,
+      "product_id": 54,
+      "quantity": 20,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 244,
+      "order_id": 171,
+      "product_id": 88,
+      "quantity": 5,
+      "price": 4,
+      "product_snapshot_name": "CORDÃO CRACHÁ SEM PERSONALIZAÇÃO",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 245,
+      "order_id": 172,
+      "product_id": 13,
+      "quantity": 1,
+      "price": 8,
+      "product_snapshot_name": "ADESIVOS A4 VINIL - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 246,
+      "order_id": 172,
+      "product_id": 97,
+      "quantity": 1,
+      "price": 2,
+      "product_snapshot_name": "LAMINAÇÃO A3",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 247,
+      "order_id": 172,
+      "product_id": 97,
+      "quantity": 1,
+      "price": 2,
+      "product_snapshot_name": "LAMINAÇÃO A3",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 251,
+      "order_id": 177,
+      "product_id": 94,
+      "quantity": 160,
+      "price": 4,
+      "product_snapshot_name": "IMPRESSÃO A4 LASER - FRENTE E VERSO ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 252,
+      "order_id": 178,
+      "product_id": 57,
+      "quantity": 250,
+      "price": 0.35,
+      "product_snapshot_name": "PULSEIRA PERSONALZIADA NYLON",
+      "color_variant_id": 57,
+      "color_name": "BRANCO"
+    },
+    {
+      "id": 254,
+      "order_id": 180,
+      "product_id": 54,
+      "quantity": 4,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 255,
+      "order_id": 181,
+      "product_id": 54,
+      "quantity": 35,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 256,
+      "order_id": 182,
+      "product_id": 54,
+      "quantity": 10,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 258,
+      "order_id": 184,
+      "product_id": 54,
+      "quantity": 35,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 260,
+      "order_id": 186,
+      "product_id": 54,
+      "quantity": 6,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 263,
+      "order_id": 189,
+      "product_id": 16,
+      "quantity": 100,
+      "price": 0.8,
+      "product_snapshot_name": "INGRESSO GRÁFICO LASER MÉDIO",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 264,
+      "order_id": 190,
+      "product_id": 7,
+      "quantity": 2,
+      "price": 8,
+      "product_snapshot_name": "ADESIVO A3 COLA CRILL - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 265,
+      "order_id": 190,
+      "product_id": 13,
+      "quantity": 1,
+      "price": 8,
+      "product_snapshot_name": "ADESIVOS A4 VINIL - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 266,
+      "order_id": 190,
+      "product_id": 38,
+      "quantity": 20,
+      "price": 1.8,
+      "product_snapshot_name": "BOTTON 4,5 - ALFINETE ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 267,
+      "order_id": 191,
+      "product_id": 13,
+      "quantity": 5,
+      "price": 8,
+      "product_snapshot_name": "ADESIVOS A4 VINIL - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 269,
+      "order_id": 193,
+      "product_id": 81,
+      "quantity": 5000,
+      "price": 0.45,
+      "product_snapshot_name": "INGRESSO GRÁFICO JATO MÉDIO ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 279,
+      "order_id": 198,
+      "product_id": 71,
+      "quantity": 2,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL TRANSPARENTE - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 280,
+      "order_id": 199,
+      "product_id": 4,
+      "quantity": 6,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 283,
+      "order_id": 202,
+      "product_id": 54,
+      "quantity": 25,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 284,
+      "order_id": 203,
+      "product_id": 4,
+      "quantity": 19,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 285,
+      "order_id": 204,
+      "product_id": 16,
+      "quantity": 100,
+      "price": 0.8,
+      "product_snapshot_name": "INGRESSO GRÁFICO LASER MÉDIO",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 286,
+      "order_id": 205,
+      "product_id": 54,
+      "quantity": 33,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 287,
+      "order_id": 206,
+      "product_id": 80,
+      "quantity": 450,
+      "price": 0.5,
+      "product_snapshot_name": "INGRESSO GRÁFICO + PASS JATO MÉDIO ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 288,
+      "order_id": 207,
+      "product_id": 42,
+      "quantity": 4,
+      "price": 24,
+      "product_snapshot_name": "BLOCO 15X21 - 2 VIAS ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 289,
+      "order_id": 208,
+      "product_id": 54,
+      "quantity": 8,
+      "price": 3,
+      "product_snapshot_name": "IMPRESSÃO A4 - LASER ",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 290,
+      "order_id": 209,
+      "product_id": 4,
+      "quantity": 2,
+      "price": 15,
+      "product_snapshot_name": "ADESIVO A3 VINIL BRANCO - LASER",
+      "color_variant_id": null,
+      "color_name": null
+    },
+    {
+      "id": 291,
+      "order_id": 210,
+      "product_id": 58,
+      "quantity": 150,
+      "price": 0.2,
+      "product_snapshot_name": "PULSEIRAS NÃO PERSONALZIADAS NYLON",
+      "color_variant_id": 66,
+      "color_name": "AMARELO"
+    },
+    {
+      "id": 292,
+      "order_id": 211,
+      "product_id": 11,
+      "quantity": 4,
+      "price": 4,
+      "product_snapshot_name": "ADESIVO A4 GLOSSY OU MATTE - JATO",
+      "color_variant_id": null,
+      "color_name": null
     }
   ],
   "clients": [
@@ -10626,6 +10819,19 @@
       "origin": "Balcao",
       "core_discount": 0,
       "created_at": "2026-04-16 13:46:13",
+      "cpf": "",
+      "address": "",
+      "city": "",
+      "state": "",
+      "zip_code": ""
+    },
+    {
+      "id": 78,
+      "name": "Cíntia",
+      "phone": "3387059401",
+      "origin": "Balcao",
+      "core_discount": 0,
+      "created_at": "2026-04-20 16:12:28",
       "cpf": "",
       "address": "",
       "city": "",
