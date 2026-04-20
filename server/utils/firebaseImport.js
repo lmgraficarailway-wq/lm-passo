@@ -13,6 +13,9 @@ const DB_PATH = path.resolve(process.cwd(), 'database.sqlite');
 async function restoreFromFirebase() {
     return new Promise(async (resolve, reject) => {
         try {
+            // Aguarda 2 segundos para garantir que o db.js terminou de criar as tabelas e os triggers (Race Condition)
+            await new Promise(res => setTimeout(res, 2000));
+
             // Verifica se o banco existe e se possui dados na tabela clients (se tiver > 0, assume que tá intacto)
             if (fs.existsSync(DB_PATH)) {
                 const checkDb = new sqlite3.Database(DB_PATH);
