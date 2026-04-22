@@ -797,7 +797,7 @@ export const render = (user) => {
                     <input id="menu-inp-event" type="text" placeholder="Ex: Casamento João e Maria, Festival de Verão..." maxlength="200"/>
                 </div>
                 <div class="rm-field">
-                    <label for="menu-inp-client">Cliente (Produtor) *</label>
+                    <label for="menu-inp-client">Cliente *</label>
                     <input type="text" id="menu-inp-client-search" placeholder="🔍 Buscar cliente..." style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem; margin-bottom: 0.5rem; transition: border-color 0.2s; outline: none;" autocomplete="off" />
                     <select id="menu-inp-client" class="rm-select">
                         <option value="">Carregando clientes...</option>
