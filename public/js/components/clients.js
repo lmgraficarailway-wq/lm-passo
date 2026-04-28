@@ -140,13 +140,37 @@ export const render = () => {
                                 </div>
                             </div>
 
-                            <div id="loyalty-statement-section" style="display:none; background:white; border:1px solid #fde68a; border-radius:12px; overflow:hidden;">
+                            <div id="loyalty-statement-section" style="display:none; background:white; border:1px solid #fde68a; border-radius:12px; overflow:hidden; margin-bottom:1.25rem;">
                                 <div style="background:#fef3c7; padding:0.6rem 1rem; font-weight:900; color:#92400e; font-size:0.75rem; display:flex; justify-content:space-between;">
                                     <span>HISTÓRICO RECENTE</span>
                                     <span id="client-credit-balance-display">R$ 0,00</span>
                                 </div>
                                 <div id="credit-movements-list" style="max-height:180px; overflow-y:auto;"></div>
                             </div>
+
+                            <!-- Credenciais dentro da Conta Fidelidade -->
+                            <div id="access-info" style="display:none; padding:1rem; background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+                                <div style="display:flex; gap:2rem;">
+                                    <div>
+                                        <div style="font-size:0.75rem; color:#065f46; font-weight:800; text-transform:uppercase;">Usuário Ativo</div>
+                                        <div id="access-username-display" style="font-weight:900; color:#1e293b;">-</div>
+                                    </div>
+                                    <div id="access-password-container" style="display:none;">
+                                        <div style="font-size:0.75rem; color:#065f46; font-weight:800; text-transform:uppercase;">Senha</div>
+                                        <div id="access-password-display" style="font-weight:900; color:#1e293b; font-family:monospace;">-</div>
+                                    </div>
+                                </div>
+                                <button type="button" id="btn-reset-access" style="background:white; color:#16a34a; border:1.5px solid #16a34a; padding:0.4rem 0.8rem; border-radius:8px; font-size:0.75rem; font-weight:800; cursor:pointer;">🔁 RESETAR SENHA</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Portal Access Toggle (apenas botão de ligar/desligar) -->
+                    <div id="access-section" style="display:none; margin-bottom:1.5rem;">
+                        <div style="display:flex; align-items:center; gap:0.75rem; padding:0.6rem 1rem; background:#f0fdf4; border-radius:10px; border:1.5px solid #86efac; cursor:pointer;" onclick="const cb = document.getElementById('client-access-toggle'); cb.checked = !cb.checked; cb.dispatchEvent(new Event('change'));">
+                            <input type="checkbox" id="client-access-toggle" style="width:18px; height:18px; cursor:pointer; pointer-events:none;">
+                            <label style="margin:0; cursor:pointer; font-weight:700; color:#065f46; font-size:0.85rem;">🔐 Acesso ao Portal (Financeiro Cliente)</label>
                         </div>
                     </div>
 
@@ -156,19 +180,7 @@ export const render = () => {
                             <input type="checkbox" id="client-access-toggle" style="width:18px; height:18px; cursor:pointer; pointer-events:none;">
                             <label style="margin:0; cursor:pointer; font-weight:700; color:#065f46; font-size:0.85rem;">🔐 Acesso ao Portal (Financeiro Cliente)</label>
                         </div>
-                        <div id="access-info" style="display:none; margin-top:0.75rem; padding:1rem; background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
-                            <div style="display:flex; gap:2rem;">
-                                <div>
-                                    <div style="font-size:0.75rem; color:#065f46; font-weight:800; text-transform:uppercase;">Usuário Ativo</div>
-                                    <div id="access-username-display" style="font-weight:900; color:#1e293b;">-</div>
-                                </div>
-                                <div id="access-password-container" style="display:none;">
-                                    <div style="font-size:0.75rem; color:#065f46; font-weight:800; text-transform:uppercase;">Senha</div>
-                                    <div id="access-password-display" style="font-weight:900; color:#1e293b; font-family:monospace;">-</div>
-                                </div>
-                            </div>
-                            <button type="button" id="btn-reset-access" style="background:white; color:#16a34a; border:1.5px solid #16a34a; padding:0.4rem 0.8rem; border-radius:8px; font-size:0.75rem; font-weight:800; cursor:pointer;">🔁 RESETAR SENHA</button>
-                        </div>
+
                     </div>
 
                     <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #e2e8f0; padding-top:1.5rem; margin-top:0.5rem;">
