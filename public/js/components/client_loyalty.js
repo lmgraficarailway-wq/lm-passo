@@ -5,34 +5,77 @@ export const render = () => {
 
     container.innerHTML = `
         <style>
+            .loyalty-container {
+                animation: fadeIn 0.4s ease-out;
+            }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+            
             .loyalty-tab-btn {
                 display: flex; align-items: center; gap: 0.5rem;
-                padding: 0.75rem 1.5rem; border: none; background: transparent;
-                border-radius: 12px; font-size: 0.9rem; font-weight: 700;
-                color: #64748b; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+                padding: 0.85rem 1.75rem; border: none; background: transparent;
+                border-radius: 50px; font-size: 0.95rem; font-weight: 800;
+                color: #64748b; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap;
             }
             .loyalty-tab-btn.active {
-                background: white; color: #b45309;
-                box-shadow: 0 2px 12px rgba(180,83,9,0.15);
+                background: linear-gradient(135deg, #b45309, #f59e0b); color: white;
+                box-shadow: 0 4px 15px rgba(180,83,9,0.3);
+                transform: translateY(-2px);
             }
-            .loyalty-tab-btn:hover:not(.active) { background: rgba(255,255,255,0.5); color: #92400e; }
-            .loyalty-panel { display: none; }
-            .loyalty-panel.active { display: block; }
+            .loyalty-tab-btn:hover:not(.active) { background: rgba(245,158,11,0.1); color: #92400e; transform: translateY(-1px); }
+            
+            .loyalty-panel { display: none; opacity: 0; transition: opacity 0.3s; }
+            .loyalty-panel.active { display: block; opacity: 1; animation: slideUp 0.4s ease-out; }
+            @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+            
             .mov-row {
                 display: flex; align-items: center; gap: 1rem;
-                padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9;
-                transition: background 0.15s;
+                padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9;
+                transition: all 0.2s;
             }
-            .mov-row:hover { background: #fafafa; }
+            .mov-row:hover { background: #f8fafc; transform: scale(1.005); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border-bottom-color: transparent; z-index: 10; position: relative; }
             .mov-row:last-child { border-bottom: none; }
+            
             .order-card {
-                background: white; border-radius: 14px; border: 1px solid #e2e8f0;
-                padding: 1.25rem 1.5rem; margin-bottom: 1rem;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-                transition: box-shadow 0.2s;
+                background: white; border-radius: 16px; border: 1px solid #f1f5f9;
+                padding: 1.5rem; margin-bottom: 1rem;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative; overflow: hidden;
             }
-            .order-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+            .order-card::before {
+                content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+                background: linear-gradient(to bottom, #f59e0b, #b45309);
+                opacity: 0; transition: opacity 0.3s;
+            }
+            .order-card:hover { 
+                box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+                transform: translateY(-3px);
+                border-color: #fcd34d;
+            }
+            .order-card:hover::before { opacity: 1; }
+
+            .premium-stock-card {
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(255,255,255,0.5);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+                border-radius: 20px;
+                padding: 1.5rem;
+                transition: all 0.3s;
+                position: relative;
+                overflow: hidden;
+            }
+            .premium-stock-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            }
+            .premium-stock-card::after {
+                content: ''; position: absolute; top: 0; right: 0; width: 100px; height: 100px;
+                background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+                opacity: 0.5; border-radius: 50%; transform: translate(30%, -30%);
+            }
         </style>
+        <div class="loyalty-container">
 
         <!-- Top Header -->
         <div style="margin-bottom:2rem; position:relative;">
@@ -63,53 +106,64 @@ export const render = () => {
         </div>
 
         <!-- Balance Cards -->
-        <div class="stock-cards" style="margin-bottom:2rem;">
-            <div class="stock-card" style="border:2px solid #fcd34d; background:linear-gradient(135deg,#fffbeb,#fef3c7); flex:1; min-width:180px;">
-                <div class="stock-card-icon" style="background:#f59e0b20; color:#b45309;">
-                    <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path stroke-linecap="round" stroke-linejoin="round" d="M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg>
-                </div>
-                <div class="stock-card-info">
-                    <div class="stock-card-value" id="cl-balance" style="color:#b45309; font-size:1.5rem;">R$ 0,00</div>
-                    <div class="stock-card-label">Saldo Atual</div>
-                </div>
-            </div>
-            <div class="stock-card" style="flex:1; min-width:180px;">
-                <div class="stock-card-icon" style="background:#dc262620; color:#dc2626;">
-                    <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                </div>
-                <div class="stock-card-info">
-                    <div class="stock-card-value" id="cl-total-orders" style="color:#dc2626;">0</div>
-                    <div class="stock-card-label">Compras (mês)</div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem; margin-bottom:2.5rem;">
+            <div class="premium-stock-card" style="border: 2px solid #fcd34d; background: linear-gradient(135deg, rgba(255,251,235,0.9), rgba(254,243,199,0.9));">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <div style="font-size:0.85rem; font-weight:700; color:#92400e; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;">Saldo Atual</div>
+                        <div id="cl-balance" style="color:#b45309; font-size:2rem; font-weight:900; letter-spacing:-0.03em; line-height:1;">R$ 0,00</div>
+                    </div>
+                    <div style="width:48px; height:48px; border-radius:14px; background:rgba(245,158,11,0.2); color:#b45309; display:flex; align-items:center; justify-content:center; font-size:1.5rem; box-shadow:inset 0 2px 4px rgba(255,255,255,0.5);">
+                        💰
+                    </div>
                 </div>
             </div>
-            <div class="stock-card" style="flex:1; min-width:180px;">
-                <div class="stock-card-icon" style="background:#10b98120; color:#10b981;">
-                    <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-                <div class="stock-card-info">
-                    <div class="stock-card-value" id="cl-total-debits" style="color:#10b981;">R$ 0,00</div>
-                    <div class="stock-card-label">Total Gasto (mês)</div>
+            
+            <div class="premium-stock-card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <div style="font-size:0.85rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;">Compras (mês)</div>
+                        <div id="cl-total-orders" style="color:#1e293b; font-size:2rem; font-weight:900; letter-spacing:-0.03em; line-height:1;">0</div>
+                    </div>
+                    <div style="width:48px; height:48px; border-radius:14px; background:rgba(59,130,246,0.1); color:#3b82f6; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
+                        🛍️
+                    </div>
                 </div>
             </div>
-            <div class="stock-card" id="cl-billing-card" style="display:none; flex:1; min-width:180px; border:1px solid #c7d2fe;">
-                <div class="stock-card-icon" style="background:#6366f120; color:#6366f1;">
-                    <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+
+            <div class="premium-stock-card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <div style="font-size:0.85rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;">Total Gasto (mês)</div>
+                        <div id="cl-total-debits" style="color:#10b981; font-size:2rem; font-weight:900; letter-spacing:-0.03em; line-height:1;">R$ 0,00</div>
+                    </div>
+                    <div style="width:48px; height:48px; border-radius:14px; background:rgba(16,185,129,0.1); color:#10b981; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
+                        💳
+                    </div>
                 </div>
-                <div class="stock-card-info">
-                    <div class="stock-card-value" id="cl-billing-date" style="color:#6366f1;">Dia --</div>
-                    <div class="stock-card-label">Vencimento da Fatura</div>
+            </div>
+
+            <div class="premium-stock-card" id="cl-billing-card" style="display:none; border:1px solid #c7d2fe; background:linear-gradient(135deg, rgba(238,242,255,0.8), rgba(224,231,255,0.8));">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <div style="font-size:0.85rem; font-weight:700; color:#4f46e5; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem;">Vencimento</div>
+                        <div id="cl-billing-date" style="color:#4338ca; font-size:2rem; font-weight:900; letter-spacing:-0.03em; line-height:1;">Dia --</div>
+                    </div>
+                    <div style="width:48px; height:48px; border-radius:14px; background:rgba(99,102,241,0.2); color:#4f46e5; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
+                        📅
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Tabs -->
-        <div style="background:rgba(180,83,9,0.06); border-radius:16px; padding:0.4rem; display:flex; gap:0.25rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+        <div style="background:rgba(241, 245, 249, 0.6); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.5); border-radius:50px; padding:0.4rem; display:flex; gap:0.25rem; margin-bottom:1.5rem; flex-wrap:wrap; box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);">
             <button class="loyalty-tab-btn active" data-tab="orders" id="tab-btn-orders">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                 Minhas Compras
             </button>
             <button class="loyalty-tab-btn" data-tab="statement" id="tab-btn-statement">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6M11 3H5a2 2 0 00-2 2v16a2 2 0 002 2h14a2 2 0 002-2v-5"/></svg>
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6M11 3H5a2 2 0 00-2 2v16a2 2 0 002 2h14a2 2 0 002-2v-5"/></svg>
                 Extrato da Conta
             </button>
         </div>
@@ -124,16 +178,16 @@ export const render = () => {
 
         <!-- ── TAB: MINHAS COMPRAS ──────────────────────────────────────── -->
         <div class="loyalty-panel active" id="panel-orders">
-            <div style="background:white; border-radius:16px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.04);">
-                <div style="background:linear-gradient(135deg,#b45309,#f59e0b); padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="color:white; font-weight:700;">🛍️ Histórico de Compras</span>
-                    <span id="cl-orders-count" style="color:rgba(255,255,255,0.8); font-size:0.85rem;"></span>
+            <div style="background:white; border-radius:20px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,0.06);">
+                <div style="background:linear-gradient(135deg,#1e293b,#0f172a); padding:1.25rem 2rem; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:white; font-weight:800; font-size:1.1rem; display:flex; align-items:center; gap:0.75rem;"><span style="font-size:1.4rem;">🛍️</span> Histórico de Compras</span>
+                    <span id="cl-orders-count" style="color:#94a3b8; font-size:0.9rem; font-weight:600; background:rgba(255,255,255,0.1); padding:0.25rem 0.75rem; border-radius:20px;"></span>
                 </div>
-                <div id="cl-orders-list" style="padding:0.5rem;">
+                <div id="cl-orders-list" style="padding:1.5rem; background:#f8fafc;">
                     <div style="padding:3rem 2rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:1rem;">
-                        <div style="font-size:3rem; opacity:0.3;">🛍️</div>
-                        <div style="font-weight:700; color:#94a3b8; font-size:1rem;">Nenhuma compra registrada</div>
-                        <div style="color:#cbd5e1; font-size:0.85rem; max-width:300px;">Suas compras realizadas via Conta Fidelidade aparecerão aqui.</div>
+                        <div style="font-size:4rem; opacity:0.3; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🛍️</div>
+                        <div style="font-weight:800; color:#64748b; font-size:1.2rem;">Nenhuma compra registrada</div>
+                        <div style="color:#94a3b8; font-size:0.95rem; max-width:350px;">Suas compras realizadas via Conta Fidelidade aparecerão aqui.</div>
                     </div>
                 </div>
             </div>
@@ -141,20 +195,21 @@ export const render = () => {
 
         <!-- ── TAB: EXTRATO ───────────────────────────────────────────── -->
         <div class="loyalty-panel" id="panel-statement">
-            <div style="background:white; border-radius:16px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.04);">
-                <div style="background:linear-gradient(135deg,#b45309,#f59e0b); padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="color:white; font-weight:700;">💳 Extrato de Movimentações</span>
-                    <span id="cl-movements-count" style="color:rgba(255,255,255,0.8); font-size:0.85rem;"></span>
+            <div style="background:white; border-radius:20px; border:1px solid #e2e8f0; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,0.06);">
+                <div style="background:linear-gradient(135deg,#1e293b,#0f172a); padding:1.25rem 2rem; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:white; font-weight:800; font-size:1.1rem; display:flex; align-items:center; gap:0.75rem;"><span style="font-size:1.4rem;">💳</span> Extrato de Movimentações</span>
+                    <span id="cl-movements-count" style="color:#94a3b8; font-size:0.9rem; font-weight:600; background:rgba(255,255,255,0.1); padding:0.25rem 0.75rem; border-radius:20px;"></span>
                 </div>
-                <div id="cl-movements-list" style="min-height:100px;">
+                <div id="cl-movements-list" style="min-height:100px; background:#fff;">
                     <div style="padding:3rem 2rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:1rem;">
-                        <div style="font-size:3rem; opacity:0.3;">💳</div>
-                        <div style="font-weight:700; color:#94a3b8; font-size:1rem;">Conta zerada — sem movimentações</div>
-                        <div style="color:#cbd5e1; font-size:0.85rem; max-width:300px;">Débitos de compras e pagamentos realizados aparecerão aqui no seu extrato.</div>
+                        <div style="font-size:4rem; opacity:0.3; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.1));">💳</div>
+                        <div style="font-weight:800; color:#64748b; font-size:1.2rem;">Conta zerada — sem movimentações</div>
+                        <div style="color:#94a3b8; font-size:0.95rem; max-width:350px;">Débitos de compras e pagamentos realizados aparecerão aqui no seu extrato.</div>
                     </div>
                 </div>
             </div>
         </div>
+        </div> <!-- end loyalty-container -->
     `;
 
 
