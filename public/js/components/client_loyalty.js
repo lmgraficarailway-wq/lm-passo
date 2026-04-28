@@ -401,6 +401,7 @@ export const render = () => {
                     titleEl.innerHTML = 'Conta Fidelidade: VIP Ouro';
                     titleEl.style.background = 'linear-gradient(135deg, #f59e0b, #b45309)';
                     descEl.innerHTML = 'Você possui <b>15% de desconto</b> em tudo e <b>Prioridade Máxima</b>.';
+                    document.documentElement.style.setProperty('--sidebar-bg', 'linear-gradient(180deg, #92400e 0%, #b45309 100%)');
                 } else if (tier === 'prata') {
                     iconEl.innerHTML = '🥈';
                     iconEl.style.background = 'linear-gradient(135deg, #94a3b8, #64748b)';
@@ -408,6 +409,7 @@ export const render = () => {
                     titleEl.innerHTML = 'Conta Fidelidade: Prata';
                     titleEl.style.background = 'linear-gradient(135deg, #64748b, #475569)';
                     descEl.innerHTML = 'Você possui <b>10% de desconto</b> em tudo e <b>1 Dia de Prazo</b>.';
+                    document.documentElement.style.setProperty('--sidebar-bg', 'linear-gradient(180deg, #334155 0%, #475569 100%)');
                 } else {
                     iconEl.innerHTML = '🥉';
                     iconEl.style.background = 'linear-gradient(135deg, #fff7ed, #fde68a)';
@@ -416,6 +418,7 @@ export const render = () => {
                     titleEl.innerHTML = 'Conta Fidelidade: Bronze';
                     titleEl.style.background = 'linear-gradient(135deg, #b45309, #92400e)';
                     descEl.innerHTML = 'Você possui <b>5% de desconto</b> em todos os serviços.';
+                    document.documentElement.style.setProperty('--sidebar-bg', 'linear-gradient(180deg, #78350f 0%, #92400e 100%)');
                 }
 
                 // Level Up Animation Trigger

@@ -141,6 +141,7 @@ export const render = () => {
                 hIcon.innerHTML = '🏆';
                 hIcon.style.background = 'linear-gradient(135deg, #f59e0b, #b45309)';
                 hIcon.style.boxShadow = '0 6px 20px rgba(245, 158, 11, 0.4)';
+                document.documentElement.style.setProperty('--sidebar-bg', 'linear-gradient(180deg, #92400e 0%, #b45309 100%)');
             } else if (tier === 'prata') {
                 tName.innerHTML = 'PRATA 🥈';
                 tName.style.background = 'linear-gradient(to right, #94a3b8, #64748b)';
@@ -148,6 +149,7 @@ export const render = () => {
                 hIcon.innerHTML = '🥈';
                 hIcon.style.background = 'linear-gradient(135deg, #94a3b8, #64748b)';
                 hIcon.style.boxShadow = '0 6px 20px rgba(148, 163, 184, 0.4)';
+                document.documentElement.style.setProperty('--sidebar-bg', 'linear-gradient(180deg, #334155 0%, #475569 100%)');
             } else {
                 tName.innerHTML = 'BRONZE 🥉';
                 tName.style.background = 'linear-gradient(to right, #b45309, #92400e)';
@@ -156,6 +158,7 @@ export const render = () => {
                 hIcon.style.background = 'linear-gradient(135deg, #fff7ed, #fde68a)';
                 hIcon.style.border = '1px solid #fcd34d';
                 hIcon.style.boxShadow = 'none';
+                document.documentElement.style.setProperty('--sidebar-bg', 'linear-gradient(180deg, #78350f 0%, #92400e 100%)');
             }
 
             // Progress logic
