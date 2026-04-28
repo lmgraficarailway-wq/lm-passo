@@ -2,14 +2,21 @@ export const render = (user) => {
     const container = document.createElement('div');
     container.innerHTML = `
         <!-- Header -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 2rem; flex-wrap:wrap; gap:1rem;">
             <div style="display:flex; flex-direction:column; gap:0.2rem;">
                 <h2 style="font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, var(--primary), #4c1d95); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin:0; letter-spacing: -0.03em;">Financeiro Geral</h2>
                 <p style="color: #64748b; margin: 0; font-size: 0.95rem; font-weight:500; white-space: nowrap;">Controle de pagamentos, faturamento e relatórios financeiros.</p>
             </div>
+            <div>
+                <button id="btn-toggle-fidelity" class="btn" style="background: linear-gradient(135deg, #f59e0b, #b45309); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s;">
+                    🏆 Contas Fidelidade
+                </button>
+            </div>
         </div>
 
-
+        <div id="fidelity-dashboard-container" style="display:none; margin-bottom: 2rem; background: #fffbeb; padding: 1.5rem; border: 1px solid #fde68a; border-radius: 12px; box-shadow: 0 10px 25px rgba(217, 119, 6, 0.1);">
+            <div style="text-align:center; padding:2rem; color:#b45309;">Carregando contas fidelidade...</div>
+        </div>
 
         <!-- Filters -->
         <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; padding:0.75rem; background:white; border-radius:8px; border:1px solid var(--border);">
@@ -648,6 +655,106 @@ export const render = (user) => {
         applyFilters();
     };
 
+    const setupFidelityDashboard = () => {
+        const btnToggle = container.querySelector('#btn-toggle-fidelity');
+        const dashContainer = container.querySelector('#fidelity-dashboard-container');
+        let isLoaded = false;
+
+        btnToggle.addEventListener('click', async () => {
+            const isHidden = dashContainer.style.display === 'none';
+            if (isHidden) {
+                dashContainer.style.display = 'block';
+                btnToggle.style.opacity = '0.8';
+                
+                if (!isLoaded) {
+                    dashContainer.innerHTML = '<div style="text-align:center; padding:2rem; color:#b45309; font-weight:bold;">Carregando contas fidelidade...</div>';
+                    try {
+                        const res = await fetch('/api/clients');
+                        const { data } = await res.json();
+                        
+                        // Filter only fidelity clients
+                        const fidelityClients = (data || []).filter(c => c.loyalty_status === 1);
+                        
+                        if (fidelityClients.length === 0) {
+                            dashContainer.innerHTML = '<div style="text-align:center; padding:2rem; color:#b45309;">Nenhum cliente fidelidade encontrado.</div>';
+                            isLoaded = true;
+                            return;
+                        }
+
+                        let totalBalance = 0;
+                        let totalDebt = 0;
+
+                        const rows = fidelityClients.map(c => {
+                            const balance = parseFloat(c.credit_balance || 0);
+                            const spent = parseFloat(c.L90_spent || 0);
+                            const tier = c.loyalty_tier || 'bronze';
+                            
+                            if (balance > 0) totalBalance += balance;
+                            if (balance < 0) totalDebt += Math.abs(balance);
+                            
+                            let tierIcon = '🥉';
+                            let tierColor = '#b45309';
+                            if (tier === 'ouro') { tierIcon = '🏆'; tierColor = '#f59e0b'; }
+                            else if (tier === 'prata') { tierIcon = '🥈'; tierColor = '#94a3b8'; }
+
+                            const balanceColor = balance >= 0 ? '#16a34a' : '#dc2626';
+
+                            return `
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem; border-bottom:1px solid #fde68a; flex-wrap:wrap; gap:1rem;">
+                                    <div style="flex:1; min-width:200px;">
+                                        <div style="font-weight:800; font-size:1.1rem; color:#78350f;">${c.name}</div>
+                                        <div style="font-size:0.85rem; color:#b45309;">${c.phone || 'Sem telefone'} | Vencimento: Dia ${c.billing_date || '-'}</div>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:0.5rem; background:#fef3c7; padding:0.3rem 0.8rem; border-radius:20px; border:1px solid #fcd34d;">
+                                        <span style="font-size:1.2rem;">${tierIcon}</span>
+                                        <span style="font-weight:700; color:${tierColor}; text-transform:uppercase; font-size:0.85rem;">${tier}</span>
+                                    </div>
+                                    <div style="text-align:right; min-width:120px;">
+                                        <div style="font-size:0.75rem; color:#b45309; text-transform:uppercase; font-weight:600;">Saldo Atual</div>
+                                        <div style="font-weight:900; font-size:1.2rem; color:${balanceColor};">R$ ${balance.toFixed(2).replace('.', ',')}</div>
+                                    </div>
+                                    <div style="text-align:right; min-width:120px; border-left:1px solid #fde68a; padding-left:1rem;">
+                                        <div style="font-size:0.75rem; color:#b45309; text-transform:uppercase; font-weight:600;">Gasto p/ Nível</div>
+                                        <div style="font-weight:800; font-size:1.1rem; color:#92400e;">R$ ${spent.toFixed(2).replace('.', ',')}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+
+                        dashContainer.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1.5rem; border-bottom:2px solid #f59e0b; padding-bottom:1rem; flex-wrap:wrap; gap:1rem;">
+                                <div>
+                                    <h3 style="margin:0; font-size:1.5rem; font-weight:900; color:#92400e;">Painel de Clientes Fidelidade</h3>
+                                    <p style="margin:0; color:#b45309; font-size:0.9rem;">Visão financeira geral das contas fidelidade ativas.</p>
+                                </div>
+                                <div style="display:flex; gap:1.5rem;">
+                                    <div style="text-align:right;">
+                                        <div style="font-size:0.8rem; color:#b45309; font-weight:bold; text-transform:uppercase;">Crédito Positivo Total</div>
+                                        <div style="font-size:1.3rem; font-weight:900; color:#16a34a;">+ R$ ${totalBalance.toFixed(2).replace('.', ',')}</div>
+                                    </div>
+                                    <div style="text-align:right; border-left:1px solid #fcd34d; padding-left:1.5rem;">
+                                        <div style="font-size:0.8rem; color:#b45309; font-weight:bold; text-transform:uppercase;">Dívida Acumulada Total</div>
+                                        <div style="font-size:1.3rem; font-weight:900; color:#dc2626;">- R$ ${totalDebt.toFixed(2).replace('.', ',')}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="background:white; border-radius:8px; border:1px solid #fde68a; overflow:hidden;">
+                                ${rows}
+                            </div>
+                        `;
+                        isLoaded = true;
+                    } catch (err) {
+                        dashContainer.innerHTML = '<div style="text-align:center; padding:2rem; color:#dc2626; font-weight:bold;">Erro ao carregar dados de fidelidade.</div>';
+                    }
+                }
+            } else {
+                dashContainer.style.display = 'none';
+                btnToggle.style.opacity = '1';
+            }
+        });
+    };
+
+    setupFidelityDashboard();
     loadFinancial();
     return container;
 };
