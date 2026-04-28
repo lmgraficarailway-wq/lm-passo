@@ -227,6 +227,10 @@ export const render = () => {
                                (c.cpf && c.cpf.toLowerCase().includes(term));
             const matchCore = isCoreOnly ? c.origin === 'CORE' : true;
             return matchSearch && matchCore;
+        }).sort((a, b) => {
+            if (a.loyalty_status && !b.loyalty_status) return -1;
+            if (!a.loyalty_status && b.loyalty_status) return 1;
+            return a.name.localeCompare(b.name);
         });
 
         const tbody = container.querySelector('#clients-list');
@@ -237,8 +241,11 @@ export const render = () => {
             return;
         }
 
-        tbody.innerHTML = filtered.map(c => `
-            <tr>
+        tbody.innerHTML = filtered.map(c => {
+            const isPremium = c.loyalty_status ? true : false;
+            const rowStyle = isPremium ? 'background: linear-gradient(to right, #fffbeb, #ffffff); border-left: 4px solid #f59e0b; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15); position: relative; z-index: 1;' : '';
+            return `
+            <tr style="${rowStyle}">
                 <td>
                     <div style="font-weight: 800; color: #1e1b4b; font-size: 1.05rem;">${c.name}</div>
                 </td>
@@ -265,7 +272,8 @@ export const render = () => {
                     <button class="btn btn-sm edit-btn" data-json='${JSON.stringify(c).replace(/'/g, "&#39;")}' style="background:#fff; color:var(--primary); font-weight:800; border:2px solid #e2e8f0; border-radius:8px; padding:0.5rem 1rem; cursor:pointer; transition:all 0.2s; box-shadow:0 2px 4px rgba(0,0,0,0.02);" onmouseover="this.style.background='var(--primary)'; this.style.color='white'; this.style.borderColor='var(--primary)'" onmouseout="this.style.background='#fff'; this.style.color='var(--primary)'; this.style.borderColor='#e2e8f0'">Editar</button>
                 </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
 
         tbody.querySelectorAll('.edit-btn').forEach(btn => {
             btn.onclick = () => openEditModal(JSON.parse(btn.dataset.json));
