@@ -613,9 +613,9 @@ export const render = () => {
             const canSeePassword = ['master', 'gerente', 'supervisor'].includes(currentUser.role);
             const pwdContainer = container.querySelector('#access-password-container');
             if (pwdContainer) {
-                if (canSeePassword && client.access_password) {
+                if (canSeePassword) {
                     pwdContainer.style.display = 'block';
-                    container.querySelector('#access-password-display').textContent = client.access_password;
+                    container.querySelector('#access-password-display').textContent = client.access_password || '******';
                 } else {
                     pwdContainer.style.display = 'none';
                 }
