@@ -313,7 +313,7 @@ exports.syncAccessName = (req, res) => {
 };
 
 exports.resetPoints = (req, res) => {
-    const sql = "UPDATE clients SET points_reset_at = datetime('now', 'localtime') WHERE id = ?";
+    const sql = "UPDATE clients SET points_reset_at = CURRENT_TIMESTAMP WHERE id = ?";
     db.run(sql, [req.params.id], function (err) {
         if (err) return res.status(500).json({ error: err.message });
         if (this.changes === 0) return res.status(404).json({ error: 'Cliente não encontrado' });

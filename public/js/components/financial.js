@@ -758,11 +758,14 @@ export const render = (user) => {
                                 
                                 const res = await fetch(`/api/clients/${id}/reset-points`, { method: 'PUT' });
                                 if (res.ok) {
-                                    isLoaded = false; // Force reload
-                                    btnToggle.click(); // Hide
-                                    btnToggle.click(); // Re-show to reload
+                                    isLoaded = false;
+                                    // Refresh the dashboard content without closing it
+                                    dashContainer.innerHTML = '<div style="text-align:center; padding:2rem; color:#b45309; font-weight:bold;">Atualizando...</div>';
+                                    btnToggle.click(); // This will HIDE it
+                                    setTimeout(() => btnToggle.click(), 50); // This will RE-SHOW and TRIGGER RELOAD
                                 } else {
-                                    alert('Erro ao zerar pontuação.');
+                                    const errorData = await res.json().catch(() => ({}));
+                                    alert('Erro ao zerar pontuação: ' + (errorData.error || 'Erro desconhecido no servidor'));
                                 }
                             };
                         });
