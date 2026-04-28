@@ -21,7 +21,7 @@ exports.getAllClients = (req, res) => {
         LEFT JOIN users u ON u.client_id = c.id AND u.role = 'cliente'
         LEFT JOIN client_credit_movements m ON m.client_id = c.id 
              AND m.type = 'order_debit' 
-             AND m.created_at >= '2026-04-28'
+             AND m.created_at >= COALESCE(c.points_reset_at, '2026-04-28')
         GROUP BY c.id
         ORDER BY c.name ASC
     `;
@@ -310,4 +310,13 @@ exports.syncAccessName = (req, res) => {
             res.json({ message: 'Nome sincronizado', changes: this.changes });
         }
     );
+};
+
+exports.resetPoints = (req, res) => {
+    const sql = "UPDATE clients SET points_reset_at = datetime('now', 'localtime') WHERE id = ?";
+    db.run(sql, [req.params.id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        if (this.changes === 0) return res.status(404).json({ error: 'Cliente não encontrado' });
+        res.json({ message: 'Pontuação zerada com sucesso!' });
+    });
 };

@@ -30,6 +30,7 @@ router.post('/clients/:id/sync-access-name', clientController.syncAccessName);
 router.get('/clients/:id/access-credentials', clientController.getClientAccess);
 router.get('/clients/:id/credit-movements', clientController.getCreditMovements);
 router.post('/clients/:id/credit', clientController.addCreditTransaction);
+router.put('/clients/:id/reset-points', clientController.resetPoints);
 router.delete('/clients/movements/:id', clientController.deleteCreditMovement);
 
 // Products

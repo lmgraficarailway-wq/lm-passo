@@ -144,6 +144,7 @@ function initDb() {
 
         db.run("ALTER TABLE clients ADD COLUMN loyalty_tier TEXT DEFAULT 'bronze'", (err) => { /* ignore if exists */ });
     db.run("ALTER TABLE clients ADD COLUMN loyalty_tier_notified INTEGER DEFAULT 1", (err) => { /* ignore if exists */ });
+    db.run("ALTER TABLE clients ADD COLUMN points_reset_at DATETIME DEFAULT NULL", (err) => { /* ignore if exists */ });
 
     // Orders Table
         db.run(`CREATE TABLE IF NOT EXISTS orders (

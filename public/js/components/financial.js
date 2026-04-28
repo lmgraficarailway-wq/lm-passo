@@ -717,6 +717,11 @@ export const render = (user) => {
                                         <div style="font-size:0.75rem; color:#b45309; text-transform:uppercase; font-weight:600;">Gasto p/ Nível</div>
                                         <div style="font-weight:800; font-size:1.1rem; color:#92400e;">R$ ${spent.toFixed(2).replace('.', ',')}</div>
                                     </div>
+                                    <div style="text-align:right; min-width:60px;">
+                                        <button class="btn-reset-points" data-id="${c.id}" data-name="${c.name}" title="Zerar Pontuação de Fidelidade" style="background:white; border:1px solid #f59e0b; color:#b45309; padding:0.4rem 0.6rem; border-radius:6px; cursor:pointer; font-size:1rem; transition:all 0.2s;" onmouseover="this.style.background='#f59e0b'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#b45309';">
+                                            🔄
+                                        </button>
+                                    </div>
                                 </div>
                             `;
                         }).join('');
@@ -742,6 +747,26 @@ export const render = (user) => {
                                 ${rows}
                             </div>
                         `;
+
+                        // Bind reset buttons
+                        dashContainer.querySelectorAll('.btn-reset-points').forEach(btn => {
+                            btn.onclick = async (e) => {
+                                e.stopPropagation();
+                                const id = btn.dataset.id;
+                                const name = btn.dataset.name;
+                                if (!confirm(`⚠️ Deseja ZERAR a pontuação de fidelidade de "${name}"?\n\nIsso fará com que o gasto acumulado e a quantidade de pedidos voltem para ZERO para este cliente, sem afetar o saldo financeiro.`)) return;
+                                
+                                const res = await fetch(`/api/clients/${id}/reset-points`, { method: 'PUT' });
+                                if (res.ok) {
+                                    isLoaded = false; // Force reload
+                                    btnToggle.click(); // Hide
+                                    btnToggle.click(); // Re-show to reload
+                                } else {
+                                    alert('Erro ao zerar pontuação.');
+                                }
+                            };
+                        });
+
                         isLoaded = true;
                     } catch (err) {
                         dashContainer.innerHTML = '<div style="text-align:center; padding:2rem; color:#dc2626; font-weight:bold;">Erro ao carregar dados de fidelidade.</div>';
