@@ -168,11 +168,6 @@ export const render = () => {
             let spentPct = Math.min(100, (spent / nextSpentTarget) * 100);
             let ordersPct = Math.min(100, (orders / nextOrdersTarget) * 100);
 
-            if (tier === 'ouro') {
-                spentPct = 100;
-                ordersPct = 100;
-            }
-
             container.querySelector('#cp-spent').textContent = `R$ ${spent.toFixed(2).replace('.', ',')}`;
             container.querySelector('#cp-orders').textContent = orders;
 

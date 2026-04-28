@@ -21,7 +21,7 @@ exports.getAllClients = (req, res) => {
         LEFT JOIN users u ON u.client_id = c.id AND u.role = 'cliente'
         LEFT JOIN client_credit_movements m ON m.client_id = c.id 
              AND m.type = 'order_debit' 
-             AND m.created_at >= datetime('now', '-90 days')
+             AND m.created_at >= '2026-04-28'
         GROUP BY c.id
         ORDER BY c.name ASC
     `;
