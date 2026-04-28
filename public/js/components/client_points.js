@@ -131,12 +131,12 @@ export const render = () => {
                 ordersPct = 100;
             }
 
-            container.querySelector('#cp-spent').textContent = \`R$ \${spent.toFixed(2).replace('.', ',')}\`;
+            container.querySelector('#cp-spent').textContent = `R$ ${spent.toFixed(2).replace('.', ',')}`;
             container.querySelector('#cp-orders').textContent = orders;
 
             setTimeout(() => {
-                container.querySelector('#cp-spent-bar').style.width = \`\${spentPct}%\`;
-                container.querySelector('#cp-orders-bar').style.width = \`\${ordersPct}%\`;
+                container.querySelector('#cp-spent-bar').style.width = `${spentPct}%`;
+                container.querySelector('#cp-orders-bar').style.width = `${ordersPct}%`;
             }, 100);
 
             if (tier === 'ouro') {
@@ -147,8 +147,8 @@ export const render = () => {
             } else {
                 let diffS = Math.max(0, nextSpentTarget - spent);
                 let diffO = Math.max(0, nextOrdersTarget - orders);
-                container.querySelector('#cp-spent-meta').textContent = \`Faltam R$ \${diffS.toFixed(2).replace('.', ',')} para o próximo nível.\`;
-                container.querySelector('#cp-orders-meta').textContent = \`Faltam \${diffO} pedidos para o próximo nível.\`;
+                container.querySelector('#cp-spent-meta').textContent = `Faltam R$ ${diffS.toFixed(2).replace('.', ',')} para o próximo nível.`;
+                container.querySelector('#cp-orders-meta').textContent = `Faltam ${diffO} pedidos para o próximo nível.`;
             }
 
             container.querySelector('#points-loading').style.display = 'none';
