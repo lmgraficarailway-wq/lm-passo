@@ -67,21 +67,17 @@ exports.getAllOrders = (req, res) => {
         }));
         res.json({ data });
 
-        // Auto-archive old finalizado orders (>30)
-        db.run(`
-            UPDATE orders 
-            SET status = 'arquivado' 
-            WHERE id IN (
-                SELECT id FROM orders 
-                WHERE status = 'finalizado' 
-                ORDER BY COALESCE(moved_at, created_at) DESC 
-                LIMIT -1 OFFSET 30
-            )
-        `, (err) => {
-            if (err) console.error("Error auto-archiving orders:", err);
+        // Auto-archive old finalizado orders (>30) — Firestore-compatible
+        db.all(`SELECT id FROM orders WHERE status = 'finalizado' ORDER BY created_at DESC`, [], (err2, allFin) => {
+            if (err2 || !allFin || allFin.length <= 30) return;
+            const toArchive = allFin.slice(30).map(r => r.id);
+            toArchive.forEach(oid => {
+                db.run(`UPDATE orders SET status = 'arquivado' WHERE id = ?`, [oid], () => {});
+            });
         });
     });
 };
+
 
 exports.updateChecklist = (req, res) => {
     const { checklist } = req.body; // Expecting JSON object
