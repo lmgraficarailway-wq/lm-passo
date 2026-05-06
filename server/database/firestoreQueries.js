@@ -60,10 +60,12 @@ async function handleAll(sql, params, db) {
     // Aplicar JOINs em memória
     if (up.includes('LEFT JOIN') || up.includes('JOIN')) {
         rows = await applyJoins(rows, s, db);
+        // Mapear aliases do SELECT: "c.name as client_name" → row.client_name = row.c_name
+        rows = applySelectAliases(rows, s);
     }
 
-    // Filtro WHERE em memória (para queries com JOIN)
-    if (up.includes('WHERE') && (up.includes('JOIN') || params.length > 1)) {
+    // Filtro WHERE em memória — sempre aplica se há WHERE (inclui valores literais)
+    if (up.includes('WHERE')) {
         rows = applyWhereInMemory(rows, s, params);
     }
 
@@ -80,14 +82,61 @@ async function handleAll(sql, params, db) {
     return rows;
 }
 
+// ── Resolução de aliases do SELECT ─────────────────────────────────────────
+// Traduz "c.name as client_name" em row.client_name = row.c_name
+function applySelectAliases(rows, sql) {
+    // Extrair tudo entre SELECT e FROM
+    const selectMatch = sql.match(/SELECT\s+(.*?)\s+FROM\s+/is);
+    if (!selectMatch) return rows;
+
+    const selectPart = selectMatch[1];
+    // Encontrar padrões alias.campo AS alias_final
+    const aliasRegex = /(\w+)\.(\w+)\s+[Aa][Ss]\s+(\w+)/g;
+    const mappings = []; // { from: 'c_name', to: 'client_name' }
+    let am;
+    while ((am = aliasRegex.exec(selectPart)) !== null) {
+        mappings.push({ from: `${am[1]}_${am[2]}`, to: am[3] });
+    }
+
+    if (mappings.length === 0) return rows;
+
+    return rows.map(row => {
+        const r = { ...row };
+        mappings.forEach(({ from, to }) => {
+            if (r[from] !== undefined && r[to] === undefined) {
+                r[to] = r[from];
+            }
+        });
+        return r;
+    });
+}
+
 // ── JOINs em memória ───────────────────────────────────────────────────────
 
 async function applyJoins(rows, sql, db) {
     const joins = [];
+    // Captura: JOIN tabela alias ON campo1 = campo2
     const joinRegex = /(?:LEFT\s+)?JOIN\s+(\w+)\s+(\w+)\s+ON\s+([\w.]+)\s*=\s*([\w.]+)/gi;
     let m;
     while ((m = joinRegex.exec(sql)) !== null) {
-        joins.push({ table: m[1], alias: m[2], on: [m[3], m[4]] });
+        const onLeft = m[3];   // ex: "o.client_id"
+        const onRight = m[4];  // ex: "c.id"
+        const alias = m[2];    // ex: "c"
+
+        // Determinar qual lado é a FK na tabela base e qual é o PK na tabela joinada
+        // O lado que tem o alias da tabela joinada é o PK (geralmente "alias.id")
+        let fkField, pkIsId;
+        if (onRight.startsWith(alias + '.')) {
+            // FK está no lado esquerdo: onLeft = base_alias.fk_field
+            fkField = onLeft.includes('.') ? onLeft.split('.')[1] : onLeft;
+            pkIsId = onRight.split('.')[1]; // geralmente 'id'
+        } else {
+            // FK está no lado direito
+            fkField = onRight.includes('.') ? onRight.split('.')[1] : onRight;
+            pkIsId = onLeft.split('.')[1];
+        }
+
+        joins.push({ table: m[1], alias, fkField, pkIsId });
     }
 
     for (const join of joins) {
@@ -95,26 +144,23 @@ async function applyJoins(rows, sql, db) {
         const lookupMap = {};
         snap.docs.forEach(d => {
             const data = { id: parseInt(d.id), ...d.data() };
-            lookupMap[d.id] = data;
+            // Indexar pelo campo PK (geralmente 'id')
+            const pkVal = join.pkIsId === 'id' ? d.id : data[join.pkIsId];
+            lookupMap[String(pkVal)] = data;
         });
 
         rows = rows.map(row => {
-            // Determinar qual campo do row fazer o join
-            const leftField = join.on.find(f => f.includes('.') ? f.split('.')[0] !== join.alias : false) || join.on[0];
-            const rightField = join.on.find(f => f.includes('.') ? f.split('.')[0] === join.alias : false) || join.on[1];
-
-            const leftKey = leftField.includes('.') ? leftField.split('.')[1] : leftField;
-            const rightKey = rightField.includes('.') ? rightField.split('.')[1] : rightField;
-
-            const foreignId = row[rightKey] || row[leftKey];
-            const joined = lookupMap[String(foreignId)];
+            const fkVal = row[join.fkField];
+            const joined = fkVal != null ? lookupMap[String(fkVal)] : null;
 
             if (joined) {
-                // Prefixar campos do join com alias para evitar conflito
+                // Adicionar todos os campos do join com prefixo do alias
                 const prefixed = {};
                 Object.keys(joined).forEach(k => {
                     if (k !== 'id') prefixed[`${join.alias}_${k}`] = joined[k];
                 });
+                // Também adicionar campos com nome comum esperado pelos controllers
+                // Ex: c.name → client_name, u.name → created_by_name, etc.
                 return { ...row, ...prefixed, [`${join.alias}_id`]: joined.id };
             }
             return row;
@@ -127,52 +173,113 @@ async function applyJoins(rows, sql, db) {
 // ── WHERE em memória ───────────────────────────────────────────────────────
 
 function applyWhereInMemory(rows, sql, params) {
-    const whereMatch = sql.match(/WHERE\s+(.*?)(?:ORDER|GROUP|LIMIT|$)/is);
+    const whereMatch = sql.match(/WHERE\s+(.*?)(?:\s+ORDER\s+BY|\s+GROUP\s+BY|\s+LIMIT|$)/is);
     if (!whereMatch) return rows;
     
     const clause = whereMatch[1].trim();
     let pi = 0;
 
-    // Condições simples separadas por AND/OR
-    const parts = clause.split(/\s+AND\s+/i);
+    // Dividir por AND (mas não dentro de parênteses de IN)
+    const parts = splitByAnd(clause);
     
     return rows.filter(row => {
         return parts.every(part => {
             const p = part.trim();
             
-            // campo = ?
-            const eq = p.match(/^[\w.]+\s*=\s*\?$/);
-            if (eq && pi < params.length) {
+            // campo = ? (param)
+            const eqParam = p.match(/^[\w.]+\s*=\s*\?$/);
+            if (eqParam && pi < params.length) {
                 const field = p.split(/\s*=\s*/)[0].trim().replace(/\w+\./, '');
                 return String(row[field]) === String(params[pi++]);
             }
 
-            // campo != ?
-            const neq = p.match(/^[\w.]+\s*!=\s*\?$/);
-            if (neq && pi < params.length) {
+            // campo != ? (param)
+            const neqParam = p.match(/^[\w.]+\s*!=\s*\?$/);
+            if (neqParam && pi < params.length) {
                 const field = p.split(/\s*!=\s*/)[0].trim().replace(/\w+\./, '');
                 return String(row[field]) !== String(params[pi++]);
             }
 
-            // campo IN (...)
-            const inMatch = p.match(/^[\w.]+\s+IN\s*\(([^)]+)\)/i);
-            if (inMatch) {
+            // campo = 'valor_literal' ou campo = 0
+            const eqLit = p.match(/^[\w.]+\s*=\s*'([^']*)'$/) || p.match(/^[\w.]+\s*=\s*(\d+)$/);
+            if (eqLit) {
+                const field = p.split(/\s*=\s*/)[0].trim().replace(/\w+\./, '');
+                const val = eqLit[1];
+                return String(row[field]) === String(val);
+            }
+
+            // campo != 'valor_literal' ou campo != 0
+            const neqLit = p.match(/^[\w.]+\s*!=\s*'([^']*)'$/) || p.match(/^[\w.]+\s*!=\s*(\d+)$/);
+            if (neqLit) {
+                const field = p.split(/\s*!=\s*/)[0].trim().replace(/\w+\./, '');
+                const val = neqLit[1];
+                return String(row[field]) !== String(val);
+            }
+
+            // campo IN ('a', 'b', 'c') — valores literais
+            const inLit = p.match(/^[\w.]+\s+IN\s*\(([^)]+)\)/i);
+            if (inLit) {
                 const field = p.split(/\s+IN\s+/i)[0].trim().replace(/\w+\./, '');
-                const values = inMatch[1].split(',').map(v => v.trim().replace(/['"]/g, ''));
-                return values.includes(String(row[field]));
+                const values = inLit[1].split(',').map(v => v.trim().replace(/^['"]|['"]$/g, ''));
+                // Se há params ?, substituir
+                const resolvedValues = values.map(v => v === '?' ? String(params[pi++] ?? '') : v);
+                return resolvedValues.includes(String(row[field]));
             }
 
             // campo NOT IN (...)
             const notInMatch = p.match(/^[\w.]+\s+NOT\s+IN\s*\(([^)]+)\)/i);
             if (notInMatch) {
                 const field = p.split(/\s+NOT\s+IN\s+/i)[0].trim().replace(/\w+\./, '');
-                const values = notInMatch[1].split(',').map(v => v.trim().replace(/['"]/g, ''));
+                const values = notInMatch[1].split(',').map(v => v.trim().replace(/^['"]|['"]$/g, ''));
                 return !values.includes(String(row[field]));
             }
 
-            return true;
+            // campo IS NULL
+            if (/^[\w.]+\s+IS\s+NULL$/i.test(p)) {
+                const field = p.split(/\s+IS\s+/i)[0].trim().replace(/\w+\./, '');
+                return row[field] == null;
+            }
+
+            // campo IS NOT NULL
+            if (/^[\w.]+\s+IS\s+NOT\s+NULL$/i.test(p)) {
+                const field = p.split(/\s+IS\s+NOT\s+/i)[0].trim().replace(/\w+\./, '');
+                return row[field] != null;
+            }
+
+            // campo > ? ou campo >= ?
+            const gtParam = p.match(/^([\w.]+)\s*(>=|>)\s*\?$/);
+            if (gtParam && pi < params.length) {
+                const field = gtParam[1].replace(/\w+\./, '');
+                const op = gtParam[2];
+                const val = params[pi++];
+                return op === '>=' ? row[field] >= val : row[field] > val;
+            }
+
+            return true; // condição não reconhecida — não filtrar
         });
     });
+}
+
+// Divide cláusula WHERE por AND, ignorando ANDs dentro de parênteses
+function splitByAnd(clause) {
+    const parts = [];
+    let depth = 0;
+    let current = '';
+    for (let i = 0; i < clause.length; i++) {
+        const ch = clause[i];
+        if (ch === '(') depth++;
+        else if (ch === ')') depth--;
+        if (depth === 0 && clause.substring(i).match(/^\s+AND\s+/i)) {
+            parts.push(current.trim());
+            const m = clause.substring(i).match(/^\s+AND\s+/i);
+            i += m[0].length - 1;
+            current = '';
+        } else {
+            current += ch;
+        }
+    }
+    if (current.trim()) parts.push(current.trim());
+    return parts.length > 0 ? parts : [clause];
 }
 
 // ── ORDER BY em memória ────────────────────────────────────────────────────
