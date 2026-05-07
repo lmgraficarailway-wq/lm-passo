@@ -7,34 +7,46 @@ const SECRET_KEY = 'lm-passo-secret-key-change-me'; // Em produção usar .env
 exports.login = (req, res) => {
     const { username, password } = req.body;
 
-    db.get(`
-        SELECT u.*, c.loyalty_status
-        FROM users u
-        LEFT JOIN clients c ON c.id = u.client_id
-        WHERE u.username = ?
-    `, [username], (err, user) => {
-        if (err) return res.status(500).json({ error: 'Erro no servidor' });
+    // Query simples sem JOIN — mais confiável no modo Firestore
+    db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, user) => {
+        if (err) {
+            console.error('[Auth] Erro ao buscar usuário:', err.message);
+            return res.status(500).json({ error: 'Erro no servidor' });
+        }
         if (!user) return res.status(401).json({ error: 'Usuário não encontrado' });
 
         const passwordIsValid = bcrypt.compareSync(password, user.password);
         if (!passwordIsValid) return res.status(401).json({ error: 'Senha inválida' });
 
-        const token = jwt.sign({ id: user.id, role: user.role, name: user.name, client_id: user.client_id || null }, SECRET_KEY, {
-            expiresIn: 86400 // 24 hours
-        });
+        const token = jwt.sign(
+            { id: user.id, role: user.role, name: user.name, client_id: user.client_id || null },
+            SECRET_KEY,
+            { expiresIn: 86400 }
+        );
 
-        res.status(200).send({
-            auth: true,
-            token: token,
-            user: {
-                id: user.id,
-                username: user.username,
-                role: user.role,
-                name: user.name,
-                client_id: user.client_id || null,
-                loyalty_status: user.loyalty_status ? true : false
-            }
-        });
+        // Para usuários clientes, buscar loyalty_status separadamente
+        const sendResponse = (loyaltyStatus) => {
+            res.status(200).send({
+                auth: true,
+                token: token,
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    role: user.role,
+                    name: user.name,
+                    client_id: user.client_id || null,
+                    loyalty_status: loyaltyStatus
+                }
+            });
+        };
+
+        if (user.client_id) {
+            db.get(`SELECT loyalty_status FROM clients WHERE id = ?`, [user.client_id], (err2, client) => {
+                sendResponse(client ? !!client.loyalty_status : false);
+            });
+        } else {
+            sendResponse(false);
+        }
     });
 };
 
