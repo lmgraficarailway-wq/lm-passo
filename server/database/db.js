@@ -7,7 +7,7 @@
  * Se sqlite3 não estiver instalado, usa Firestore automaticamente.
  */
 
-const useLocal = process.env.USE_SQLITE === 'true';
+const useLocal = process.env.USE_SQLITE === 'true' || !!process.env.RAILWAY_ENVIRONMENT;
 
 if (useLocal) {
     try {

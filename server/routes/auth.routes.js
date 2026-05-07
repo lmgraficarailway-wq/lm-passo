@@ -6,7 +6,20 @@ const multer = require('multer');
 const path = require('path');
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, path.join(process.cwd(), 'public/uploads/')),
+    destination: (req, file, cb) => {
+        const volumePath = process.env.RAILWAY_VOLUME_MOUNT_PATH;
+        let dest = path.join(process.cwd(), 'public/uploads/');
+        
+        if (volumePath) {
+            dest = path.join(volumePath, 'uploads/');
+            // Certifique-se de que a pasta existe no volume
+            const fs = require('fs');
+            if (!fs.existsSync(dest)) {
+                fs.mkdirSync(dest, { recursive: true });
+            }
+        }
+        cb(null, dest);
+    },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, uniqueSuffix + path.extname(file.originalname));

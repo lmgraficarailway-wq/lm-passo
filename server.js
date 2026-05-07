@@ -45,6 +45,17 @@ app.use(compression());
 const diskPublic = path.join(process.cwd(), 'public');
 app.use(express.static(diskPublic));
 
+// Servir uploads do volume no Railway
+const volumePath = process.env.RAILWAY_VOLUME_MOUNT_PATH;
+if (volumePath) {
+    const fs = require('fs');
+    const volumeUploads = path.join(volumePath, 'uploads/');
+    if (!fs.existsSync(volumeUploads)) {
+        fs.mkdirSync(volumeUploads, { recursive: true });
+    }
+    app.use('/uploads', express.static(volumeUploads));
+}
+
 // ── Rotas da API ─────────────────────────────────────────────────────────────
 const apiRoutes = require('./server/routes/api.routes');
 const authRoutes = require('./server/routes/auth.routes');
