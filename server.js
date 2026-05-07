@@ -119,8 +119,6 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // ── Backup Automático Firebase → Local ───────────────────────────────────────
-// Quando o app está em modo Firebase (USE_SQLITE=false), faz cópias locais
-// automáticas dos dados para garantir backup sempre atualizado.
 if (process.env.USE_SQLITE !== 'true' && process.env.NODE_ENV !== 'production') {
     const BACKUP_INTERVAL = 4 * 60 * 60 * 1000; // 4 horas
 
@@ -133,10 +131,19 @@ if (process.env.USE_SQLITE !== 'true' && process.env.NODE_ENV !== 'production') 
         }
     };
 
-    // Primeiro backup após 30 segundos do servidor inicializar
     setTimeout(() => {
         doBackup();
         setInterval(doBackup, BACKUP_INTERVAL);
         console.log('💾 Backup automático ativado — cópia local do Firebase a cada 4h');
     }, 30 * 1000);
 }
+
+// ── Auto-Deploy: envia mudanças ao GitHub → Render deploya automaticamente ───
+if (process.env.NODE_ENV !== 'production') {
+    try {
+        require('./scripts/auto_push');
+    } catch (e) {
+        // silencioso
+    }
+}
+
