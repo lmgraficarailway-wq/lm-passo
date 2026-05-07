@@ -195,12 +195,14 @@ function applyWhereInMemory(rows, sql, params) {
     if (!whereMatch) return rows;
     
     const clause = whereMatch[1].trim();
-    let pi = 0;
 
     // Dividir por AND (mas não dentro de parênteses de IN)
     const parts = splitByAnd(clause);
     
     return rows.filter(row => {
+        // IMPORTANTE: pi deve ser resetado para cada linha para que o filtro
+        // WHERE funcione corretamente em todas as linhas, não só na primeira.
+        let pi = 0;
         return parts.every(part => {
             const p = part.trim();
             
