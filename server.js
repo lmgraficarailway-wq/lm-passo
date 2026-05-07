@@ -95,3 +95,28 @@ try {
 } catch (err) {
     console.log('ℹ️  Firebase Sync desativado (sem credenciais configuradas)');
 }
+
+// ── Keep-Alive: evita o "sleep" do Render free tier ──────────────────────────
+// O Render dorme após 15 min sem tráfego. Este ping interno a cada 10 min
+// mantém o servidor acordado 24h, eliminando o cold start de 1-2 minutos.
+if (process.env.NODE_ENV === 'production') {
+    const https = require('https');
+    const RENDER_URL = process.env.RENDER_EXTERNAL_URL || 'https://lm-passo.onrender.com';
+    const PING_INTERVAL = 10 * 60 * 1000; // 10 minutos
+
+    const keepAlive = () => {
+        const url = `${RENDER_URL}/api/health`;
+        https.get(url, (res) => {
+            console.log(`[Keep-Alive] Ping OK - ${new Date().toLocaleTimeString('pt-BR')} - Status: ${res.statusCode}`);
+        }).on('error', (err) => {
+            console.log(`[Keep-Alive] Ping falhou: ${err.message}`);
+        });
+    };
+
+    // Aguarda 1 minuto após inicializar antes de começar os pings
+    setTimeout(() => {
+        keepAlive();
+        setInterval(keepAlive, PING_INTERVAL);
+        console.log('⏰ Keep-Alive ativado — ping a cada 10 min para manter o servidor acordado');
+    }, 60 * 1000);
+}

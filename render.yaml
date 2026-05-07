@@ -2,11 +2,15 @@ services:
   - type: web
     name: lm-passo
     env: node
-    buildCommand: npm install
+    plan: free
+    buildCommand: npm ci --omit=dev
     startCommand: node server.js
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: USE_SQLITE
+        value: "false"
       - key: FIREBASE_CREDENTIALS
         sync: false
       - key: GEMINI_API_KEY
