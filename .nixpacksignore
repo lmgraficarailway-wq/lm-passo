@@ -1,0 +1,7 @@
+*.bat
+*.vbs
+*.ps1
+old_*
+*_backup.js
+old_clients.js
+kanban_backup.js
