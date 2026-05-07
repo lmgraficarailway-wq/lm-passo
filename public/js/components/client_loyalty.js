@@ -4,9 +4,20 @@ export const render = () => {
     const container = document.createElement('div');
 
     container.innerHTML = `
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
         <style>
+            :root {
+                --loyalty-primary: #b45309;
+                --loyalty-secondary: #f59e0b;
+                --loyalty-bg: #ffffff;
+                --loyalty-text: #1e293b;
+                --loyalty-accent: rgba(180, 83, 9, 0.1);
+            }
+
             .loyalty-container {
-                animation: fadeIn 0.4s ease-out;
+                font-family: 'Outfit', sans-serif;
+                animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+                color: var(--loyalty-text);
             }
             @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
             
@@ -48,9 +59,9 @@ export const render = () => {
                 opacity: 0; transition: opacity 0.3s;
             }
             .order-card:hover { 
-                box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-                transform: translateY(-3px);
-                border-color: #fcd34d;
+                box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+                transform: translateY(-5px) scale(1.01);
+                border-color: var(--loyalty-secondary);
             }
             .order-card:hover::before { opacity: 1; }
 
@@ -80,10 +91,10 @@ export const render = () => {
         <!-- Top Header -->
         <div style="margin-bottom:2rem; position:relative;">
             <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
-                <div id="cl-tier-icon" style="width:52px; height:52px; background:linear-gradient(135deg,#b45309,#f59e0b); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; box-shadow:0 6px 20px rgba(180,83,9,0.35); flex-shrink:0; transition:all 0.3s;">⭐</div>
+                <div id="cl-tier-icon" style="width:64px; height:64px; background:linear-gradient(135deg, var(--loyalty-primary), var(--loyalty-secondary)); border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:2rem; box-shadow:0 8px 25px rgba(0,0,0,0.15); flex-shrink:0; transition:all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">⭐</div>
                 <div style="flex:1;">
-                    <h2 id="cl-tier-title" style="font-size:1.75rem; font-weight:900; background:linear-gradient(135deg,#92400e,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin:0; letter-spacing:-0.03em;">Minha Conta Fidelidade</h2>
-                    <p style="color:#64748b; margin:0; font-size:0.9rem; font-weight:500;">Bem-vindo, ${user.name}. <span id="cl-tier-desc"></span></p>
+                    <h2 id="cl-tier-title" style="font-size:2.2rem; font-weight:900; background:linear-gradient(135deg, var(--loyalty-text), var(--loyalty-primary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin:0; letter-spacing:-0.04em;">Fidelidade Premium</h2>
+                    <p style="color:#64748b; margin:0; font-size:1.1rem; font-weight:500; opacity:0.8;">Olá, ${user.name}. <span id="cl-tier-desc" style="font-weight:700; color:var(--loyalty-primary);"></span></p>
                 </div>
             </div>
         </div>
@@ -389,35 +400,34 @@ export const render = () => {
             
             if (myClient) {
                 // Tier rendering
-                const tier = myClient.loyalty_tier || 'bronze';
+                const tier = (myClient.loyalty_tier || 'bronze').toLowerCase();
                 const iconEl = container.querySelector('#cl-tier-icon');
                 const titleEl = container.querySelector('#cl-tier-title');
                 const descEl = container.querySelector('#cl-tier-desc');
+                const cont = container.querySelector('.loyalty-container');
                 
                 if (tier === 'ouro') {
+                    cont.style.setProperty('--loyalty-primary', '#fbbf24');
+                    cont.style.setProperty('--loyalty-secondary', '#d97706');
+                    cont.style.setProperty('--loyalty-text', '#0f172a');
                     iconEl.innerHTML = '🏆';
-                    iconEl.style.background = 'linear-gradient(135deg, #f59e0b, #b45309)';
-                    iconEl.style.boxShadow = '0 6px 20px rgba(245, 158, 11, 0.4)';
-                    titleEl.innerHTML = 'Conta Fidelidade: VIP Ouro';
-                    titleEl.style.background = 'linear-gradient(135deg, #f59e0b, #b45309)';
-                    descEl.innerHTML = 'Você possui <b>15% de desconto</b> em tudo e <b>Prioridade Máxima</b>.';
+                    titleEl.innerHTML = 'Fidelidade Premium: VIP OURO';
+                    descEl.innerHTML = 'Prioridade Máxima • 15% Desconto Fixado';
                     document.documentElement.style.setProperty('--sidebar-bg', 'linear-gradient(180deg, #92400e 0%, #b45309 100%)');
                 } else if (tier === 'prata') {
+                    cont.style.setProperty('--loyalty-primary', '#94a3b8');
+                    cont.style.setProperty('--loyalty-secondary', '#475569');
+                    cont.style.setProperty('--loyalty-text', '#1e293b');
                     iconEl.innerHTML = '🥈';
-                    iconEl.style.background = 'linear-gradient(135deg, #94a3b8, #64748b)';
-                    iconEl.style.boxShadow = '0 6px 20px rgba(148, 163, 184, 0.4)';
-                    titleEl.innerHTML = 'Conta Fidelidade: Prata';
-                    titleEl.style.background = 'linear-gradient(135deg, #64748b, #475569)';
-                    descEl.innerHTML = 'Você possui <b>10% de desconto</b> em tudo e <b>1 Dia de Prazo</b>.';
+                    titleEl.innerHTML = 'Fidelidade Premium: PRATA';
+                    descEl.innerHTML = 'Prazo 1 Dia • 10% Desconto Fixado';
                     document.documentElement.style.setProperty('--sidebar-bg', 'linear-gradient(180deg, #334155 0%, #475569 100%)');
                 } else {
+                    cont.style.setProperty('--loyalty-primary', '#b45309');
+                    cont.style.setProperty('--loyalty-secondary', '#f59e0b');
                     iconEl.innerHTML = '🥉';
-                    iconEl.style.background = 'linear-gradient(135deg, #fff7ed, #fde68a)';
-                    iconEl.style.boxShadow = 'none';
-                    iconEl.style.border = '1px solid #fcd34d';
-                    titleEl.innerHTML = 'Conta Fidelidade: Bronze';
-                    titleEl.style.background = 'linear-gradient(135deg, #b45309, #92400e)';
-                    descEl.innerHTML = 'Você possui <b>5% de desconto</b> em todos os serviços.';
+                    titleEl.innerHTML = 'Fidelidade Premium: BRONZE';
+                    descEl.innerHTML = 'Benefício Inicial • 5% Desconto Fixado';
                     document.documentElement.style.setProperty('--sidebar-bg', 'linear-gradient(180deg, #78350f 0%, #92400e 100%)');
                 }
 

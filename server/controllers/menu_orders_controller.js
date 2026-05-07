@@ -136,7 +136,7 @@ const launchToCore = (req, res) => {
 
         if (isUnlaunching) {
             revertOrderData(row, userId, () => {
-                db.run(`UPDATE menu_orders SET launched_to_core = 0, status = 'pendente', order_id = NULL WHERE id = ?`, [id], function(e) {
+                db.run(`UPDATE menu_orders SET launched_to_core = 0, status = 'pendente', order_id = NULL, launched_at = NULL WHERE id = ?`, [id], function(e) {
                     if (e) return res.status(500).json({ error: e.message });
                     res.json({ success: true, launched_to_core: 0 });
                 });
@@ -182,9 +182,9 @@ const launchToCore = (req, res) => {
                                     [productId, -row.quantity, `Cardápio (CORE) Pedido #${orderId}`, userId]);
 
                                 // Finally update the menu_order itself
-                                db.run(`UPDATE menu_orders SET launched_to_core = 1, status = 'lançado', order_id = ? WHERE id = ?`, [orderId, id], function(e) {
+                                db.run(`UPDATE menu_orders SET launched_to_core = 1, status = 'lançado', order_id = ?, launched_at = CURRENT_TIMESTAMP WHERE id = ?`, [orderId, id], function(e) {
                                     if (e) return res.status(500).json({ error: e.message });
-                                    res.json({ success: true, launched_to_core: 1, order_id: orderId });
+                                    res.json({ success: true, launched_to_core: 1, order_id: orderId, launched_at: new Date().toISOString() });
                                 });
                             });
                         }
@@ -228,13 +228,11 @@ const updateOrder = (req, res) => {
     }
 
     db.serialize(() => {
-        db.run('BEGIN TRANSACTION');
         const stmt = db.prepare('UPDATE menu_orders SET position = ? WHERE id = ?');
         items.forEach(item => {
             stmt.run(item.position, item.id);
         });
-        stmt.finalize();
-        db.run('COMMIT', (err) => {
+        stmt.finalize((err) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json({ success: true });
         });

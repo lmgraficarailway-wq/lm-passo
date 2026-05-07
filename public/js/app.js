@@ -115,6 +115,7 @@ const loadView = (view, container) => {
         case 'admin': modulePath = './components/admin.js'; break;
         case 'demand': modulePath = './components/demand.js'; break;
         case 'reminders': modulePath = './components/reminders.js'; break;
+        case 'budget': modulePath = './components/budget.js'; break;
         case 'chat': modulePath = './components/chatWidget.js'; break;
         case 'client_portal': modulePath = './components/client_portal.js'; break;
         case 'client_financial': modulePath = './components/client_financial.js'; break;
@@ -130,7 +131,7 @@ const loadView = (view, container) => {
     import(modulePath + '?v=51-' + Date.now()).then(module => {
         container.innerHTML = '';
         // Pass user to financial view for role-based controls
-        const viewArg = ['financial', 'clients'].includes(view) ? state.user : undefined;
+        const viewArg = ['financial', 'clients', 'budget'].includes(view) ? state.user : undefined;
         container.appendChild(module.render(viewArg));
     }).catch(err => {
         console.error("Error loading view:", err);

@@ -1,7 +1,7 @@
 export const render = () => {
     const container = document.createElement('div');
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const canEdit = !['producao', 'vendedor'].includes(currentUser.role);
+    const canEdit = !['vendedor'].includes(currentUser.role);
 
     container.innerHTML = `
         <!-- Header -->

@@ -123,13 +123,11 @@ const updateOrder = (req, res) => {
     }
 
     db.serialize(() => {
-        db.run('BEGIN TRANSACTION');
         const stmt = db.prepare('UPDATE reminders SET position = ? WHERE id = ?');
         items.forEach(item => {
             stmt.run(item.position, item.id);
         });
-        stmt.finalize();
-        db.run('COMMIT', (err) => {
+        stmt.finalize((err) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json({ success: true });
         });

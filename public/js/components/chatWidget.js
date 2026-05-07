@@ -21,6 +21,17 @@ export const initChatWidget = (user, parentContainer) => {
             transform: scale(1.12) translateY(-3px);
             box-shadow: 0 14px 35px rgba(124, 58, 237, 0.6);
         }
+        
+        @keyframes pulse-unread {
+            0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7); transform: scale(1); }
+            70% { box-shadow: 0 0 0 15px rgba(124, 58, 237, 0); transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); transform: scale(1); }
+        }
+        .chat-widget-btn.has-unread {
+            animation: pulse-unread 2s infinite;
+            background: linear-gradient(135deg, #7c3aed, #ef4444);
+        }
+
         .chat-widget-btn svg { transition: transform 0.3s ease; }
         .chat-window.open ~ .chat-widget-btn svg,
         .chat-widget-btn.is-open svg { transform: rotate(90deg); }
@@ -819,6 +830,7 @@ export const initChatWidget = (user, parentContainer) => {
             tag: 'lm-chat',        // agrupa em vez de empilhar infinitamente
             renotify: true,         // toca som mesmo com a mesma tag
             silent: false,
+            requireInteraction: true // <--- Garante que a notificação nativa fique até fechar manualmente
         });
 
         notif.onclick = () => {
@@ -826,9 +838,6 @@ export const initChatWidget = (user, parentContainer) => {
             notif.close();
             if (!isOpen) toggleChat();
         };
-
-        // Auto-fechar após 6s
-        setTimeout(() => notif.close(), 6000);
     };
 
     // ── Resposta a mensagens ──────────────────────────────
@@ -849,27 +858,32 @@ export const initChatWidget = (user, parentContainer) => {
     };
 
     // ── Som de Notificação (Nativo) ───────────────────────
-    const playNotificationSound = () => {
+    let audioCtx = null;
+    const playNotificationSound = async () => {
         try {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             if (!AudioCtx) return;
-            const ctx = new AudioCtx();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
+            
+            if (!audioCtx) audioCtx = new AudioCtx();
+            if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
             
             osc.connect(gain);
-            gain.connect(ctx.destination);
+            gain.connect(audioCtx.destination);
             
+            // Som de "ping" premium
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(800, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.08);
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+            osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.15);
             
-            gain.gain.setValueAtTime(0, ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
             
-            osc.start(ctx.currentTime);
-            osc.stop(ctx.currentTime + 0.1);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.2);
         } catch (e) { console.warn('Audio play failed', e); }
     };
 
@@ -1080,7 +1094,6 @@ export const initChatWidget = (user, parentContainer) => {
                 <div class="chat-toast-msg">${displayMsg || '📎 Arquivo anexado'}</div>
             </div>
             <button class="chat-toast-close" title="Fechar">✕</button>
-            <div class="chat-toast-progress"></div>
         `;
 
         const closeBtn = toast.querySelector('.chat-toast-close');
@@ -1095,8 +1108,8 @@ export const initChatWidget = (user, parentContainer) => {
 
         toastContainer.appendChild(toast);
 
-        // Auto-dismiss após 5s
-        setTimeout(dismiss, 5000);
+        // Auto-dismiss após 6s para o toast interno
+        setTimeout(dismiss, 6000);
     };
 
     // ── Excluir mensagem ──────────────────────────────────
@@ -1285,46 +1298,58 @@ export const initChatWidget = (user, parentContainer) => {
     });
 
     // ── SSE ───────────────────────────────────────────────
-    const evtSource = new EventSource('/api/chat/stream');
+    let evtSource;
 
-    evtSource.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === 'message') {
-            addMessage(data);
-            if (data.user_id !== user.id) {
-                if (!isOpen) {
-                    unreadCount++;
-                    badge.style.display = 'flex';
-                    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
-                    btn.classList.add('has-unread');
+    const connectSSE = () => {
+        if (evtSource) evtSource.close();
+        
+        evtSource = new EventSource('/api/chat/stream');
+
+        evtSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'message') {
+                addMessage(data);
+                if (data.user_id !== user.id) {
+                    if (!isOpen) {
+                        unreadCount++;
+                        badge.style.display = 'flex';
+                        badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                        btn.classList.add('has-unread');
+                    }
+                    showToast(data.user_name, data.user_role, data.message, data.author_avatar);
+                    showNativeNotification(data.user_name, data.message, data.author_avatar);
+                    playNotificationSound();
                 }
-                showToast(data.user_name, data.user_role, data.message, data.author_avatar);
-                showNativeNotification(data.user_name, data.message, data.author_avatar);
-                playNotificationSound();
+            } else if (data.type === 'delete') {
+                const wrapToRemove = body.querySelector(`.chat-bubble-wrap[data-msg-id="${data.id}"]`);
+                if (wrapToRemove) {
+                    wrapToRemove.classList.add('removing');
+                    setTimeout(() => wrapToRemove.remove(), 320);
+                }
+            } else if (data.type === 'typing') {
+                if (data.user_id === user.id) return;
+                if (data.isTyping) {
+                    typingEl.innerHTML = `
+                        <span style="opacity:0.8;">${data.user_name} digitando</span>
+                        <div class="typing-dots">
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                        </div>`;
+                } else {
+                    typingEl.innerHTML = '';
+                }
+            } else if (data.type === 'edit') {
+                applyEdit(data);
             }
-        } else if (data.type === 'delete') {
-            const wrapToRemove = body.querySelector(`.chat-bubble-wrap[data-msg-id="${data.id}"]`);
-            if (wrapToRemove) {
-                wrapToRemove.classList.add('removing');
-                setTimeout(() => wrapToRemove.remove(), 320);
-            }
-        } else if (data.type === 'typing') {
-            if (data.user_id === user.id) return;
-            if (data.isTyping) {
-                typingEl.innerHTML = `
-                    <span style="opacity:0.8;">${data.user_name} digitando</span>
-                    <div class="typing-dots">
-                        <span class="typing-dot"></span>
-                        <span class="typing-dot"></span>
-                        <span class="typing-dot"></span>
-                    </div>`;
-            } else {
-                typingEl.innerHTML = '';
-            }
-        } else if (data.type === 'edit') {
-            applyEdit(data);
-        }
+        };
+
+        evtSource.onerror = () => {
+            console.warn('SSE chat: conexão interrompida, tentando reconectar em 5s...');
+            evtSource.close();
+            setTimeout(connectSSE, 5000);
+        };
     };
 
-    evtSource.onerror = () => { console.warn('SSE chat: conexão interrompida'); };
+    connectSSE();
 };

@@ -53,6 +53,7 @@ export const render = (user, onLogout, onNavigate) => {
         logout: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>`,
         cash: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path stroke-linecap="round" stroke-linejoin="round" d="M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg>`,
         star: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        budget: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`,
     };
 
 
@@ -92,6 +93,11 @@ export const render = (user, onLogout, onNavigate) => {
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" id="nav-clients" data-view="clients" title="CLIENTES">
+                    ${icons.clients} <span class="nav-text" translate="no">CLIENTES</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" id="nav-products" data-view="products" title="PRODUTOS">
                     ${icons.products} <span class="nav-text" translate="no">PRODUTOS</span>
                 </a>
@@ -105,6 +111,11 @@ export const render = (user, onLogout, onNavigate) => {
                 <a class="nav-link" id="nav-reminders" data-view="reminders" title="LEMBRETES" style="position:relative;">
                     ${icons.reminders} <span class="nav-text" translate="no">LEMBRETES</span>
                     <span id="reminders-alert-badge" style="display:none; position:absolute; top:10px; right:10px; background:#ef4444; color:white; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:10px; box-shadow:0 0 8px rgba(239,68,68,0.8);"></span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="nav-budget" data-view="budget" title="ORÇAMENTOS">
+                    ${icons.budget} <span class="nav-text" translate="no">ORÇAMENTOS</span>
                 </a>
             </li>
         `;
@@ -136,10 +147,15 @@ export const render = (user, onLogout, onNavigate) => {
                     <span id="reminders-alert-badge" style="display:none; position:absolute; top:10px; right:10px; background:#ef4444; color:white; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:10px; box-shadow:0 0 8px rgba(239,68,68,0.8);"></span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" id="nav-budget" data-view="budget" title="ORÇAMENTOS">
+                    ${icons.budget} <span class="nav-text" translate="no">ORÇAMENTOS</span>
+                </a>
+            </li>
         `;
     }
 
-    const canSeeStock = ['master'].includes(user.role);
+    const canSeeStock = ['master', 'producao'].includes(user.role);
 
     if (canSeeStock) {
         menuItems += `

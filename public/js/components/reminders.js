@@ -209,6 +209,13 @@ export const render = (user) => {
 
     const sortMenuOrders = (list) => 
         [...list].sort((a, b) => {
+            // Lançados: ordenar pelo mais recente no topo (launched_at DESC)
+            if (a.launched_to_core && b.launched_to_core) {
+                const la = a.launched_at ? window.parseDBDate(a.launched_at) : 0;
+                const lb = b.launched_at ? window.parseDBDate(b.launched_at) : 0;
+                return lb - la;
+            }
+            // Pendentes: respeitar position manual, depois created_at DESC
             const posA = a.position || 0;
             const posB = b.position || 0;
             if (posA !== posB) return posA - posB;
@@ -386,7 +393,11 @@ export const render = (user) => {
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || 'Erro ao lançar no CORE');
         const m = menuOrders.find(m => m.id === id);
-        if (m) { m.launched_to_core = json.launched_to_core; m.status = json.launched_to_core ? 'lançado' : 'pendente'; }
+        if (m) {
+            m.launched_to_core = json.launched_to_core;
+            m.status = json.launched_to_core ? 'lançado' : 'pendente';
+            m.launched_at = json.launched_to_core ? (json.launched_at || new Date().toISOString()) : null;
+        }
         updateMenuCounters(); renderMenuList();
     };
 

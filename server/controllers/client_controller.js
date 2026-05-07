@@ -66,11 +66,9 @@ exports.getAllClients = (req, res) => {
         // Run async DB updates for any tier changes
         if (updates.length > 0) {
             db.serialize(() => {
-                db.run("BEGIN TRANSACTION");
                 const stmt = db.prepare("UPDATE clients SET loyalty_tier = ?, loyalty_tier_notified = ? WHERE id = ?");
                 updates.forEach(u => stmt.run(u.tier, u.notified, u.id));
                 stmt.finalize();
-                db.run("COMMIT");
             });
         }
 
